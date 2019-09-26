@@ -1,7 +1,7 @@
 import os
 
-import Base64Converters
-from JSONSerializer import SerializableMixin
+from Core import Base64Converters
+from SaveAndLoad.JSONSerializer import SerializableMixin
 
 
 class Page(SerializableMixin):

@@ -3,7 +3,7 @@ import os
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QDialog, QGridLayout, QListWidget, QPushButton, QListWidgetItem, QLabel, QFileDialog, QMessageBox, QScrollArea, QSplitter, QInputDialog
 
-import Base64Converters
+from Core import Base64Converters
 
 
 class ImageManagerDialog(QDialog):

@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QTreeWidget, QHeaderView, QTreeWidgetItem, QGridLayout, QPushButton, QCheckBox, QLabel, QComboBox
 
-from Page import Page
+from Core.Page import Page
 
 
 class InsertLinksDialog(QDialog):

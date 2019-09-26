@@ -1,4 +1,3 @@
-import json
 import os
 
 import mistune
@@ -6,22 +5,20 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QFileDialog, QAction, QSplitter, QApplication
 
-import MarkdownRenderers
-import Utility
-import ZimWikiConverters
-from DemotePageDialog import DemotePageDialog
-from EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
-from ExportErrorDialog import ExportErrorDialog
-from FavoritesDialog import FavoritesDialog
-from ImageManagerDialog import ImageManagerDialog
-from JSONSerializer import JSONSerializer
-from NewPageDialog import NewPageDialog
-from NotebookDisplayWidget import NotebookDisplayWidget
-from Page import Page
-from SearchIndexer import SearchIndexer
-from SearchWidget import SearchWidget
-from TemplateManagerDialog import TemplateManagerDialog
-from TextWidget import TextWidget
+from Core import MarkdownRenderers, Utility, ZimWikiConverters
+from Interface.Dialogs.DemotePageDialog import DemotePageDialog
+from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
+from Interface.Dialogs.ExportErrorDialog import ExportErrorDialog
+from Interface.Dialogs.FavoritesDialog import FavoritesDialog
+from Interface.Dialogs.ImageManagerDialog import ImageManagerDialog
+from SaveAndLoad.JSONSerializer import JSONSerializer
+from Interface.Dialogs.NewPageDialog import NewPageDialog
+from Interface.Widgets.NotebookDisplayWidget import NotebookDisplayWidget
+from Core.Page import Page
+from Core.SearchIndexer import SearchIndexer
+from Interface.Widgets.SearchWidget import SearchWidget
+from Interface.Dialogs.TemplateManagerDialog import TemplateManagerDialog
+from Interface.Widgets.TextWidget import TextWidget
 
 
 class MainWindow(QMainWindow):

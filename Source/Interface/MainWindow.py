@@ -6,22 +6,22 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QFileDialog, QAction, QSplitter, QApplication
 
 from Core import MarkdownRenderers, Utility, ZimWikiConverters
+from Core.Page import Page
+from Core.SearchIndexer import SearchIndexer
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
 from Interface.Dialogs.ExportErrorDialog import ExportErrorDialog
 from Interface.Dialogs.FavoritesDialog import FavoritesDialog
 from Interface.Dialogs.ImageManagerDialog import ImageManagerDialog
-from SaveAndLoad.JSONSerializer import JSONSerializer
 from Interface.Dialogs.NewPageDialog import NewPageDialog
-from Interface.Widgets.NotebookDisplayWidget import NotebookDisplayWidget
-from Core.Page import Page
-from Core.SearchIndexer import SearchIndexer
-from Interface.Widgets.SearchWidget import SearchWidget
 from Interface.Dialogs.TemplateManagerDialog import TemplateManagerDialog
+from Interface.Widgets.NotebookDisplayWidget import NotebookDisplayWidget
+from Interface.Widgets.SearchWidget import SearchWidget
 from Interface.Widgets.TextWidget import TextWidget
+from SaveAndLoad.SaveAndOpenMixin import SaveAndOpenMixin
 
 
-class MainWindow(QMainWindow):
+class MainWindow(QMainWindow, SaveAndOpenMixin):
     # Initialization Methods
     def __init__(self, ScriptName):
         super().__init__()
@@ -30,13 +30,10 @@ class MainWindow(QMainWindow):
         self.ScriptName = ScriptName
 
         # Variables
-        self.CurrentOpenFileName = ""
-        self.FileExtension = ".ntbk"
-        self.UnsavedChanges = False
         self.CurrentZoomLevel = 0
 
-        # Create JSONSerializer
-        self.JSONSerializer = JSONSerializer()
+        # Set Up Save and Open
+        self.SetUpSaveAndOpen(".ntbk", "Notebook", (Page,))
 
         # Load Favorites
         if os.path.isfile("Favorites.cfg"):
@@ -116,11 +113,11 @@ class MainWindow(QMainWindow):
         # Create Actions
         self.NewAction = QAction("New")
         self.NewAction.setShortcut("Ctrl+Shift+N")
-        self.NewAction.triggered.connect(self.New)
+        self.NewAction.triggered.connect(self.NewActionTriggered)
 
         self.OpenAction = QAction("Open")
         self.OpenAction.setShortcut("Ctrl+O")
-        self.OpenAction.triggered.connect(lambda: self.Open())
+        self.OpenAction.triggered.connect(lambda: self.OpenActionTriggered())
 
         self.FavoritesAction = QAction(self.FavoritesIcon, "Favorites")
         self.FavoritesAction.setShortcut("Ctrl+Shift+O")
@@ -128,11 +125,11 @@ class MainWindow(QMainWindow):
 
         self.SaveAction = QAction("Save")
         self.SaveAction.setShortcut("Ctrl+S")
-        self.SaveAction.triggered.connect(lambda: self.Save())
+        self.SaveAction.triggered.connect(lambda: self.SaveActionTriggered())
 
         self.SaveAsAction = QAction("Save As")
         self.SaveAsAction.setShortcut("Ctrl+Shift+S")
-        self.SaveAsAction.triggered.connect(lambda: self.Save(SaveAs=True))
+        self.SaveAsAction.triggered.connect(lambda: self.SaveActionTriggered(SaveAs=True))
 
         self.ExitAction = QAction("Exit")
         self.ExitAction.setShortcut("Ctrl+Q")
@@ -500,7 +497,7 @@ class MainWindow(QMainWindow):
 
     # Notebook Methods
     def NewRootPage(self):
-        return Page(0, "New Notebook", "", self.JSONSerializer.ObjectTypeCalls, IsRootPage=True)
+        return Page(0, "New Notebook", "", IsRootPage=True)
 
     def UpdateRootPage(self, RootPage):
         self.RootPage = RootPage
@@ -766,7 +763,7 @@ class MainWindow(QMainWindow):
         self.ImportPlainText(ZimWikiCompatible=True)
 
     def CreatePagesFromPlainText(self, CurrentDirectory, ZimWikiCompatible=False):
-        CurrentPage = Page(0, os.path.split(CurrentDirectory)[1], "Imported pages from " + ("plain text" if not ZimWikiCompatible else "Zim Wiki") + " files.", self.JSONSerializer.ObjectTypeCalls)
+        CurrentPage = Page(0, os.path.split(CurrentDirectory)[1], "Imported pages from " + ("plain text" if not ZimWikiCompatible else "Zim Wiki") + " files.")
         self.CreateSubPagesFromPlainText(CurrentDirectory, CurrentPage, ZimWikiCompatible=ZimWikiCompatible)
         return CurrentPage
 
@@ -790,7 +787,7 @@ class MainWindow(QMainWindow):
                 PageContents = OpenFile.read()
             if ZimWikiCompatible:
                 PageContents = ZimWikiConverters.ConvertFromZimWikiPage(PageContents)
-            SubPage = Page(0, PageTitle, PageContents, self.JSONSerializer.ObjectTypeCalls)
+            SubPage = Page(0, PageTitle, PageContents)
             Pages[PageTitle] = SubPage
             CurrentPage.AppendSubPage(SubPage)
         for Directory in Directories:
@@ -904,74 +901,38 @@ class MainWindow(QMainWindow):
             self.ExportSubPagesToHTML(CurrentPageDirectory, SubPage, MarkdownParser, HTMLExportRenderer, ErrorList)
 
     # Save and Open Methods
-    def Save(self, SaveAs=False):
-        SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs else QFileDialog.getSaveFileName(caption="Save Notebook File", filter="Notebook files (*" + self.FileExtension + ")")[0]
-        if SaveFileName != "":
-            JSONString = self.JSONSerializer.SerializeDataToJSONString(self.RootPage)
-            with open(SaveFileName, "w") as SaveFile:
-                SaveFile.write(JSONString)
-            self.CurrentOpenFileName = SaveFileName
-            SaveFileNameShort = os.path.basename(SaveFileName)
-            self.FlashStatusBar("File saved as:  " + SaveFileNameShort)
+    def SaveActionTriggered(self, SaveAs=False):
+        if self.Save(self.RootPage, SaveAs=SaveAs):
             self.SearchIndexer.BuildIndex()
             self.SearchWidgetInst.RefreshSearch()
             self.UpdateUnsavedChangesFlag(False)
-            return True
         else:
-            self.FlashStatusBar("No file saved.")
-            return False
+            self.UpdateWindowTitle()
 
-    def Open(self, FilePath=None):
-        if self.UnsavedChanges:
-            SavePrompt = self.DisplayMessageBox("Save unsaved work before opening another notebook?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
-            if SavePrompt == QMessageBox.Yes:
-                if not self.Save():
-                    return
-            elif SavePrompt == QMessageBox.No:
-                pass
-            elif SavePrompt == QMessageBox.Cancel:
-                return
-        OpenFileName = FilePath if FilePath is not None else QFileDialog.getOpenFileName(caption="Open Notebook File", filter="Notebook files (*" + self.FileExtension + ")")[0]
-        if OpenFileName != "":
-            with open(OpenFileName, "r") as LoadFile:
-                JSONString = LoadFile.read()
-            OpenFileNameShort = os.path.basename(OpenFileName)
-            try:
-                Data = self.JSONSerializer.DeserializeDataFromJSONString(JSONString)
-            except KeyError:
-                self.DisplayMessageBox("There was an error opening " + OpenFileNameShort + ".\n\nTry using the Update Notebook Format option in the Notebook menu.", Icon=QMessageBox.Warning)
-                return
-            self.UpdateRootPage(Data)
+    def OpenActionTriggered(self, FilePath=None):
+        NewRootPage = self.Open(self.RootPage, FilePath=FilePath)
+        if NewRootPage is not None:
+            self.UpdateRootPage(NewRootPage)
             self.NotebookDisplayWidgetInst.FillFromRootPage()
             self.SearchIndexer.BuildIndex()
             self.SearchWidgetInst.ClearSearch()
-            self.CurrentOpenFileName = OpenFileName
-            self.FlashStatusBar("Opened file:  " + OpenFileNameShort)
             self.UpdateUnsavedChangesFlag(False)
         else:
-            self.FlashStatusBar("No file opened.")
+            self.UpdateWindowTitle()
 
     def Favorites(self):
         FavoritesDialogInst = FavoritesDialog(self.ScriptName, self.WindowIcon, self.DisplayMessageBox, self.FavoritesData, self)
         if FavoritesDialogInst.OpenFilePath is not None:
-            self.Open(FavoritesDialogInst.OpenFilePath)
+            self.OpenActionTriggered(FavoritesDialogInst.OpenFilePath)
 
-    def New(self):
-        if self.UnsavedChanges:
-            SavePrompt = self.DisplayMessageBox("Save unsaved work before starting a new notebook?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
-            if SavePrompt == QMessageBox.Yes:
-                if not self.Save():
-                    return
-            elif SavePrompt == QMessageBox.No:
-                pass
-            elif SavePrompt == QMessageBox.Cancel:
-                return
+    def NewActionTriggered(self):
+        if not self.New(self.RootPage):
+            self.UpdateWindowTitle()
+            return
         self.UpdateRootPage(self.NewRootPage())
         self.NotebookDisplayWidgetInst.FillFromRootPage()
         self.SearchIndexer.BuildIndex()
         self.SearchWidgetInst.ClearSearch()
-        self.CurrentOpenFileName = ""
-        self.FlashStatusBar("New notebook opened.")
         self.UpdateUnsavedChangesFlag(False)
 
     def closeEvent(self, event):
@@ -979,7 +940,7 @@ class MainWindow(QMainWindow):
         if self.UnsavedChanges:
             SavePrompt = self.DisplayMessageBox("Save unsaved work before closing?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
             if SavePrompt == QMessageBox.Yes:
-                if not self.Save():
+                if not self.Save(self.RootPage):
                     Close = False
             elif SavePrompt == QMessageBox.No:
                 pass

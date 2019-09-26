@@ -5,7 +5,7 @@ from SaveAndLoad.JSONSerializer import SerializableMixin
 
 
 class Page(SerializableMixin):
-    def __init__(self, PageIndex, Title, Content, JSONSerializerObjectTypeCalls, Path=None, IsRootPage=False, SubPages=None, Images=None, PageTemplates=None, Header=None, Footer=None):
+    def __init__(self, PageIndex, Title, Content, Path=None, IsRootPage=False, SubPages=None, Images=None, PageTemplates=None, Header=None, Footer=None):
         # Store Parameters
         self.PageIndex = PageIndex
         self.Title = Title
@@ -17,7 +17,6 @@ class Page(SerializableMixin):
         self.PageTemplates = PageTemplates if PageTemplates is not None else ({} if self.IsRootPage else None)
         self.Header = Header if Header is not None else ("# {PAGETITLE}" if self.IsRootPage else None)
         self.Footer = Footer if Footer is not None else ("" if self.IsRootPage else None)
-        self.JSONSerializerObjectTypeCalls = JSONSerializerObjectTypeCalls
 
         # Initialize Serializable Mixin
         super().__init__()
@@ -26,7 +25,7 @@ class Page(SerializableMixin):
     def AddSubPage(self, Title, Content):
         PageIndex = len(self.SubPages)
         SubPagePath = self.GetFullIndexPath()
-        self.SubPages.append(Page(PageIndex, str(Title), str(Content), self.JSONSerializerObjectTypeCalls, SubPagePath))
+        self.SubPages.append(Page(PageIndex, str(Title), str(Content), SubPagePath))
 
     def AppendSubPage(self, PageToAppend):
         self.SubPages.append(PageToAppend)
@@ -123,14 +122,6 @@ class Page(SerializableMixin):
         return sorted(self.PageTemplates.keys())
 
     # Serialization Methods
-    def RegisterObjectType(self):
-        if self.__class__.__name__ not in self.JSONSerializerObjectTypeCalls:
-            self.JSONSerializerObjectTypeCalls[self.__class__.__name__] = lambda DecodedObjectData: self.__class__(DecodedObjectData["PageIndex"], DecodedObjectData["Title"], DecodedObjectData["Content"],
-                                                                                                                   self.JSONSerializerObjectTypeCalls, Path=DecodedObjectData["Path"], IsRootPage=DecodedObjectData["IsRootPage"],
-                                                                                                                   SubPages=DecodedObjectData["SubPages"], Images=DecodedObjectData["Images"],
-                                                                                                                   PageTemplates=DecodedObjectData["PageTemplates"], Header=DecodedObjectData["Header"],
-                                                                                                                   Footer=DecodedObjectData["Footer"])
-
     def SetState(self, NewState):
         self.PageIndex = NewState["PageIndex"]
         self.Title = NewState["Title"]
@@ -156,3 +147,8 @@ class Page(SerializableMixin):
         Data["Header"] = self.Header
         Data["Footer"] = self.Footer
         return Data
+
+    @classmethod
+    def CreateFromState(cls, State):
+        NewPage = cls(State["PageIndex"], State["Title"], State["Content"], State["Path"], State["IsRootPage"], State["SubPages"], State["Images"], State["PageTemplates"], State["Header"], State["Footer"])
+        return NewPage

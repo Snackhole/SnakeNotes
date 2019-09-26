@@ -6,7 +6,7 @@ from PyInstaller import __main__ as PyInstall
 
 def Build():
     # Version String
-    Version = "20"
+    Version = "21"
 
     # Build Variables
     ExecutableScript = "Source/SerpentNotes " + Version + ".pyw"

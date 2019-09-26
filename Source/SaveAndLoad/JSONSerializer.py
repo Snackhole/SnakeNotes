@@ -15,11 +15,14 @@ class JSONSerializer:
     To deserialize data from a JSON string, call the DeserializeDataFromJSONString method, which returns the reconstituted data structure.
     """
 
-    def __init__(self):
+    def __init__(self, ObjectClasses=()):
         """
-        ObjectTypeCalls is part of the process for restoring objects from JSON.  It should only be manipulated from implementations of the RegisterObjectType method of SerializableMixin.
+        ObjectClasses should be a tuple of classes to be serialized; a dictionary is created from them that allows the Decoder to reconstitute the objects from states.
         """
+        self.ObjectClasses = ObjectClasses
         self.ObjectTypeCalls = {}
+        for ObjectClass in ObjectClasses:
+            self.ObjectTypeCalls[ObjectClass.__name__] = lambda State, ObjectClass=ObjectClass: ObjectClass.CreateFromState(State)
 
     def SerializeDataToJSONString(self, Data, Indent=2):
         return json.dumps(Data, cls=Encoder, indent=Indent)
@@ -34,22 +37,6 @@ class SerializableMixin(metaclass=abc.ABCMeta):
 
     See the docstrings of the abstract methods for details on what they should do.
     """
-
-    def __init__(self):
-        self.RegisterObjectType()
-
-    @abc.abstractmethod
-    def RegisterObjectType(self):
-        """
-        This method should add a callable to the serializer's ObjectTypeCalls dictionary that returns an object of the type to be serialized.  For example:
-
-        JSONSerializerObject.ObjectTypeCalls[self.__class__.__name__] = lambda DecodedObjectData: self.__class__(DecodedObjectData)
-
-        This callable is used when deserializing from a JSON string, to reconstitute objects.
-
-        Note that the data provided to the callable will be in the form of the data returned by the GetState method, so any parameters necessary for creating the object need to be included and parsed out from that data.
-        """
-        pass
 
     @abc.abstractmethod
     def SetState(self, NewState):
@@ -66,6 +53,14 @@ class SerializableMixin(metaclass=abc.ABCMeta):
         This method should capture the state of the object and return it.
 
         For example, a GUI object like a single-line text edit widget should return its contents as a string.
+        """
+        pass
+
+    @classmethod
+    @abc.abstractmethod
+    def CreateFromState(cls, State):
+        """
+        This method should create a new instance of the class, set its state, and return the instance.
         """
         pass
 

@@ -3,7 +3,7 @@ import os
 
 import mistune
 
-import Utility
+from Core import Utility
 
 
 class Renderer(mistune.Renderer):

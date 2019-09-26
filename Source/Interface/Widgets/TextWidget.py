@@ -6,10 +6,9 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QTextCursor, QTextCharFormat
 from PyQt5.QtWidgets import QTextEdit, QInputDialog, QMessageBox
 
-import MarkdownRenderers
-import ZimWikiConverters
-from InsertLinksDialog import InsertLinksDialog
-from InsertTableDialog import InsertTableDialog, TableDimensionsDialog
+from Core import MarkdownRenderers, ZimWikiConverters
+from Interface.Dialogs.InsertLinksDialog import InsertLinksDialog
+from Interface.Dialogs.InsertTableDialog import InsertTableDialog, TableDimensionsDialog
 
 
 class TextWidget(QTextEdit):

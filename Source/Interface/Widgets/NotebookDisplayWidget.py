@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QHeaderView, QMenu
 
-from Page import Page
+from Core.Page import Page
 
 
 class NotebookDisplayWidget(QTreeWidget):

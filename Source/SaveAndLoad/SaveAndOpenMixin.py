@@ -2,7 +2,6 @@ import os
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
-from Interface.Window import Window
 from SaveAndLoad.JSONSerializer import JSONSerializer
 
 
@@ -13,7 +12,8 @@ class SaveAndOpenMixin:
         self.CurrentOpenFileName = ""
 
     def Save(self, ObjectToSerialize, SaveAs=False, AlternateFileDescription=None, AlternateFileExtension=None):
-        assert isinstance(self, Window)
+        from Interface.MainWindow import MainWindow
+        assert isinstance(self, MainWindow)
         Caption = "Save " + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
         Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + (self.FileExtension if AlternateFileExtension is None else AlternateFileExtension) + ")"
         SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs else QFileDialog.getSaveFileName(caption=Caption, filter=Filter)[0]
@@ -31,7 +31,8 @@ class SaveAndOpenMixin:
             return False
 
     def Open(self, ObjectToSerialize, FilePath=None, RespectUnsavedChanges=True, AlternateFileDescription=None, AlternateFileExtension=None):
-        assert isinstance(self, Window)
+        from Interface.MainWindow import MainWindow
+        assert isinstance(self, MainWindow)
         if self.UnsavedChanges and RespectUnsavedChanges:
             SavePrompt = self.DisplayMessageBox("Save unsaved work before opening?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
             if SavePrompt == QMessageBox.Yes:
@@ -62,7 +63,8 @@ class SaveAndOpenMixin:
             return None
 
     def New(self, ObjectToSerialize, RespectUnsavedChanges=True):
-        assert isinstance(self, Window)
+        from Interface.MainWindow import MainWindow
+        assert isinstance(self, MainWindow)
         if self.UnsavedChanges and RespectUnsavedChanges:
             SavePrompt = self.DisplayMessageBox("Save unsaved work before starting a new file?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
             if SavePrompt == QMessageBox.Yes:
@@ -78,13 +80,16 @@ class SaveAndOpenMixin:
         return True
 
     def closeEvent(self, event):
-        assert isinstance(self, Window)
+        from Interface.MainWindow import MainWindow
+        assert isinstance(self, MainWindow)
         if self.UnsavedChanges:
             SavePrompt = self.DisplayMessageBox("There are unsaved changes.  Close anyway?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No))
             if SavePrompt == QMessageBox.Yes:
                 event.accept()
             elif SavePrompt == QMessageBox.No:
                 event.ignore()
+        else:
+            event.accept()
 
     def SetUpSaveAndOpen(self, FileExtension, FileDescription, ObjectClasses):
         self.FileExtension = FileExtension

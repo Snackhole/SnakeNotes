@@ -1,14 +1,11 @@
 from PyQt5.QtWidgets import QDialog, QTreeWidget, QHeaderView, QTreeWidgetItem, QGridLayout, QPushButton, QCheckBox, QLabel, QComboBox
 
-from Core.Page import Page
-
 
 class InsertLinksDialog(QDialog):
-    def __init__(self, RootPage, ScriptName, Icon, Parent):
+    def __init__(self, Notebook, MainWindow, Parent):
         # Store Parameters
-        self.RootPage = RootPage
-        self.ScriptName = ScriptName
-        self.Icon = Icon
+        self.Notebook = Notebook
+        self.MainWindow = MainWindow
         self.Parent = Parent
 
         # QDialog Init
@@ -60,8 +57,8 @@ class InsertLinksDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.ScriptName)
-        self.setWindowIcon(self.Icon)
+        self.setWindowTitle(self.MainWindow.ScriptName)
+        self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize
         self.Resize()
@@ -90,20 +87,18 @@ class InsertLinksDialog(QDialog):
 
     def PopulateNotebookDisplay(self):
         self.NotebookDisplay.clear()
-        self.FillNotebookWidgetItem(self.NotebookDisplay.invisibleRootItem(), self.RootPage, IsRootPage=True)
+        self.FillNotebookWidgetItem(self.NotebookDisplay.invisibleRootItem(), self.Notebook.RootPage, IsRootPage=True)
         self.NotebookDisplay.setFocus()
 
     def FillNotebookWidgetItem(self, CurrentTreeItem, CurrentPage, IsRootPage=False):
-        assert isinstance(CurrentPage, Page)
-
         SubPageIndexPaths = []
-        for SubPage in CurrentPage.SubPages:
-            SubPageIndexPaths.append((SubPage.Title, SubPage.GetFullIndexPath()))
+        for SubPage in CurrentPage["SubPages"]:
+            SubPageIndexPaths.append((SubPage["Title"], SubPage["IndexPath"]))
 
-        ChildTreeItem = NotebookDisplayItem(CurrentPage.Title, CurrentPage.GetFullIndexPath(), SubPageIndexPaths)
+        ChildTreeItem = NotebookDisplayItem(CurrentPage["Title"], CurrentPage["IndexPath"], SubPageIndexPaths)
         CurrentTreeItem.addChild(ChildTreeItem)
 
-        for SubPage in CurrentPage.SubPages:
+        for SubPage in CurrentPage["SubPages"]:
             self.FillNotebookWidgetItem(ChildTreeItem, SubPage)
 
         if IsRootPage:

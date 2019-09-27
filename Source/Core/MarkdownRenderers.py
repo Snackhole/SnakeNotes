@@ -7,9 +7,9 @@ from Core import Utility
 
 
 class Renderer(mistune.Renderer):
-    def __init__(self, RootPage):
+    def __init__(self, Notebook):
         super().__init__()
-        self.RootPage = RootPage
+        self.Notebook = Notebook
 
     def strikethrough(self, Text):
         return "<s>" + Text + "</s>"
@@ -33,8 +33,8 @@ class Renderer(mistune.Renderer):
         return "<h" + str(level) + " style=\"color: seagreen\">" + text + "</h" + str(level) + ">\n"
 
     def image(self, Source, Title, AltText):
-        if self.RootPage.HasImage(Source):
-            Source = "data:image/" + os.path.splitext(Source)[1] + ";base64, " + self.RootPage.GetImage(Source)
+        if self.Notebook.HasImage(Source):
+            Source = "data:image/" + os.path.splitext(Source)[1] + ";base64, " + self.Notebook.GetImage(Source)
             AltText = mistune.escape(AltText, quote=True)
             if Title is not None:
                 Title = mistune.escape(Title, quote=True)
@@ -49,14 +49,12 @@ class Renderer(mistune.Renderer):
 
 
 class HTMLExportRenderer(Renderer):
-    def __init__(self, RootPage, NotebookDisplayWidget, JSONSerializer):
-        super().__init__(RootPage)
-        self.NotebookDisplayWidget = NotebookDisplayWidget
-        self.JSONSerializer = JSONSerializer
+    def __init__(self, Notebook):
+        super().__init__(Notebook)
         self.CurrentPage = None
 
     def link(self, Link, Title, Text):
-        if self.NotebookDisplayWidget.StringIsValidIndexPath(Link):
+        if self.Notebook.StringIsValidIndexPath(Link):
             Link = self.ConstructRelativeFilePathFromIndexPathString(Link)
         Link = mistune.escape_link(Link)
         if not Title:
@@ -70,15 +68,15 @@ class HTMLExportRenderer(Renderer):
             RelativeFilePath = ""
 
             # Append Relative Path to Root from Current Page
-            CurrentPageIndexPath = self.CurrentPage.GetFullIndexPath()
+            CurrentPageIndexPath = self.CurrentPage["IndexPath"]
             RelativeFilePath += "../" * (len(CurrentPageIndexPath) - 1)
 
             # Append Path to Linked Page
-            LinkedIndexPath = self.JSONSerializer.DeserializeDataFromJSONString(IndexPathString)
+            LinkedIndexPath = json.loads(IndexPathString)
             for IndexLevel in range(len(LinkedIndexPath)):
                 CurrentLinkStepIndexPath = LinkedIndexPath[:IndexLevel + 1]
-                CurrentLinkStepPage = self.RootPage.GetSubPageByIndexPath(CurrentLinkStepIndexPath)
-                CurrentLinkStepFileName = str(CurrentLinkStepPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(CurrentLinkStepPage.Title)
+                CurrentLinkStepPage = self.Notebook.GetPageFromIndexPath(CurrentLinkStepIndexPath)
+                CurrentLinkStepFileName = str(CurrentLinkStepPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(CurrentLinkStepPage["Title"])
                 RelativeFilePath += CurrentLinkStepFileName
                 if IndexLevel == len(LinkedIndexPath) - 1:
                     RelativeFilePath += ".html"
@@ -89,15 +87,15 @@ class HTMLExportRenderer(Renderer):
             return IndexPathString
 
 
-def ConstructMarkdownStringFromPage(Page, RootPage):
-    HeaderString = RootPage.Header + "\n\n"
+def ConstructMarkdownStringFromPage(Page, Notebook):
+    HeaderString = Notebook.Header + "\n\n"
     HeaderString = HeaderString.replace("{PAGETITLE}", Page.Title)
     HeaderString = HeaderString.replace("{SUBPAGELINKS}", ConstructSubPageLinks(Page))
-    HeaderString = HeaderString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, RootPage))
-    FooterString = "\n\n" + RootPage.Footer
+    HeaderString = HeaderString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, Notebook))
+    FooterString = "\n\n" + Notebook.Footer
     FooterString = FooterString.replace("{PAGETITLE}", Page.Title)
     FooterString = FooterString.replace("{SUBPAGELINKS}", ConstructSubPageLinks(Page))
-    FooterString = FooterString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, RootPage))
+    FooterString = FooterString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, Notebook))
     MarkdownString = HeaderString + Page.Content + FooterString
     return MarkdownString
 
@@ -113,10 +111,10 @@ def ConstructSubPageLinks(Page):
     return LinksString
 
 
-def ConstructSubPageOfLink(Page, RootPage):
-    if Page is RootPage:
+def ConstructSubPageOfLink(Page, Notebook):
+    if Page is Notebook.RootPage:
         LinkString = "This is the root page."
     else:
-        SuperPage = RootPage.GetSuperOfSubPageByIndexPath(Page.GetFullIndexPath())
-        LinkString = "[" + SuperPage.Title + "](" + json.dumps(SuperPage.GetFullIndexPath()) + ")"
+        SuperPage = Notebook.GetSuperOfPageFromIndexPath(Page["IndexPath"])
+        LinkString = "[" + SuperPage["Title"] + "](" + json.dumps(SuperPage["IndexPath"]) + ")"
     return LinkString

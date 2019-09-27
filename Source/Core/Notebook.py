@@ -1,3 +1,4 @@
+import json
 import os
 
 from Core import Base64Converters
@@ -83,6 +84,30 @@ class Notebook(SerializableMixin):
         for Index in range(len(SubPagesList)):
             SubPagesList[Index]["IndexPath"] = CurrentIndexPath + [Index]
             self.UpdateSubPageIndexPaths(SubPagesList[Index]["IndexPath"], SubPagesList[Index]["SubPages"])
+
+    def StringIsValidIndexPath(self, IndexPathString):
+        try:
+            IndexPath = json.loads(IndexPathString)
+        except:
+            return False
+        if not isinstance(IndexPath, list):
+            return False
+        if len(IndexPath) < 1:
+            return False
+        if IndexPath[0] != 0:
+            return False
+        for Element in IndexPath:
+            if not isinstance(Element, int):
+                return False
+            if Element < 0:
+                return False
+        try:
+            DestinationPage = self.GetPageFromIndexPath(IndexPath)
+        except IndexError:
+            return False
+        if DestinationPage is None:
+            return False
+        return True
 
     # Image Methods
     def HasImage(self, FileName):

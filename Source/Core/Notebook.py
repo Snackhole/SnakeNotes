@@ -120,7 +120,7 @@ class Notebook(SerializableMixin):
     # Search Methods
     def BuildSearchIndex(self):
         self.SearchIndex.clear()
-        self.AddPageToSearchIndex()
+        self.AddPageToSearchIndex(self.RootPage)
         self.SearchIndexUpToDate = True
 
     def AddPageToSearchIndex(self, Page):

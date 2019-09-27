@@ -6,16 +6,12 @@ from PyQt5.QtWidgets import QFrame, QLineEdit, QListWidget, QGridLayout, QListWi
 
 
 class SearchWidget(QFrame):
-    def __init__(self, RootPage, SearchIndexer, NotebookDisplayWidget, TextWidget, MainWindow):
+    def __init__(self, Notebook, MainWindow):
         super().__init__()
 
         # Store Parameters
-        self.RootPage = RootPage
-        self.SearchIndexer = SearchIndexer
-        self.NotebookDisplayWidget = NotebookDisplayWidget
-        self.TextWidget = TextWidget
+        self.Notebook = Notebook
         self.MainWindow = MainWindow
-        self.ToggleReadModeActionsList = self.MainWindow.ToggleReadModeActionsList
 
         # Variables
         self.RefreshingSearchResults = False
@@ -36,7 +32,7 @@ class SearchWidget(QFrame):
         # Replace Text Line Edit
         self.ReplaceTextLineEdit = SearchLineEdit(self)
         self.ReplaceTextLineEdit.setPlaceholderText("Replace With")
-        self.ToggleReadModeActionsList.append(self.ReplaceTextLineEdit)
+        self.MainWindow.ToggleReadModeActionsList.append(self.ReplaceTextLineEdit)
 
         # Buttons
         self.SearchButton = QPushButton("Search Notebook")
@@ -45,13 +41,13 @@ class SearchWidget(QFrame):
         self.FindInPageButton.clicked.connect(self.FindInPage)
         self.ReplaceButton = QPushButton("Replace\nCurrent Hit")
         self.ReplaceButton.clicked.connect(self.Replace)
-        self.ToggleReadModeActionsList.append(self.ReplaceButton)
+        self.MainWindow.ToggleReadModeActionsList.append(self.ReplaceButton)
         self.ReplaceAllInPageButton = QPushButton("Replace All\nIn Page")
         self.ReplaceAllInPageButton.clicked.connect(self.ReplaceAllInPage)
-        self.ToggleReadModeActionsList.append(self.ReplaceAllInPageButton)
+        self.MainWindow.ToggleReadModeActionsList.append(self.ReplaceAllInPageButton)
         self.ReplaceAllInNotebookButton = QPushButton("Replace All\nIn Notebook")
         self.ReplaceAllInNotebookButton.clicked.connect(lambda: self.ReplaceAllInNotebook())
-        self.ToggleReadModeActionsList.append(self.ReplaceAllInNotebookButton)
+        self.MainWindow.ToggleReadModeActionsList.append(self.ReplaceAllInNotebookButton)
 
         # Layout
         self.Layout = QGridLayout()
@@ -75,7 +71,7 @@ class SearchWidget(QFrame):
         self.ResultsList.clear()
         if SearchText == "":
             return
-        Results = self.SearchIndexer.GetSearchResults(SearchText, MatchCase=MatchCase)
+        Results = self.Notebook.GetSearchResults(SearchText, MatchCase=MatchCase)
         for Result in Results:
             self.ResultsList.addItem(SearchResult(Result[0], Result[1]))
         self.ResultsList.setCurrentIndex(self.ResultsList.model().index(0))
@@ -86,8 +82,8 @@ class SearchWidget(QFrame):
         SelectedItems = self.ResultsList.selectedItems()
         if len(SelectedItems) > 0 and not self.RefreshingSearchResults:
             SelectedItem = SelectedItems[0]
-            if self.NotebookDisplayWidget.GetCurrentPageIndexPath() != SelectedItem.IndexPath:
-                self.NotebookDisplayWidget.SelectTreeItemFromIndexPath(SelectedItem.IndexPath)
+            if self.MainWindow.NotebookDisplayWidgetInst.GetCurrentPageIndexPath() != SelectedItem.IndexPath:
+                self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(SelectedItem.IndexPath)
 
     def SearchResultActivated(self):
         self.SearchResultSelected()
@@ -97,48 +93,48 @@ class SearchWidget(QFrame):
         SearchText = self.SearchTextLineEdit.text()
         MatchCase = self.MatchCaseCheckBox.isChecked()
         if MatchCase:
-            if not self.TextWidget.find(SearchText, QTextDocument.FindCaseSensitively):
-                self.TextWidget.moveCursor(QTextCursor.Start)
-                self.TextWidget.find(SearchText, QTextDocument.FindCaseSensitively)
+            if not self.MainWindow.TextWidgetInst.find(SearchText, QTextDocument.FindCaseSensitively):
+                self.MainWindow.TextWidgetInst.moveCursor(QTextCursor.Start)
+                self.MainWindow.TextWidgetInst.find(SearchText, QTextDocument.FindCaseSensitively)
         else:
-            if not self.TextWidget.find(SearchText):
-                self.TextWidget.moveCursor(QTextCursor.Start)
-                self.TextWidget.find(SearchText)
+            if not self.MainWindow.TextWidgetInst.find(SearchText):
+                self.MainWindow.TextWidgetInst.moveCursor(QTextCursor.Start)
+                self.MainWindow.TextWidgetInst.find(SearchText)
 
     def Replace(self):
-        if not self.TextWidget.ReadMode:
+        if not self.MainWindow.TextWidgetInst.ReadMode:
             SearchText = self.SearchTextLineEdit.text()
             if SearchText == "":
                 return
             ReplaceText = self.ReplaceTextLineEdit.text()
-            Cursor = self.TextWidget.textCursor()
+            Cursor = self.MainWindow.TextWidgetInst.textCursor()
             CurrentHitText = Cursor.selectedText()
             MatchCase = self.MatchCaseCheckBox.isChecked()
             if not MatchCase:
                 SearchText = SearchText.casefold()
                 CurrentHitText = CurrentHitText.casefold()
             if SearchText == CurrentHitText:
-                self.TextWidget.insertPlainText(ReplaceText)
+                self.MainWindow.TextWidgetInst.insertPlainText(ReplaceText)
             self.FindInPage()
             self.RefreshSearch()
 
     def ReplaceAllInPage(self):
-        if not self.TextWidget.ReadMode:
+        if not self.MainWindow.TextWidgetInst.ReadMode:
             SearchText = self.SearchTextLineEdit.text()
             if SearchText == "":
                 return
             ReplaceText = self.ReplaceTextLineEdit.text()
             MatchCase = self.MatchCaseCheckBox.isChecked()
-            PageText = self.TextWidget.toPlainText()
+            PageText = self.MainWindow.TextWidgetInst.toPlainText()
             if MatchCase:
                 PageText = PageText.replace(SearchText, ReplaceText)
             else:
                 PageText = re.sub(re.escape(SearchText), lambda x: ReplaceText, PageText, flags=re.IGNORECASE)
-            self.TextWidget.setPlainText(PageText)
+            self.MainWindow.TextWidgetInst.setPlainText(PageText)
             self.RefreshSearch()
 
     def ReplaceAllInNotebook(self, SearchText=None, ReplaceText=None, MatchCase=None, DelayTextUpdate=False):
-        if not self.TextWidget.ReadMode:
+        if not self.MainWindow.TextWidgetInst.ReadMode:
             if SearchText is None:
                 SearchText = self.SearchTextLineEdit.text()
             if SearchText == "":
@@ -147,23 +143,19 @@ class SearchWidget(QFrame):
                 ReplaceText = self.ReplaceTextLineEdit.text()
             if MatchCase is None:
                 MatchCase = self.MatchCaseCheckBox.isChecked()
-            if MatchCase:
-                self.RootPage.Content = self.RootPage.Content.replace(SearchText, ReplaceText)
-            else:
-                self.RootPage.Content = re.sub(re.escape(SearchText), lambda x: ReplaceText, self.RootPage.Content, flags=re.IGNORECASE)
-            self.ReplaceAllInSubPages(self.RootPage, SearchText, ReplaceText, MatchCase)
+            self.ReplaceAllInPageAndSubPages(self.Notebook.RootPage, SearchText, ReplaceText, MatchCase)
             if not DelayTextUpdate:
-                self.TextWidget.UpdateText()
+                self.MainWindow.TextWidgetInst.UpdateText()
                 self.MainWindow.UpdateUnsavedChangesFlag(True)
             self.RefreshSearch()
 
-    def ReplaceAllInSubPages(self, CurrentPage, SearchText, ReplaceText, MatchCase):
-        for SubPage in CurrentPage.SubPages:
-            if MatchCase:
-                SubPage.Content = SubPage.Content.replace(SearchText, ReplaceText)
-            else:
-                SubPage.Content = re.sub(re.escape(SearchText), lambda x: ReplaceText, SubPage.Content, flags=re.IGNORECASE)
-            self.ReplaceAllInSubPages(SubPage, SearchText, ReplaceText, MatchCase)
+    def ReplaceAllInPageAndSubPages(self, CurrentPage, SearchText, ReplaceText, MatchCase):
+        if MatchCase:
+            CurrentPage["Content"] = CurrentPage["Content"].replace(SearchText, ReplaceText)
+        else:
+            CurrentPage["Content"] = re.sub(re.escape(SearchText), lambda x: ReplaceText, CurrentPage["Content"], flags=re.IGNORECASE)
+        for SubPage in CurrentPage["SubPages"]:
+            self.ReplaceAllInPageAndSubPages(SubPage, SearchText, ReplaceText, MatchCase)
 
     def ClearSearch(self):
         self.SearchTextLineEdit.clear()
@@ -177,7 +169,7 @@ class SearchWidget(QFrame):
 
     def RefreshSearch(self):
         self.RefreshingSearchResults = True
-        self.SearchIndexer.IndexUpToDate = False
+        self.Notebook.SearchIndexUpToDate = False
         self.Search()
         self.RefreshingSearchResults = False
 

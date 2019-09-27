@@ -12,6 +12,8 @@ class Notebook(SerializableMixin):
         self.RootPage = self.CreatePage("New Notebook")
         self.Images = {}
         self.PageTemplates = {}
+        self.SearchIndexUpToDate = False
+        self.SearchIndex = []
 
     # Page Methods
     def CreatePage(self, Title="New Page", Content="", IndexPath=None):
@@ -114,6 +116,31 @@ class Notebook(SerializableMixin):
 
     def GetTemplateNames(self):
         return sorted(self.PageTemplates.keys())
+
+    # Search Methods
+    def BuildSearchIndex(self):
+        self.SearchIndex.clear()
+        self.AddPageToSearchIndex()
+        self.SearchIndexUpToDate = True
+
+    def AddPageToSearchIndex(self, Page):
+        self.SearchIndex.append((Page["Title"], Page["Content"], Page["IndexPath"]))
+        for SubPage in Page["SubPages"]:
+            self.AddPageToSearchIndex(SubPage)
+
+    def GetSearchResults(self, SearchTermString, MatchCase=False, ExactTitleOnly=False):
+        if not MatchCase:
+            SearchTermString = SearchTermString.casefold()
+        if not self.SearchIndexUpToDate:
+            self.BuildSearchIndex()
+        Results = []
+        for PageData in self.SearchIndex:
+            ExactTitle = (PageData[0].casefold() if not MatchCase else PageData[0]) == SearchTermString
+            TitleHits = (PageData[0].casefold() if not MatchCase else PageData[0]).count(SearchTermString)
+            ContentHits = (PageData[1].casefold() if not MatchCase else PageData[1]).count(SearchTermString)
+            if (ExactTitleOnly and ExactTitle) or (not ExactTitleOnly and (TitleHits > 0 or ContentHits > 0)):
+                Results.append((PageData[0], PageData[2], ExactTitle, TitleHits, ContentHits))
+        return Results
 
     # Serialization Methods
     def SetState(self, NewState):

@@ -14,7 +14,9 @@ class Notebook(SerializableMixin):
         self.PageTemplates = {}
 
     # Page Methods
-    def CreatePage(self, Title="New Page", Content="", IndexPath=(0,)):
+    def CreatePage(self, Title="New Page", Content="", IndexPath=None):
+        if IndexPath is None:
+            IndexPath = [0]
         Page = {}
         Page["Title"] = Title
         Page["Content"] = Content
@@ -22,7 +24,9 @@ class Notebook(SerializableMixin):
         Page["SubPages"] = []
         return Page
 
-    def AddSubPage(self, Title="New Page", Content="", SuperPageIndexPath=(0,), PageToAdd=None):
+    def AddSubPage(self, Title="New Page", Content="", SuperPageIndexPath=None, PageToAdd=None):
+        if SuperPageIndexPath is None:
+            SuperPageIndexPath = [0]
         if PageToAdd is None:
             PageToAdd = self.CreatePage(Title, Content)
         SuperPage = self.GetPageFromIndexPath(SuperPageIndexPath)
@@ -70,12 +74,12 @@ class Notebook(SerializableMixin):
         return self.GetPageFromIndexPath(IndexPath[:-1])
 
     def UpdateIndexPaths(self):
-        self.RootPage["IndexPath"] = (0,)
+        self.RootPage["IndexPath"] = [0]
         self.UpdateSubPageIndexPaths(self.RootPage["IndexPath"], self.RootPage["SubPages"])
 
     def UpdateSubPageIndexPaths(self, CurrentIndexPath, SubPagesList):
         for Index in range(len(SubPagesList)):
-            SubPagesList[Index]["IndexPath"] = CurrentIndexPath + (Index,)
+            SubPagesList[Index]["IndexPath"] = CurrentIndexPath + [Index]
             self.UpdateSubPageIndexPaths(SubPagesList[Index]["IndexPath"], SubPagesList[Index]["SubPages"])
 
     # Image Methods

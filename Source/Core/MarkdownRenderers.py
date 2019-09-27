@@ -89,24 +89,24 @@ class HTMLExportRenderer(Renderer):
 
 def ConstructMarkdownStringFromPage(Page, Notebook):
     HeaderString = Notebook.Header + "\n\n"
-    HeaderString = HeaderString.replace("{PAGETITLE}", Page.Title)
+    HeaderString = HeaderString.replace("{PAGETITLE}", Page["Title"])
     HeaderString = HeaderString.replace("{SUBPAGELINKS}", ConstructSubPageLinks(Page))
     HeaderString = HeaderString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, Notebook))
     FooterString = "\n\n" + Notebook.Footer
-    FooterString = FooterString.replace("{PAGETITLE}", Page.Title)
+    FooterString = FooterString.replace("{PAGETITLE}", Page["Title"])
     FooterString = FooterString.replace("{SUBPAGELINKS}", ConstructSubPageLinks(Page))
     FooterString = FooterString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, Notebook))
-    MarkdownString = HeaderString + Page.Content + FooterString
+    MarkdownString = HeaderString + Page["Content"] + FooterString
     return MarkdownString
 
 
 def ConstructSubPageLinks(Page):
-    if len(Page.SubPages) < 1:
+    if len(Page["SubPages"]) < 1:
         LinksString = "No sub pages."
     else:
         LinksString = ""
-        for SubPage in Page.SubPages:
-            LinksString += "[" + SubPage.Title + "](" + json.dumps(SubPage.GetFullIndexPath()) + ")  \n"
+        for SubPage in Page["SubPages"]:
+            LinksString += "[" + SubPage["Title"] + "](" + json.dumps(SubPage["IndexPath"]) + ")  \n"
         LinksString = LinksString.rstrip()
     return LinksString
 

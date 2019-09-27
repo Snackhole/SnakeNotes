@@ -6,8 +6,8 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QFileDialog, QAction, QSplitter, QApplication
 
 from Core import MarkdownRenderers, Utility, ZimWikiConverters
+from Core.Notebook import Notebook
 from Core.Page import Page
-from Core.SearchIndexer import SearchIndexer
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
 from Interface.Dialogs.ExportErrorDialog import ExportErrorDialog
@@ -33,7 +33,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CurrentZoomLevel = 0
 
         # Set Up Save and Open
-        self.SetUpSaveAndOpen(".ntbk", "Notebook", (Page,))
+        self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook, Page))
 
         # Load Favorites
         if os.path.isfile("Favorites.cfg"):
@@ -45,8 +45,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Create Root Page
         self.RootPage = self.NewRootPage()
 
-        # Create Search Indexer
-        self.SearchIndexer = SearchIndexer(self.RootPage)
+        # Create Notebook
+        self.Notebook = Notebook()
 
         # Create Interface
         self.CreateInterface()
@@ -87,15 +87,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleReadModeActionsList = []
 
         # Create Notebook Display Widget
-        self.NotebookDisplayWidgetInst = NotebookDisplayWidget(self.RootPage, self.JSONSerializer, self)
+        self.NotebookDisplayWidgetInst = NotebookDisplayWidget(self.Notebook, self)
         self.NotebookDisplayWidgetInst.itemSelectionChanged.connect(self.PageSelected)
 
         # Create Text Widget
-        self.TextWidgetInst = TextWidget(self.RootPage, self.NotebookDisplayWidgetInst, self.DisplayMessageBox, self.JSONSerializer, self.SearchIndexer, self.ScriptName, self.WindowIcon)
+        self.TextWidgetInst = TextWidget(self.Notebook, self)
         self.TextWidgetInst.textChanged.connect(self.TextChanged)
 
         # Create Search Widget
-        self.SearchWidgetInst = SearchWidget(self.RootPage, self.SearchIndexer, self.NotebookDisplayWidgetInst, self.TextWidgetInst, self)
+        self.SearchWidgetInst = SearchWidget(self.Notebook, self)
 
         # Create and Populate Splitters
         self.NotebookAndSearchSplitter = QSplitter(Qt.Vertical)
@@ -111,6 +111,36 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.setCentralWidget(self.NotebookAndTextSplitter)
 
         # Create Actions
+        self.CreateActions()
+
+        # Disable Edit-Only Actions and Widgets
+        for Action in self.ToggleReadModeActionsList:
+            Action.setEnabled(not self.TextWidgetInst.ReadMode)
+
+        # Create Menu Bar
+        self.CreateMenuBar()
+
+        # Create Tool Bar
+        self.CreateToolBar()
+
+        # Create Status Bar
+        self.StatusBar = self.statusBar()
+
+        # Window Setup
+        self.WindowSetup()
+
+        # Initial Focus on NotebookDisplayWidgetInst
+        self.NotebookDisplayWidgetInst.setFocus()
+
+        # Initial Selection of Root Page
+        self.PageSelected([0])
+
+        # Set Up Tab Order
+        self.setTabOrder(self.NotebookDisplayWidgetInst, self.TextWidgetInst)
+        self.setTabOrder(self.TextWidgetInst, self.SearchWidgetInst)
+        self.setTabOrder(self.SearchWidgetInst, self.NotebookDisplayWidgetInst)
+
+    def CreateActions(self):
         self.NewAction = QAction("New")
         self.NewAction.setShortcut("Ctrl+Shift+N")
         self.NewAction.triggered.connect(self.NewActionTriggered)
@@ -308,7 +338,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleReadModeActionsList.append(self.InsertTableAction)
 
         self.InsertImageAction = QAction(self.InsertImageIcon, "Insert Image")
-        self.InsertImageAction.triggered.connect(self.InsertImage)
+        self.InsertImageAction.triggered.connect(self.TextWidgetInst.InsertImage)
         self.ToggleReadModeActionsList.append(self.InsertImageAction)
 
         self.MoveLineUpAction = QAction("Move Line Up")
@@ -355,11 +385,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleSearchAction.setShortcut("Ctrl+Shift+F")
         self.ToggleSearchAction.triggered.connect(self.SearchWidgetInst.ToggleVisibility)
 
-        # Disable Edit-Only Actions and Widgets
-        for Action in self.ToggleReadModeActionsList:
-            Action.setEnabled(not self.TextWidgetInst.ReadMode)
-
-        # Menu Bar
+    def CreateMenuBar(self):
         self.MenuBar = self.menuBar()
 
         self.FileMenu = self.MenuBar.addMenu("File")
@@ -443,7 +469,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.ExportHTMLAction)
 
-        # Tool Bar
+    def CreateToolBar(self):
         self.ToolBar = self.addToolBar("Actions")
         self.ToolBar.addAction(self.ToggleReadModeAction)
         self.ToolBar.addSeparator()
@@ -477,23 +503,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToolBar.addSeparator()
         self.ToolBar.addAction(self.FavoritesAction)
 
-        # Create Status Bar
-        self.StatusBar = self.statusBar()
-        self.StatusBar.showMessage("Status")
-
-        # Window Setup
-        self.WindowSetup()
-
-        # Initial Focus on NotebookDisplayWidgetInst
-        self.NotebookDisplayWidgetInst.setFocus()
-
-        # Initial Selection of Root Page
-        self.PageSelected([0])
-
-        # Set Up Tab Order
-        self.setTabOrder(self.NotebookDisplayWidgetInst, self.TextWidgetInst)
-        self.setTabOrder(self.TextWidgetInst, self.SearchWidgetInst)
-        self.setTabOrder(self.SearchWidgetInst, self.NotebookDisplayWidgetInst)
+    # TODO:  Continue Notebook rewrite from here
 
     # Notebook Methods
     def NewRootPage(self):
@@ -501,16 +511,16 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def UpdateRootPage(self, RootPage):
         self.RootPage = RootPage
-        self.NotebookDisplayWidgetInst.RootPage = self.RootPage
-        self.TextWidgetInst.RootPage = self.RootPage
+        self.NotebookDisplayWidgetInst.Notebook = self.RootPage
+        self.TextWidgetInst.Notebook = self.RootPage
         self.TextWidgetInst.Renderer.RootPage = self.RootPage
         self.SearchIndexer.RootPage = self.RootPage
-        self.SearchWidgetInst.RootPage = self.RootPage
+        self.SearchWidgetInst.Notebook = self.RootPage
 
     def PageSelected(self, IndexPath=None):
         Path = IndexPath if IndexPath is not None else self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
         if Path is not None:
-            self.TextWidgetInst.SetCurrentPage(self.RootPage.GetSubPageByIndexPath(Path))
+            self.TextWidgetInst.SetCurrentPage(self.Notebook.GetPageFromIndexPath(Path))
 
     def NewPage(self):
         if not self.TextWidgetInst.ReadMode:
@@ -691,8 +701,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def TextChanged(self):
         if self.TextWidgetInst.DisplayChanging or self.TextWidgetInst.ReadMode:
             return
-        self.TextWidgetInst.CurrentPage.Content = self.TextWidgetInst.toPlainText()
-        self.SearchIndexer.IndexUpToDate = False
+        self.TextWidgetInst.CurrentPage["Content"] = self.TextWidgetInst.toPlainText()
+        self.Notebook.SearchIndexUpToDate = False
         self.UpdateUnsavedChangesFlag(True)
 
     def ToggleReadMode(self):
@@ -717,19 +727,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.TextWidgetInst.zoomIn(-self.CurrentZoomLevel)
             self.CurrentZoomLevel = 0
 
-    # Image Methods
-    def InsertImage(self):
-        if not self.TextWidgetInst.ReadMode and self.TextWidgetInst.hasFocus():
-            AttachedImages = self.RootPage.GetImageNames()
-            if len(AttachedImages) < 1:
-                self.DisplayMessageBox("No images are attached to the notebook.\n\nUse the Image Manager in the Notebook menu to add images to the notebook.")
-            else:
-                ImageFileName, OK = QInputDialog.getItem(self, "Select Image", "Image file:", AttachedImages, editable=False)
-                if OK:
-                    self.TextWidgetInst.InsertImage(ImageFileName)
-                else:
-                    self.FlashStatusBar("No image inserted.")
-
     # Interface Methods
     def DisplayMessageBox(self, Message, Icon=QMessageBox.Information, Buttons=QMessageBox.Ok, Parent=None):
         MessageBox = QMessageBox(self if Parent is None else Parent)
@@ -742,7 +739,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def FlashStatusBar(self, Status, Duration=2000):
         self.StatusBar.showMessage(Status)
-        QTimer.singleShot(Duration, lambda: self.StatusBar.showMessage("Status"))
+        QTimer.singleShot(Duration, self.StatusBar.clearMessage)
 
     def UpdateWindowTitle(self):
         self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + (" *" if self.UnsavedChanges else ""))
@@ -823,7 +820,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if ZimWikiCompatible:
             RootPageTitle = RootPageTitle.replace(" ", "_")
         with open(os.path.join(ExportDirectory, RootPageTitle) + ".txt", "w") as ExportFile:
-            MarkdownString = MarkdownRenderers.ConstructMarkdownStringFromPage(self.RootPage, self.RootPage)
+            MarkdownString = MarkdownRenderers.ConstructMarkdownStringFromPage(self.Notebook.RootPage, self.Notebook)
             try:
                 ExportFile.write(MarkdownString)
             except Exception as Error:
@@ -843,7 +840,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             if ZimWikiCompatible:
                 SubPageTitle = SubPageTitle.replace(" ", "_")
             with open(os.path.join(CurrentPageDirectory, SubPageTitle + ".txt"), "w") as ExportFile:
-                MarkdownString = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.RootPage)
+                MarkdownString = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.Notebook)
                 try:
                     ExportFile.write(MarkdownString)
                 except Exception as Error:
@@ -869,10 +866,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def ExportPagesToHTML(self, ExportDirectory, ErrorList):
         RootPageTitle = str(self.RootPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(self.RootPage.Title)
-        HTMLExportRenderer = MarkdownRenderers.HTMLExportRenderer(self.RootPage, self.NotebookDisplayWidgetInst, self.JSONSerializer)
+        HTMLExportRenderer = MarkdownRenderers.HTMLExportRenderer(self.RootPage)
         HTMLExportMarkdownParser = mistune.Markdown(renderer=HTMLExportRenderer)
         with open(os.path.join(ExportDirectory, RootPageTitle) + ".html", "w") as ExportFile:
-            MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.RootPage, self.RootPage)
+            MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.Notebook.RootPage, self.Notebook)
             HTMLExportRenderer.CurrentPage = self.RootPage
             HTMLText = HTMLExportMarkdownParser(MarkdownText)
             try:
@@ -890,7 +887,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 os.makedirs(CurrentPageDirectory, exist_ok=True)
             SubPageTitle = str(SubPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(SubPage.Title)
             with open(os.path.join(CurrentPageDirectory, SubPageTitle) + ".html", "w") as ExportFile:
-                MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.RootPage)
+                MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.Notebook)
                 HTMLExportRenderer.CurrentPage = SubPage
                 HTMLText = MarkdownParser(MarkdownText)
                 try:
@@ -940,7 +937,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if self.UnsavedChanges:
             SavePrompt = self.DisplayMessageBox("Save unsaved work before closing?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
             if SavePrompt == QMessageBox.Yes:
-                if not self.Save(self.RootPage):
+                if not self.Save(self.Notebook):
                     Close = False
             elif SavePrompt == QMessageBox.No:
                 pass

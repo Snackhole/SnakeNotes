@@ -2,15 +2,13 @@ from PyQt5.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QGridLayout
 
 
 class NewPageDialog(QDialog):
-    def __init__(self, CurrentPageName, ScriptName, Icon, DisplayMessageBox, TemplateNames, Parent):
-        super().__init__(parent=Parent)
+    def __init__(self, CurrentPageName, TemplateNames, MainWindow):
+        super().__init__(parent=MainWindow)
 
         # Store Parameters
         self.CurrentPageName = CurrentPageName
-        self.ScriptName = ScriptName
-        self.Icon = Icon
-        self.DisplayMessageBox = DisplayMessageBox
         self.TemplateNames = TemplateNames
+        self.MainWindow = MainWindow
 
         # Variables
         self.NewPageAdded = False
@@ -51,8 +49,8 @@ class NewPageDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.ScriptName)
-        self.setWindowIcon(self.Icon)
+        self.setWindowTitle(self.MainWindow.ScriptName)
+        self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog
         self.exec_()
@@ -60,7 +58,7 @@ class NewPageDialog(QDialog):
     def Done(self):
         NewPageName = self.PageNameLineEdit.text()
         if NewPageName == "":
-            self.DisplayMessageBox("Page names cannot be blank.", Parent=self)
+            self.MainWindow.DisplayMessageBox("Page names cannot be blank.", Parent=self)
             return
         self.NewPageName = NewPageName
         self.TemplateName = self.TemplateComboBox.currentText()

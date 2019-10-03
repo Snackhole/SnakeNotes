@@ -1,3 +1,4 @@
+import json
 import os
 
 import mistune
@@ -41,9 +42,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.FavoritesData = self.JSONSerializer.DeserializeDataFromJSONString(ConfigFile.read())
         else:
             self.FavoritesData = {}
-
-        # Create Root Page
-        self.RootPage = self.NewRootPage()
 
         # Create Notebook
         self.Notebook = Notebook()
@@ -503,19 +501,16 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToolBar.addSeparator()
         self.ToolBar.addAction(self.FavoritesAction)
 
-    # TODO:  Continue Notebook rewrite from here
-
     # Notebook Methods
-    def NewRootPage(self):
-        return Page(0, "New Notebook", "", IsRootPage=True)
+    def NewNotebook(self):
+        return Notebook()
 
-    def UpdateRootPage(self, RootPage):
-        self.RootPage = RootPage
-        self.NotebookDisplayWidgetInst.Notebook = self.RootPage
-        self.TextWidgetInst.Notebook = self.RootPage
-        self.TextWidgetInst.Renderer.RootPage = self.RootPage
-        self.SearchIndexer.RootPage = self.RootPage
-        self.SearchWidgetInst.Notebook = self.RootPage
+    def UpdateNotebook(self, Notebook):
+        self.Notebook = Notebook
+        self.NotebookDisplayWidgetInst.Notebook = self.Notebook
+        self.TextWidgetInst.Notebook = self.Notebook
+        self.TextWidgetInst.Renderer.Notebook = self.Notebook
+        self.SearchWidgetInst.Notebook = self.Notebook
 
     def PageSelected(self, IndexPath=None):
         Path = IndexPath if IndexPath is not None else self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
@@ -525,11 +520,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def NewPage(self):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
-            NewPageDialogInst = NewPageDialog(CurrentPage.Title, self.ScriptName, self.WindowIcon, self.DisplayMessageBox, self.RootPage.GetTemplateNames(), self)
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+            NewPageDialogInst = NewPageDialog(CurrentPage["Title"], self.Notebook.GetTemplateNames(), self)
             if NewPageDialogInst.NewPageAdded:
                 OldLinkData = self.GetLinkData()
-                CurrentPage.AddSubPage(NewPageDialogInst.NewPageName, "" if NewPageDialogInst.TemplateName == "None" else self.RootPage.GetTemplate(NewPageDialogInst.TemplateName))
+                self.Notebook.AddSubPage(NewPageDialogInst.NewPageName, "" if NewPageDialogInst.TemplateName == "None" else self.Notebook.GetTemplate(NewPageDialogInst.TemplateName), CurrentPageIndexPath)
                 NewLinkData = self.GetLinkData()
                 self.UpdateLinks(OldLinkData, NewLinkData)
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
@@ -541,22 +536,21 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def DeletePage(self):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
-            if CurrentPage.IsRootPage:
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+            if CurrentPage["IndexPath"] == [0]:
                 self.DisplayMessageBox("The root page of a notebook cannot be deleted.")
             elif self.DisplayMessageBox("Are you sure you want to delete this page?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.Yes:
-                CurrentPageSuper = self.RootPage.GetSuperOfSubPageByIndexPath(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath())
                 OldLinkData = self.GetLinkData()
-                CurrentPageSuper.DeleteSubPage(self.NotebookDisplayWidgetInst.GetCurrentPageIndex())
+                self.Notebook.DeleteSubPage(CurrentPageIndexPath)
                 NewLinkData = self.GetLinkData()
                 self.UpdateLinks(OldLinkData, NewLinkData)
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
                 SelectParent = False
                 SelectDelta = 0
-                CurrentPageSuperSubPagesLength = len(CurrentPageSuper.SubPages)
+                CurrentPageSuperSubPagesLength = len(self.Notebook.GetSuperOfPageFromIndexPath(CurrentPageIndexPath)["SubPages"])
                 if CurrentPageSuperSubPagesLength < 1:
                     SelectParent = True
-                elif CurrentPageSuperSubPagesLength == CurrentPage.PageIndex:
+                elif CurrentPageSuperSubPagesLength == CurrentPageIndexPath[-1]:
                     SelectDelta = -1
                 self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath, SelectParent=SelectParent, SelectDelta=SelectDelta)
                 self.SearchWidgetInst.RefreshSearch()
@@ -566,11 +560,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def MovePage(self, Delta):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
             OldLinkData = self.GetLinkData()
-            if CurrentPage.IsRootPage:
+            if CurrentPage["IndexPath"] == [0]:
                 self.DisplayMessageBox("The root page of a notebook cannot be moved.")
-            elif self.RootPage.GetSuperOfSubPageByIndexPath(CurrentPageIndexPath).MovePage(self.NotebookDisplayWidgetInst.GetCurrentPageIndex(), Delta):
+            elif self.Notebook.MoveSubPage(CurrentPageIndexPath, Delta):
                 NewLinkData = self.GetLinkData()
                 self.UpdateLinks(OldLinkData, NewLinkData)
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
@@ -578,6 +572,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.SearchWidgetInst.RefreshSearch()
                 self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
+
+    # TODO:  Continue Notebook rewrite from here
 
     def PromotePage(self):
         if not self.TextWidgetInst.ReadMode:
@@ -648,13 +644,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def GetLinkData(self):
         LinkData = {}
-        LinkData[id(self.RootPage)] = "](" + self.JSONSerializer.SerializeDataToJSONString(self.RootPage.GetFullIndexPath(), Indent=None) + ")"
-        self.AddSubPageLinkData(self.RootPage, LinkData)
+        LinkData[id(self.Notebook.RootPage)] = "](" + json.dumps(self.Notebook.RootPage["IndexPath"], indent=None) + ")"
+        self.AddSubPageLinkData(self.Notebook.RootPage, LinkData)
         return LinkData
 
     def AddSubPageLinkData(self, CurrentPage, LinkData):
-        for SubPage in CurrentPage.SubPages:
-            LinkData[id(SubPage)] = "](" + self.JSONSerializer.SerializeDataToJSONString(SubPage.GetFullIndexPath(), Indent=None) + ")"
+        for SubPage in CurrentPage["SubPages"]:
+            LinkData[id(SubPage)] = "](" + json.dumps(SubPage["IndexPath"], indent=None) + ")"
             self.AddSubPageLinkData(SubPage, LinkData)
 
     def UpdateLinks(self, OldLinkData, NewLinkData):
@@ -909,7 +905,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def OpenActionTriggered(self, FilePath=None):
         NewRootPage = self.Open(self.RootPage, FilePath=FilePath)
         if NewRootPage is not None:
-            self.UpdateRootPage(NewRootPage)
+            self.UpdateNotebook(NewRootPage)
             self.NotebookDisplayWidgetInst.FillFromRootPage()
             self.SearchIndexer.BuildIndex()
             self.SearchWidgetInst.ClearSearch()
@@ -926,7 +922,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if not self.New(self.RootPage):
             self.UpdateWindowTitle()
             return
-        self.UpdateRootPage(self.NewRootPage())
+        self.UpdateNotebook(self.NewNotebook())
         self.NotebookDisplayWidgetInst.FillFromRootPage()
         self.SearchIndexer.BuildIndex()
         self.SearchWidgetInst.ClearSearch()

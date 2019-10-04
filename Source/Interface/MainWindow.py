@@ -698,8 +698,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def UpdateWindowTitle(self):
         self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + (" *" if self.UnsavedChanges else ""))
 
-    # TODO:  Continue Notebook rewrite from here
-
     # HTML Export Methods
     def ExportHTML(self):
         ExportDirectory = QFileDialog.getExistingDirectory(caption="Export HTML")
@@ -714,31 +712,31 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 for ErrorString in ErrorList:
                     CombinedErrorString += ErrorString + "\n\n"
                 CombinedErrorString = CombinedErrorString.rstrip()
-                ExportErrorDialog(CombinedErrorString, self.WindowIcon, self)
+                ExportErrorDialog(CombinedErrorString, self)
             self.FlashStatusBar("Exported notebook to:  " + ExportDirectory)
 
     def ExportPagesToHTML(self, ExportDirectory, ErrorList):
-        RootPageTitle = str(self.RootPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(self.RootPage.Title)
-        HTMLExportRenderer = MarkdownRenderers.HTMLExportRenderer(self.RootPage)
+        RootPageTitle = str(self.Notebook.RootPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(self.Notebook.RootPage["Title"])
+        HTMLExportRenderer = MarkdownRenderers.HTMLExportRenderer(self.Notebook)
         HTMLExportMarkdownParser = mistune.Markdown(renderer=HTMLExportRenderer)
         with open(os.path.join(ExportDirectory, RootPageTitle) + ".html", "w") as ExportFile:
             MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.Notebook.RootPage, self.Notebook)
-            HTMLExportRenderer.CurrentPage = self.RootPage
+            HTMLExportRenderer.CurrentPage = self.Notebook.RootPage
             HTMLText = HTMLExportMarkdownParser(MarkdownText)
             try:
                 ExportFile.write(HTMLText)
             except Exception as Error:
                 ErrorString = RootPageTitle + ":  " + str(Error)
                 ErrorList.append(ErrorString)
-        self.ExportSubPagesToHTML(ExportDirectory, self.RootPage, HTMLExportMarkdownParser, HTMLExportRenderer, ErrorList)
+        self.ExportSubPagesToHTML(ExportDirectory, self.Notebook.RootPage, HTMLExportMarkdownParser, HTMLExportRenderer, ErrorList)
 
     def ExportSubPagesToHTML(self, CurrentDirectory, CurrentPage, MarkdownParser, HTMLExportRenderer, ErrorList):
-        CurrentPageTitle = str(CurrentPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(CurrentPage.Title)
+        CurrentPageTitle = str(CurrentPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(CurrentPage["Title"])
         CurrentPageDirectory = os.path.join(CurrentDirectory, CurrentPageTitle)
-        for SubPage in CurrentPage.SubPages:
+        for SubPage in CurrentPage["SubPages"]:
             if not os.path.isdir(CurrentPageDirectory):
                 os.makedirs(CurrentPageDirectory, exist_ok=True)
-            SubPageTitle = str(SubPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(SubPage.Title)
+            SubPageTitle = str(SubPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(SubPage["Title"])
             with open(os.path.join(CurrentPageDirectory, SubPageTitle) + ".html", "w") as ExportFile:
                 MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.Notebook)
                 HTMLExportRenderer.CurrentPage = SubPage
@@ -749,6 +747,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                     ErrorString = SubPageTitle + ":  " + str(Error)
                     ErrorList.append(ErrorString)
             self.ExportSubPagesToHTML(CurrentPageDirectory, SubPage, MarkdownParser, HTMLExportRenderer, ErrorList)
+
+    # TODO:  Continue Notebook rewrite from here
 
     # Save and Open Methods
     def SaveActionTriggered(self, SaveAs=False):

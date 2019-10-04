@@ -31,6 +31,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         # Variables
         self.CurrentZoomLevel = 0
+        self.BackList = []
+        self.BackMaximum = 50
+        self.ForwardList = []
+        self.BackNavigation = False
 
         # Set Up Save and Open
         self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
@@ -130,7 +134,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookDisplayWidgetInst.setFocus()
 
         # Initial Selection of Root Page
-        self.PageSelected([0])
+        self.PageSelected(IndexPath=[0], InitialSelection=True)
 
         # Set Up Tab Order
         self.setTabOrder(self.NotebookDisplayWidgetInst, self.TextWidgetInst)
@@ -165,6 +169,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleReadModeAction = QAction(self.ToggleReadModeIcon, "Toggle Read Mode")
         self.ToggleReadModeAction.setShortcut("Ctrl+E")
         self.ToggleReadModeAction.triggered.connect(self.ToggleReadMode)
+
+        self.BackAction = QAction("Back")
+        self.BackAction.triggered.connect(self.Back)
+
+        self.ForwardAction = QAction("Forward")
+        self.ForwardAction.triggered.connect(self.Forward)
 
         self.NewPageAction = QAction(self.NewPageIcon, "New Page")
         self.NewPageAction.setShortcut("Ctrl+N")
@@ -410,6 +420,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.DeleteLineAction)
 
         self.ViewMenu = self.MenuBar.addMenu("View")
+        self.ViewMenu.addAction(self.BackAction)
+        self.ViewMenu.addAction(self.ForwardAction)
+        self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.SearchAction)
         self.ViewMenu.addAction(self.ToggleSearchAction)
         self.ViewMenu.addSeparator()
@@ -441,6 +454,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def CreateToolBar(self):
         self.ToolBar = self.addToolBar("Actions")
         self.ToolBar.addAction(self.ToggleReadModeAction)
+        self.ToolBar.addAction(self.BackAction)
+        self.ToolBar.addAction(self.ForwardAction)
         self.ToolBar.addSeparator()
         self.ToolBar.addAction(self.NewPageAction)
         self.ToolBar.addAction(self.DeletePageAction)
@@ -480,10 +495,44 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.TextWidgetInst.Renderer.Notebook = self.Notebook
         self.SearchWidgetInst.Notebook = self.Notebook
 
-    def PageSelected(self, IndexPath=None):
-        Path = IndexPath if IndexPath is not None else self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-        if Path is not None:
-            self.TextWidgetInst.SetCurrentPage(self.Notebook.GetPageFromIndexPath(Path))
+    def PageSelected(self, IndexPath=None, InitialSelection=False):
+        IndexPath = IndexPath if IndexPath is not None else self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+        if IndexPath is not None:
+            self.UpdateBackAndForward(InitialSelection)
+            self.TextWidgetInst.SetCurrentPage(self.Notebook.GetPageFromIndexPath(IndexPath))
+
+    def UpdateBackAndForward(self, InitialSelection):
+        if not self.BackNavigation and not InitialSelection:
+            PreviousPageIndexPath = self.TextWidgetInst.CurrentPage["IndexPath"]
+            if self.BackList != []:
+                if self.BackList[-1] != PreviousPageIndexPath:
+                    self.BackList.append(PreviousPageIndexPath)
+            else:
+                self.BackList.append(PreviousPageIndexPath)
+            if len(self.BackList) > self.BackMaximum:
+                self.BackList = self.BackList[-self.BackMaximum:]
+            self.ForwardList.clear()
+
+    def Back(self):
+        if len(self.BackList) > 0:
+            self.BackNavigation = True
+            TargetPageIndexPath = self.BackList[-1]
+            print(TargetPageIndexPath)
+            del self.BackList[-1]
+            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            self.ForwardList.append(CurrentPageIndexPath)
+            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
+            self.BackNavigation = False
+
+    def Forward(self):
+        if len(self.ForwardList) > 0:
+            self.BackNavigation = True
+            TargetPageIndexPath = self.ForwardList[-1]
+            del self.ForwardList[-1]
+            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            self.BackList.append(CurrentPageIndexPath)
+            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
+            self.BackNavigation = False
 
     def NewPage(self):
         if not self.TextWidgetInst.ReadMode:

@@ -2,26 +2,25 @@ from PyQt5.QtWidgets import QDialog, QGridLayout, QTextEdit, QPushButton
 
 
 class EditHeaderOrFooterDialog(QDialog):
-    def __init__(self, Mode, RootPage, Icon, Parent):
-        super().__init__(parent=Parent)
+    def __init__(self, Mode, Notebook, MainWindow):
+        super().__init__(parent=MainWindow)
 
         # Store Parameters
         self.Mode = Mode
-        self.RootPage = RootPage
-        self.Icon = Icon
-        self.Parent = Parent
+        self.Notebook = Notebook
+        self.MainWindow = MainWindow
 
         # Variables
         self.UnsavedChanges = False
         self.HeaderOrFooterString = None
-        self.Width = max(self.Parent.width() - 100, 100)
-        self.Height = max(self.Parent.height() - 100, 100)
+        self.Width = max(self.MainWindow.width() - 100, 100)
+        self.Height = max(self.MainWindow.height() - 100, 100)
 
         # Header or Footer Text
         self.HeaderOrFooterText = QTextEdit()
         self.HeaderOrFooterText.setTabChangesFocus(True)
         self.HeaderOrFooterText.setStyleSheet("selection-background-color: rgb(0, 120, 215); selection-color: white")
-        self.HeaderOrFooterText.setPlainText(self.RootPage.Header if self.Mode == "Header" else (self.RootPage.Footer if self.Mode == "Footer" else ""))
+        self.HeaderOrFooterText.setPlainText(self.Notebook.Header if self.Mode == "Header" else (self.Notebook.Footer if self.Mode == "Footer" else ""))
 
         # Edit Buttons
         self.PageTitleButton = QPushButton("Page Title")
@@ -53,7 +52,7 @@ class EditHeaderOrFooterDialog(QDialog):
 
         # Set Window Title and Icon
         self.setWindowTitle("Edit " + Mode)
-        self.setWindowIcon(self.Icon)
+        self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize
         self.Resize()

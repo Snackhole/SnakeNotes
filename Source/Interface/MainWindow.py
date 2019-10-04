@@ -217,11 +217,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleReadModeActionsList.append(self.TemplateManagerAction)
 
         self.EditHeaderAction = QAction("Edit Header")
-        self.EditHeaderAction.triggered.connect(self.EditHeader)
+        self.EditHeaderAction.triggered.connect(lambda: self.EditHeaderOrFooter("Header"))
         self.ToggleReadModeActionsList.append(self.EditHeaderAction)
 
         self.EditFooterAction = QAction("Edit Footer")
-        self.EditFooterAction.triggered.connect(self.EditFooter)
+        self.EditFooterAction.triggered.connect(lambda: self.EditHeaderOrFooter("Footer"))
         self.ToggleReadModeActionsList.append(self.EditFooterAction)
 
         self.ImportPlainTextAction = QAction("Import Plain Text Files")
@@ -573,26 +573,22 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
-    # TODO:  Continue Notebook rewrite from here
-
     def PromotePage(self):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
-            SuperOfCurrentPage = self.RootPage.GetSuperOfSubPageByIndexPath(CurrentPageIndexPath)
-            if CurrentPage.IsRootPage:
+            SuperOfCurrentPageIndexPath = self.Notebook.GetSuperOfPageFromIndexPath(CurrentPageIndexPath)["IndexPath"]
+            if CurrentPageIndexPath == [0]:
                 self.DisplayMessageBox("The root page of a notebook cannot be promoted.")
-            elif SuperOfCurrentPage.IsRootPage:
+            elif SuperOfCurrentPageIndexPath == [0]:
                 self.DisplayMessageBox("A page cannot be promoted to the same level as the root page.")
             else:
-                SuperOfSuper = self.RootPage.GetSuperOfSubPageByIndexPath(SuperOfCurrentPage.GetFullIndexPath())
+                CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
                 OldLinkData = self.GetLinkData()
-                SuperOfCurrentPage.DeleteSubPage(CurrentPage.PageIndex)
-                SuperOfSuper.AppendSubPage(CurrentPage)
+                self.Notebook.PromoteSubPage(CurrentPageIndexPath)
                 NewLinkData = self.GetLinkData()
                 self.UpdateLinks(OldLinkData, NewLinkData)
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
-                self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage.GetFullIndexPath())
+                self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
                 self.SearchWidgetInst.RefreshSearch()
                 self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
@@ -600,28 +596,24 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def DemotePage(self):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
-            SuperOfCurrentPage = self.RootPage.GetSuperOfSubPageByIndexPath(CurrentPageIndexPath)
-            if CurrentPage.IsRootPage:
+            SuperOfCurrentPage = self.Notebook.GetSuperOfPageFromIndexPath(CurrentPageIndexPath)
+            if CurrentPageIndexPath == [0]:
                 self.DisplayMessageBox("The root page of a notebook cannot be demoted.")
-            elif len(SuperOfCurrentPage.SubPages) < 2:
+            elif len(SuperOfCurrentPage["SubPages"]) < 2:
                 self.DisplayMessageBox("No valid page to demote to.")
             else:
-                SiblingPages = SuperOfCurrentPage.SubPages.copy()
+                CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+                SiblingPages = SuperOfCurrentPage["SubPages"].copy()
                 SiblingPages.remove(CurrentPage)
-                SiblingPageTitles = []
-                for Sibling in SiblingPages:
-                    SiblingPageTitles.append(Sibling.Title)
-                SiblingPageIndex = DemotePageDialog(CurrentPage.Title, CurrentPage.PageIndex, self.ScriptName, self.WindowIcon, SiblingPageTitles, self).SiblingPageIndex
+                SiblingPageTitles = [Sibling["Title"] for Sibling in SiblingPages]
+                SiblingPageIndex = DemotePageDialog(CurrentPage, SiblingPageTitles, self).SiblingPageIndex
                 if SiblingPageIndex is not None:
-                    TargetSiblingPage = SuperOfCurrentPage.SubPages[SiblingPageIndex]
                     OldLinkData = self.GetLinkData()
-                    SuperOfCurrentPage.DeleteSubPage(CurrentPage.PageIndex)
-                    TargetSiblingPage.AppendSubPage(CurrentPage)
+                    self.Notebook.DemoteSubPage(CurrentPageIndexPath, SiblingPageIndex)
                     NewLinkData = self.GetLinkData()
                     self.UpdateLinks(OldLinkData, NewLinkData)
                     self.NotebookDisplayWidgetInst.FillFromRootPage()
-                    self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage.GetFullIndexPath())
+                    self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
                     self.SearchWidgetInst.RefreshSearch()
                     self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
@@ -629,13 +621,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def RenamePage(self):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
-            NewName, OK = QInputDialog.getText(self, "Rename " + CurrentPage.Title, "Enter a title:", text=CurrentPage.Title)
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+            NewName, OK = QInputDialog.getText(self, "Rename " + CurrentPage["Title"], "Enter a title:", text=CurrentPage["Title"])
             if OK:
                 if NewName == "":
                     self.DisplayMessageBox("Page names cannot be blank.")
                 else:
-                    CurrentPage.Title = NewName
+                    CurrentPage["Title"] = NewName
                     self.NotebookDisplayWidgetInst.FillFromRootPage()
                     self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
                     self.SearchWidgetInst.RefreshSearch()
@@ -667,31 +659,27 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def ImageManager(self):
         if not self.TextWidgetInst.ReadMode:
-            ImageManagerDialogInst = ImageManagerDialog(self.RootPage, self.ScriptName, self.WindowIcon, self.DisplayMessageBox, self)
+            ImageManagerDialogInst = ImageManagerDialog(self.Notebook, self)
             if ImageManagerDialogInst.UnsavedChanges:
                 self.UpdateUnsavedChangesFlag(True)
 
     def TemplateManager(self):
         if not self.TextWidgetInst.ReadMode:
-            TemplateManagerDialogInst = TemplateManagerDialog(self.RootPage, self.ScriptName, self.WindowIcon, self.DisplayMessageBox, self)
+            TemplateManagerDialogInst = TemplateManagerDialog(self.Notebook, self)
             if TemplateManagerDialogInst.UnsavedChanges:
                 self.UpdateUnsavedChangesFlag(True)
 
-    def EditHeader(self):
-        self.EditHeaderOrFooter("Header")
-
-    def EditFooter(self):
-        self.EditHeaderOrFooter("Footer")
-
     def EditHeaderOrFooter(self, Mode):
         if not self.TextWidgetInst.ReadMode:
-            EditHeaderOrFooterDialogInst = EditHeaderOrFooterDialog(Mode, self.RootPage, self.WindowIcon, self)
+            EditHeaderOrFooterDialogInst = EditHeaderOrFooterDialog(Mode, self.Notebook, self)
             if EditHeaderOrFooterDialogInst.UnsavedChanges:
                 if EditHeaderOrFooterDialogInst.Mode == "Header":
-                    self.RootPage.Header = EditHeaderOrFooterDialogInst.HeaderOrFooterString
+                    self.Notebook.Header = EditHeaderOrFooterDialogInst.HeaderOrFooterString
                 elif EditHeaderOrFooterDialogInst.Mode == "Footer":
-                    self.RootPage.Footer = EditHeaderOrFooterDialogInst.HeaderOrFooterString
+                    self.Notebook.Footer = EditHeaderOrFooterDialogInst.HeaderOrFooterString
                 self.UpdateUnsavedChangesFlag(True)
+
+    # TODO:  Continue Notebook rewrite from here
 
     # Text Methods
     def TextChanged(self):

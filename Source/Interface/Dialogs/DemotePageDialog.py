@@ -2,21 +2,19 @@ from PyQt5.QtWidgets import QDialog, QLabel, QComboBox, QPushButton, QGridLayout
 
 
 class DemotePageDialog(QDialog):
-    def __init__(self, CurrentPageName, CurrentPageIndex, ScriptName, Icon, SiblingPageTitles, Parent):
-        super().__init__(parent=Parent)
+    def __init__(self, CurrentPage, SiblingPageTitles, MainWindow):
+        super().__init__(parent=MainWindow)
 
         # Store Parameters
-        self.CurrentPageName = CurrentPageName
-        self.CurrentPageIndex = CurrentPageIndex
-        self.ScriptName = ScriptName
-        self.Icon = Icon
+        self.CurrentPage = CurrentPage
+        self.MainWindow = MainWindow
         self.SiblingPageTitles = SiblingPageTitles
 
         # Variables
         self.SiblingPageIndex = None
 
         # Label
-        self.DemotePrompt = QLabel("Demote " + self.CurrentPageName + " to which of its siblings?")
+        self.DemotePrompt = QLabel("Demote " + self.CurrentPage["Title"] + " to which of its siblings?")
 
         # Sibling Page Titles Combo Box
         self.SiblingPageTitlesComboBox = QComboBox()
@@ -38,15 +36,15 @@ class DemotePageDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.ScriptName)
-        self.setWindowIcon(self.Icon)
+        self.setWindowTitle(self.MainWindow.ScriptName)
+        self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog
         self.exec_()
 
     def Done(self):
         SiblingPageIndex = self.SiblingPageTitlesComboBox.currentIndex()
-        if SiblingPageIndex >= self.CurrentPageIndex:
+        if SiblingPageIndex >= self.CurrentPage["IndexPath"][-1]:
             SiblingPageIndex += 1
         self.SiblingPageIndex = SiblingPageIndex
         self.close()

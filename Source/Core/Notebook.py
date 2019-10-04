@@ -60,7 +60,22 @@ class Notebook(SerializableMixin):
         self.UpdateIndexPaths()
         return True
 
-    # TODO:  Promote and Demote methods
+    def PromoteSubPage(self, IndexPath):
+        SuperPage = self.GetSuperOfPageFromIndexPath(IndexPath)
+        if SuperPage["IndexPath"] == [0] or IndexPath == [0]:
+            return
+        CurrentPage = self.GetPageFromIndexPath(IndexPath)
+        self.DeleteSubPage(IndexPath)
+        SuperOfSuperIndexPath = self.GetSuperOfPageFromIndexPath(self.GetSuperOfPageFromIndexPath(IndexPath)["IndexPath"])["IndexPath"]
+        self.AddSubPage(SuperPageIndexPath=SuperOfSuperIndexPath, PageToAdd=CurrentPage)
+
+    def DemoteSubPage(self, IndexPath, SiblingPageIndex):
+        if IndexPath == [0]:
+            return
+        CurrentPage = self.GetPageFromIndexPath(IndexPath)
+        TargetSiblingPage = self.GetPageFromIndexPath(IndexPath[:-1] + [SiblingPageIndex])
+        self.DeleteSubPage(IndexPath)
+        self.AddSubPage(SuperPageIndexPath=TargetSiblingPage["IndexPath"], PageToAdd=CurrentPage)
 
     def GetPageFromIndexPath(self, IndexPath):
         if len(IndexPath) < 1:

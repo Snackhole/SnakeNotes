@@ -7,16 +7,12 @@ from Core import Base64Converters
 
 
 class ImageManagerDialog(QDialog):
-    def __init__(self, RootPage, ScriptName, Icon, DisplayMessageBox, Parent):
-        # Store Parameters
-        self.RootPage = RootPage
-        self.ScriptName = ScriptName
-        self.Icon = Icon
-        self.DisplayMessageBox = DisplayMessageBox
-        self.Parent = Parent
+    def __init__(self, Notebook, MainWindow):
+        super().__init__(parent=MainWindow)
 
-        # QDialog Init
-        super().__init__(parent=self.Parent)
+        # Store Parameters
+        self.Notebook = Notebook
+        self.MainWindow = MainWindow
 
         # Variables
         self.UnsavedChanges = False
@@ -26,8 +22,8 @@ class ImageManagerDialog(QDialog):
         self.ExportFilters[".png"] = "PNG (*.png)"
         self.ExportFilters[".gif"] = "GIF (*.gif)"
         self.ExportFilters[".bmp"] = "BMP (*.bmp)"
-        self.Width = max(self.Parent.width() - 100, 100)
-        self.Height = max(self.Parent.height() - 100, 100)
+        self.Width = max(self.MainWindow.width() - 100, 100)
+        self.Height = max(self.MainWindow.height() - 100, 100)
 
         # Image List
         self.ImageList = QListWidget()
@@ -70,8 +66,8 @@ class ImageManagerDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.ScriptName + " Image Manager")
-        self.setWindowIcon(self.Icon)
+        self.setWindowTitle(self.MainWindow.ScriptName + " Image Manager")
+        self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize
         self.Resize()
@@ -95,7 +91,7 @@ class ImageManagerDialog(QDialog):
     def PopulateImageList(self):
         self.ImageList.clear()
         self.ImageDisplay.clear()
-        for FileName, Base64String in sorted(self.RootPage.Images.items()):
+        for FileName, Base64String in sorted(self.Notebook.Images.items()):
             self.ImageList.addItem(ImageListItem(FileName, Base64String))
         self.ImageList.setCurrentRow(0)
         self.ImageList.setFocus()
@@ -105,14 +101,14 @@ class ImageManagerDialog(QDialog):
         ImageFilePath = QFileDialog.getOpenFileName(caption="Attach Image File", filter="Images (*.jpg *.jpeg *.png *.gif *.bmp)")[0]
         if ImageFilePath != "":
             ImageFileName = os.path.basename(ImageFilePath)
-            if self.RootPage.HasImage(ImageFileName):
-                if self.DisplayMessageBox("A file named \"" + ImageFileName + "\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Question,
-                                          Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+            if self.Notebook.HasImage(ImageFileName):
+                if self.MainWindow.DisplayMessageBox("A file named \"" + ImageFileName + "\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No),
+                                                     Parent=self) == QMessageBox.Yes:
                     AttachNewFile = True
             else:
                 AttachNewFile = True
         if AttachNewFile:
-            self.RootPage.AddImage(ImageFilePath)
+            self.Notebook.AddImage(ImageFilePath)
             self.UnsavedChanges = True
             self.PopulateImageList()
 
@@ -125,13 +121,13 @@ class ImageManagerDialog(QDialog):
             NewName, OK = QInputDialog.getText(self, "Rename " + CurrentFileName, "Enter a name:", text=CurrentFileName)
             if OK:
                 if NewName == "":
-                    self.DisplayMessageBox("Image names cannot be blank.")
-                elif NewName + CurrentFileExtension in self.RootPage.Images:
-                    self.DisplayMessageBox("There is already an image by that name.")
+                    self.MainWindow.DisplayMessageBox("Image names cannot be blank.")
+                elif NewName + CurrentFileExtension in self.Notebook.Images:
+                    self.MainWindow.DisplayMessageBox("There is already an image by that name.")
                 else:
-                    ImageContent = self.RootPage.Images[CurrentFileName + CurrentFileExtension]
-                    self.RootPage.Images[NewName + CurrentFileExtension] = ImageContent
-                    del self.RootPage.Images[CurrentFileName + CurrentFileExtension]
+                    ImageContent = self.Notebook.Images[CurrentFileName + CurrentFileExtension]
+                    self.Notebook.Images[NewName + CurrentFileExtension] = ImageContent
+                    del self.Notebook.Images[CurrentFileName + CurrentFileExtension]
                     self.UnsavedChanges = True
                     self.PopulateImageList()
 
@@ -148,9 +144,9 @@ class ImageManagerDialog(QDialog):
         SelectedItems = self.ImageList.selectedItems()
         if len(SelectedItems) > 0:
             CurrentFileName = SelectedItems[0].FileName
-            if self.DisplayMessageBox("Are you sure you want to delete " + CurrentFileName + " from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No),
-                                      Parent=self) == QMessageBox.Yes:
-                del self.RootPage.Images[CurrentFileName]
+            if self.MainWindow.DisplayMessageBox("Are you sure you want to delete " + CurrentFileName + " from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No),
+                                                 Parent=self) == QMessageBox.Yes:
+                del self.Notebook.Images[CurrentFileName]
                 self.UnsavedChanges = True
                 self.PopulateImageList()
 

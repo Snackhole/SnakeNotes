@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QFileDialog,
 
 from Core import MarkdownRenderers, Utility
 from Core.Notebook import Notebook
-from Core.Page import Page
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
 from Interface.Dialogs.ExportErrorDialog import ExportErrorDialog
@@ -34,7 +33,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CurrentZoomLevel = 0
 
         # Set Up Save and Open
-        self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook, Page))
+        self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
 
         # Load Favorites
         if os.path.isfile("Favorites.cfg"):
@@ -474,9 +473,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToolBar.addAction(self.FavoritesAction)
 
     # Notebook Methods
-    def NewNotebook(self):
-        return Notebook()
-
     def UpdateNotebook(self, Notebook):
         self.Notebook = Notebook
         self.NotebookDisplayWidgetInst.Notebook = self.Notebook
@@ -748,40 +744,38 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                     ErrorList.append(ErrorString)
             self.ExportSubPagesToHTML(CurrentPageDirectory, SubPage, MarkdownParser, HTMLExportRenderer, ErrorList)
 
-    # TODO:  Continue Notebook rewrite from here
-
     # Save and Open Methods
     def SaveActionTriggered(self, SaveAs=False):
-        if self.Save(self.RootPage, SaveAs=SaveAs):
-            self.SearchIndexer.BuildIndex()
+        if self.Save(self.Notebook, SaveAs=SaveAs):
+            self.Notebook.BuildSearchIndex()
             self.SearchWidgetInst.RefreshSearch()
             self.UpdateUnsavedChangesFlag(False)
         else:
             self.UpdateWindowTitle()
 
     def OpenActionTriggered(self, FilePath=None):
-        NewRootPage = self.Open(self.RootPage, FilePath=FilePath)
-        if NewRootPage is not None:
-            self.UpdateNotebook(NewRootPage)
+        NewNotebook = self.Open(self.Notebook, FilePath=FilePath)
+        if NewNotebook is not None:
+            self.UpdateNotebook(NewNotebook)
             self.NotebookDisplayWidgetInst.FillFromRootPage()
-            self.SearchIndexer.BuildIndex()
+            self.Notebook.BuildSearchIndex()
             self.SearchWidgetInst.ClearSearch()
             self.UpdateUnsavedChangesFlag(False)
         else:
             self.UpdateWindowTitle()
 
     def Favorites(self):
-        FavoritesDialogInst = FavoritesDialog(self.ScriptName, self.WindowIcon, self.DisplayMessageBox, self.FavoritesData, self)
+        FavoritesDialogInst = FavoritesDialog(self.FavoritesData, self)
         if FavoritesDialogInst.OpenFilePath is not None:
             self.OpenActionTriggered(FavoritesDialogInst.OpenFilePath)
 
     def NewActionTriggered(self):
-        if not self.New(self.RootPage):
+        if not self.New(self.Notebook):
             self.UpdateWindowTitle()
             return
-        self.UpdateNotebook(self.NewNotebook())
+        self.UpdateNotebook(Notebook())
         self.NotebookDisplayWidgetInst.FillFromRootPage()
-        self.SearchIndexer.BuildIndex()
+        self.Notebook.BuildSearchIndex()
         self.SearchWidgetInst.ClearSearch()
         self.UpdateUnsavedChangesFlag(False)
 
@@ -800,7 +794,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             event.ignore()
         else:
             with open("Favorites.cfg", "w") as ConfigFile:
-                ConfigFile.write(self.JSONSerializer.SerializeDataToJSONString(self.FavoritesData))
+                ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
             event.accept()
 
     def UpdateUnsavedChangesFlag(self, UnsavedChanges):

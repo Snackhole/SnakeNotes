@@ -176,10 +176,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleReadModeAction.triggered.connect(self.ToggleReadMode)
 
         self.BackAction = QAction(self.BackIcon, "Back")
+        self.BackAction.setShortcut("Ctrl+,")
         self.BackAction.triggered.connect(self.Back)
         self.BackAction.setEnabled(False)
 
         self.ForwardAction = QAction(self.ForwardIcon, "Forward")
+        self.ForwardAction.setShortcut("Ctrl+.")
         self.ForwardAction.triggered.connect(self.Forward)
         self.ForwardAction.setEnabled(False)
 

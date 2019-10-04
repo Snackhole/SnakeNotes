@@ -172,9 +172,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         self.BackAction = QAction("Back")
         self.BackAction.triggered.connect(self.Back)
+        self.BackAction.setEnabled(False)
 
         self.ForwardAction = QAction("Forward")
         self.ForwardAction.triggered.connect(self.Forward)
+        self.ForwardAction.setEnabled(False)
 
         self.NewPageAction = QAction(self.NewPageIcon, "New Page")
         self.NewPageAction.setShortcut("Ctrl+N")
@@ -512,6 +514,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             if len(self.BackList) > self.BackMaximum:
                 self.BackList = self.BackList[-self.BackMaximum:]
             self.ForwardList.clear()
+        self.BackAction.setEnabled(len(self.BackList) > 0)
+        self.ForwardAction.setEnabled(len(self.ForwardList) > 0)
 
     def Back(self):
         if len(self.BackList) > 0:

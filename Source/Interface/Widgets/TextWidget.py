@@ -7,7 +7,7 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QTextCursor, QTextCharFormat
 from PyQt5.QtWidgets import QTextEdit, QInputDialog, QMessageBox
 
-from Core import MarkdownRenderers, ZimWikiConverters
+from Core import MarkdownRenderers
 from Interface.Dialogs.InsertLinksDialog import InsertLinksDialog
 from Interface.Dialogs.InsertTableDialog import InsertTableDialog, TableDimensionsDialog
 
@@ -258,16 +258,6 @@ class TextWidget(QTextEdit):
                     self.MakeCursorVisible()
                 else:
                     self.MainWindow.FlashStatusBar("No image inserted.")
-
-    def ConvertZimWikiSyntax(self):
-        if not self.ReadMode and self.hasFocus():
-            Cursor = self.textCursor()
-            SelectedText = Cursor.selectedText()
-            SelectedText = ZimWikiConverters.ConvertFromZimWikiSyntax(SelectedText)
-            Cursor.beginEditBlock()
-            self.insertPlainText(SelectedText)
-            self.MakeCursorVisible()
-            Cursor.endEditBlock()
 
     def MoveLineUp(self):
         self.MoveLine(-1)

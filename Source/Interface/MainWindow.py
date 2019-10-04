@@ -6,7 +6,7 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QFileDialog, QAction, QSplitter, QApplication
 
-from Core import MarkdownRenderers, Utility, ZimWikiConverters
+from Core import MarkdownRenderers, Utility
 from Core.Notebook import Notebook
 from Core.Page import Page
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
@@ -224,22 +224,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditFooterAction.triggered.connect(lambda: self.EditHeaderOrFooter("Footer"))
         self.ToggleReadModeActionsList.append(self.EditFooterAction)
 
-        self.ImportPlainTextAction = QAction("Import Plain Text Files")
-        self.ImportPlainTextAction.triggered.connect(self.ImportPlainText)
-        self.ToggleReadModeActionsList.append(self.ImportPlainTextAction)
-
-        self.ExportPlainTextAction = QAction("Export Plain Text Files")
-        self.ExportPlainTextAction.triggered.connect(self.ExportPlainText)
-        self.ToggleReadModeActionsList.append(self.ExportPlainTextAction)
-
-        self.ImportZimWikiAction = QAction("Import Zim Wiki Notebook")
-        self.ImportZimWikiAction.triggered.connect(self.ImportZimWiki)
-        self.ToggleReadModeActionsList.append(self.ImportZimWikiAction)
-
-        self.ExportZimWikiAction = QAction("Export Zim Wiki Notebook")
-        self.ExportZimWikiAction.triggered.connect(self.ExportZimWiki)
-        self.ToggleReadModeActionsList.append(self.ExportZimWikiAction)
-
         self.ExportHTMLAction = QAction("Export HTML Files")
         self.ExportHTMLAction.triggered.connect(self.ExportHTML)
         self.ToggleReadModeActionsList.append(self.ExportHTMLAction)
@@ -359,10 +343,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DeleteLineAction.triggered.connect(self.TextWidgetInst.DeleteLine)
         self.ToggleReadModeActionsList.append(self.DeleteLineAction)
 
-        self.ConvertZimWikiSyntaxAction = QAction("Convert Zim Wiki Syntax")
-        self.ConvertZimWikiSyntaxAction.triggered.connect(self.TextWidgetInst.ConvertZimWikiSyntax)
-        self.ToggleReadModeActionsList.append(self.ConvertZimWikiSyntaxAction)
-
         self.ZoomOutAction = QAction(self.ZoomOutIcon, "Zoom Out")
         self.ZoomOutAction.setShortcut("Ctrl+-")
         self.ZoomOutAction.triggered.connect(self.ZoomOut)
@@ -429,8 +409,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.MoveLineDownAction)
         self.EditMenu.addAction(self.DuplicateLinesAction)
         self.EditMenu.addAction(self.DeleteLineAction)
-        self.EditMenu.addSeparator()
-        self.EditMenu.addAction(self.ConvertZimWikiSyntaxAction)
 
         self.ViewMenu = self.MenuBar.addMenu("View")
         self.ViewMenu.addAction(self.SearchAction)
@@ -458,12 +436,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.EditHeaderAction)
         self.NotebookMenu.addAction(self.EditFooterAction)
-        self.NotebookMenu.addSeparator()
-        self.NotebookMenu.addAction(self.ImportPlainTextAction)
-        self.NotebookMenu.addAction(self.ExportPlainTextAction)
-        self.NotebookMenu.addSeparator()
-        self.NotebookMenu.addAction(self.ImportZimWikiAction)
-        self.NotebookMenu.addAction(self.ExportZimWikiAction)
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.ExportHTMLAction)
 
@@ -679,8 +651,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                     self.Notebook.Footer = EditHeaderOrFooterDialogInst.HeaderOrFooterString
                 self.UpdateUnsavedChangesFlag(True)
 
-    # TODO:  Continue Notebook rewrite from here
-
     # Text Methods
     def TextChanged(self):
         if self.TextWidgetInst.DisplayChanging or self.TextWidgetInst.ReadMode:
@@ -728,110 +698,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def UpdateWindowTitle(self):
         self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + (" *" if self.UnsavedChanges else ""))
 
-    # Import and Export Methods
-    def ImportPlainText(self, ZimWikiCompatible=False):
-        ImportDirectory = QFileDialog.getExistingDirectory(caption="Import " + ("Plain Text" if not ZimWikiCompatible else "Zim Wiki"))
-        if ImportDirectory != "":
-            ImportedPlainTextPage = self.CreatePagesFromPlainText(ImportDirectory, ZimWikiCompatible=ZimWikiCompatible)
-            self.RootPage.AppendSubPage(ImportedPlainTextPage)
-            self.NotebookDisplayWidgetInst.FillFromRootPage()
-            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(self.RootPage.SubPages[-1].GetFullIndexPath())
-            self.SearchWidgetInst.RefreshSearch()
-            self.UpdateUnsavedChangesFlag(True)
-            self.NotebookDisplayWidgetInst.setFocus()
+    # TODO:  Continue Notebook rewrite from here
 
-    def ImportZimWiki(self):
-        self.ImportPlainText(ZimWikiCompatible=True)
-
-    def CreatePagesFromPlainText(self, CurrentDirectory, ZimWikiCompatible=False):
-        CurrentPage = Page(0, os.path.split(CurrentDirectory)[1], "Imported pages from " + ("plain text" if not ZimWikiCompatible else "Zim Wiki") + " files.")
-        self.CreateSubPagesFromPlainText(CurrentDirectory, CurrentPage, ZimWikiCompatible=ZimWikiCompatible)
-        return CurrentPage
-
-    def CreateSubPagesFromPlainText(self, CurrentDirectory, CurrentPage, ZimWikiCompatible=False):
-        Files = os.listdir(CurrentDirectory)
-        TextFiles = []
-        Directories = []
-        Pages = {}
-        for File in Files:
-            FilePath = os.path.join(CurrentDirectory, File)
-            if os.path.isfile(FilePath):
-                if os.path.splitext(FilePath)[1] == ".txt":
-                    TextFiles.append((File, FilePath))
-            elif os.path.isdir(FilePath):
-                Directories.append((File, FilePath))
-        for TextFile in TextFiles:
-            PageTitle = os.path.splitext(TextFile[0])[0]
-            if ZimWikiCompatible:
-                PageTitle = PageTitle.replace("_", " ")
-            with open(TextFile[1], "r") as OpenFile:
-                PageContents = OpenFile.read()
-            if ZimWikiCompatible:
-                PageContents = ZimWikiConverters.ConvertFromZimWikiPage(PageContents)
-            SubPage = Page(0, PageTitle, PageContents)
-            Pages[PageTitle] = SubPage
-            CurrentPage.AppendSubPage(SubPage)
-        for Directory in Directories:
-            PageTitle = Directory[0]
-            if ZimWikiCompatible:
-                PageTitle = PageTitle.replace("_", " ")
-            if PageTitle in Pages:
-                self.CreateSubPagesFromPlainText(Directory[1], Pages[PageTitle], ZimWikiCompatible=ZimWikiCompatible)
-
-    def ExportPlainText(self, ZimWikiCompatible=False):
-        ExportDirectory = QFileDialog.getExistingDirectory(caption="Export " + ("Plain Text" if not ZimWikiCompatible else "Zim Wiki"))
-        if ExportDirectory != "":
-            if len(os.listdir(ExportDirectory)) > 0:
-                self.DisplayMessageBox(("Plain text" if not ZimWikiCompatible else "Zim Wiki") + " files must be exported to an empty folder.")
-                return
-            ErrorList = []
-            self.ExportPagesToPlainText(ExportDirectory, ErrorList, ZimWikiCompatible=ZimWikiCompatible)
-            if len(ErrorList) > 0:
-                CombinedErrorString = ""
-                for ErrorString in ErrorList:
-                    CombinedErrorString += ErrorString + "\n\n"
-                CombinedErrorString = CombinedErrorString.rstrip()
-                ExportErrorDialog(CombinedErrorString, self.WindowIcon, self)
-            self.FlashStatusBar("Exported notebook to:  " + ExportDirectory)
-
-    def ExportZimWiki(self):
-        if self.DisplayMessageBox("Warning:  Exporting to Zim Wiki will create files that Zim Wiki can read, but no syntax conversion will take place.  Formatting errors may result.\n\nProceed?", Icon=QMessageBox.Question,
-                                  Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.Yes:
-            self.ExportPlainText(ZimWikiCompatible=True)
-
-    def ExportPagesToPlainText(self, ExportDirectory, ErrorList, ZimWikiCompatible=False):
-        RootPageTitle = str(self.RootPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(self.RootPage.Title)
-        if ZimWikiCompatible:
-            RootPageTitle = RootPageTitle.replace(" ", "_")
-        with open(os.path.join(ExportDirectory, RootPageTitle) + ".txt", "w") as ExportFile:
-            MarkdownString = MarkdownRenderers.ConstructMarkdownStringFromPage(self.Notebook.RootPage, self.Notebook)
-            try:
-                ExportFile.write(MarkdownString)
-            except Exception as Error:
-                ErrorString = RootPageTitle + ":  " + str(Error)
-                ErrorList.append(ErrorString)
-        self.ExportSubPagesToPlainText(ExportDirectory, self.RootPage, ErrorList, ZimWikiCompatible=ZimWikiCompatible)
-
-    def ExportSubPagesToPlainText(self, CurrentDirectory, CurrentPage, ErrorList, ZimWikiCompatible=False):
-        CurrentPageTitle = str(CurrentPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(CurrentPage.Title)
-        if ZimWikiCompatible:
-            CurrentPageTitle = CurrentPageTitle.replace(" ", "_")
-        CurrentPageDirectory = os.path.join(CurrentDirectory, CurrentPageTitle)
-        for SubPage in CurrentPage.SubPages:
-            if not os.path.isdir(CurrentPageDirectory):
-                os.makedirs(CurrentPageDirectory, exist_ok=True)
-            SubPageTitle = str(SubPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(SubPage.Title)
-            if ZimWikiCompatible:
-                SubPageTitle = SubPageTitle.replace(" ", "_")
-            with open(os.path.join(CurrentPageDirectory, SubPageTitle + ".txt"), "w") as ExportFile:
-                MarkdownString = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.Notebook)
-                try:
-                    ExportFile.write(MarkdownString)
-                except Exception as Error:
-                    ErrorString = SubPageTitle + ":  " + str(Error)
-                    ErrorList.append(ErrorString)
-            self.ExportSubPagesToPlainText(CurrentPageDirectory, SubPage, ErrorList, ZimWikiCompatible=ZimWikiCompatible)
-
+    # HTML Export Methods
     def ExportHTML(self):
         ExportDirectory = QFileDialog.getExistingDirectory(caption="Export HTML")
         if ExportDirectory != "":

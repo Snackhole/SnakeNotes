@@ -21,6 +21,8 @@ def Build():
                             "--icon=Source/Assets/.SerpentNotes Icon.ico",
                             "--add-data=Source/Assets/.SerpentNotes Icon.ico;./Assets/",
                             "--add-data=Source/Assets/SerpentNotes Bold Icon.png;./Assets/",
+                            "--add-data=Source/Assets/SerpentNotes Back Icon.png;./Assets/",
+                            "--add-data=Source/Assets/SerpentNotes Forward Icon.png;./Assets/",
                             "--add-data=Source/Assets/SerpentNotes Bullet List Icon.png;./Assets/",
                             "--add-data=Source/Assets/SerpentNotes Delete Page Icon.png;./Assets/",
                             "--add-data=Source/Assets/SerpentNotes Demote Page Icon.png;./Assets/",

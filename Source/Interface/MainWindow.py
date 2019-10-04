@@ -128,6 +128,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DemotePageIcon = QIcon("Assets/SerpentNotes Demote Page Icon.png")
         self.RenamePageIcon = QIcon("Assets/SerpentNotes Rename Page Icon.png")
         self.ToggleReadModeIcon = QIcon("Assets/SerpentNotes Toggle Read Mode Icon.png")
+        self.BackIcon = QIcon("Assets/SerpentNotes Back Icon.png")
+        self.ForwardIcon = QIcon("Assets/SerpentNotes Forward Icon.png")
         self.ItalicsIcon = QIcon("Assets/SerpentNotes Italics Icon.png")
         self.BoldIcon = QIcon("Assets/SerpentNotes Bold Icon.png")
         self.StrikethroughIcon = QIcon("Assets/SerpentNotes Strikethrough Icon.png")
@@ -173,11 +175,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleReadModeAction.setShortcut("Ctrl+E")
         self.ToggleReadModeAction.triggered.connect(self.ToggleReadMode)
 
-        self.BackAction = QAction("Back")
+        self.BackAction = QAction(self.BackIcon, "Back")
         self.BackAction.triggered.connect(self.Back)
         self.BackAction.setEnabled(False)
 
-        self.ForwardAction = QAction("Forward")
+        self.ForwardAction = QAction(self.ForwardIcon, "Forward")
         self.ForwardAction.triggered.connect(self.Forward)
         self.ForwardAction.setEnabled(False)
 

@@ -54,31 +54,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.show()
 
     def CreateInterface(self):
-        # Icons
-        self.WindowIcon = QIcon("Assets/SerpentNotes Icon.png")
-        self.NewPageIcon = QIcon("Assets/SerpentNotes New Page Icon.png")
-        self.DeletePageIcon = QIcon("Assets/SerpentNotes Delete Page Icon.png")
-        self.MovePageUpIcon = QIcon("Assets/SerpentNotes Move Page Up Icon.png")
-        self.MovePageDownIcon = QIcon("Assets/SerpentNotes Move Page Down Icon.png")
-        self.PromotePageIcon = QIcon("Assets/SerpentNotes Promote Page Icon.png")
-        self.DemotePageIcon = QIcon("Assets/SerpentNotes Demote Page Icon.png")
-        self.RenamePageIcon = QIcon("Assets/SerpentNotes Rename Page Icon.png")
-        self.ToggleReadModeIcon = QIcon("Assets/SerpentNotes Toggle Read Mode Icon.png")
-        self.ItalicsIcon = QIcon("Assets/SerpentNotes Italics Icon.png")
-        self.BoldIcon = QIcon("Assets/SerpentNotes Bold Icon.png")
-        self.StrikethroughIcon = QIcon("Assets/SerpentNotes Strikethrough Icon.png")
-        self.BulletListIcon = QIcon("Assets/SerpentNotes Bullet List Icon.png")
-        self.NumberListIcon = QIcon("Assets/SerpentNotes Number List Icon.png")
-        self.QuoteIcon = QIcon("Assets/SerpentNotes Quote Icon.png")
-        self.InsertLinksIcon = QIcon("Assets/SerpentNotes Insert Link(s) Icon.png")
-        self.InsertExternalLinkIcon = QIcon("Assets/SerpentNotes Insert External Link Icon.png")
-        self.InsertTableIcon = QIcon("Assets/SerpentNotes Insert Table Icon.png")
-        self.InsertImageIcon = QIcon("Assets/SerpentNotes Insert Image Icon.png")
-        self.ZoomOutIcon = QIcon("Assets/SerpentNotes Zoom Out Icon.png")
-        self.ZoomInIcon = QIcon("Assets/SerpentNotes Zoom In Icon.png")
-        self.FavoritesIcon = QIcon("Assets/SerpentNotes Favorites Icon.png")
-        self.SearchIcon = QIcon("Assets/SerpentNotes Search Icon.png")
-        self.ToggleSearchIcon = QIcon("Assets/SerpentNotes Toggle Search Icon.png")
+        # Create Icons
+        self.CreateIcons()
 
         # Window Icon and Title
         self.setWindowIcon(self.WindowIcon)
@@ -134,12 +111,38 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookDisplayWidgetInst.setFocus()
 
         # Initial Selection of Root Page
-        self.PageSelected(IndexPath=[0], InitialSelection=True)
+        self.PageSelected(IndexPath=[0], SkipUpdatingBackAndForward=True)
 
         # Set Up Tab Order
         self.setTabOrder(self.NotebookDisplayWidgetInst, self.TextWidgetInst)
         self.setTabOrder(self.TextWidgetInst, self.SearchWidgetInst)
         self.setTabOrder(self.SearchWidgetInst, self.NotebookDisplayWidgetInst)
+
+    def CreateIcons(self):
+        self.WindowIcon = QIcon("Assets/SerpentNotes Icon.png")
+        self.NewPageIcon = QIcon("Assets/SerpentNotes New Page Icon.png")
+        self.DeletePageIcon = QIcon("Assets/SerpentNotes Delete Page Icon.png")
+        self.MovePageUpIcon = QIcon("Assets/SerpentNotes Move Page Up Icon.png")
+        self.MovePageDownIcon = QIcon("Assets/SerpentNotes Move Page Down Icon.png")
+        self.PromotePageIcon = QIcon("Assets/SerpentNotes Promote Page Icon.png")
+        self.DemotePageIcon = QIcon("Assets/SerpentNotes Demote Page Icon.png")
+        self.RenamePageIcon = QIcon("Assets/SerpentNotes Rename Page Icon.png")
+        self.ToggleReadModeIcon = QIcon("Assets/SerpentNotes Toggle Read Mode Icon.png")
+        self.ItalicsIcon = QIcon("Assets/SerpentNotes Italics Icon.png")
+        self.BoldIcon = QIcon("Assets/SerpentNotes Bold Icon.png")
+        self.StrikethroughIcon = QIcon("Assets/SerpentNotes Strikethrough Icon.png")
+        self.BulletListIcon = QIcon("Assets/SerpentNotes Bullet List Icon.png")
+        self.NumberListIcon = QIcon("Assets/SerpentNotes Number List Icon.png")
+        self.QuoteIcon = QIcon("Assets/SerpentNotes Quote Icon.png")
+        self.InsertLinksIcon = QIcon("Assets/SerpentNotes Insert Link(s) Icon.png")
+        self.InsertExternalLinkIcon = QIcon("Assets/SerpentNotes Insert External Link Icon.png")
+        self.InsertTableIcon = QIcon("Assets/SerpentNotes Insert Table Icon.png")
+        self.InsertImageIcon = QIcon("Assets/SerpentNotes Insert Image Icon.png")
+        self.ZoomOutIcon = QIcon("Assets/SerpentNotes Zoom Out Icon.png")
+        self.ZoomInIcon = QIcon("Assets/SerpentNotes Zoom In Icon.png")
+        self.FavoritesIcon = QIcon("Assets/SerpentNotes Favorites Icon.png")
+        self.SearchIcon = QIcon("Assets/SerpentNotes Search Icon.png")
+        self.ToggleSearchIcon = QIcon("Assets/SerpentNotes Toggle Search Icon.png")
 
     def CreateActions(self):
         self.NewAction = QAction("New")
@@ -497,14 +500,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.TextWidgetInst.Renderer.Notebook = self.Notebook
         self.SearchWidgetInst.Notebook = self.Notebook
 
-    def PageSelected(self, IndexPath=None, InitialSelection=False):
+    def PageSelected(self, IndexPath=None, SkipUpdatingBackAndForward=False):
         IndexPath = IndexPath if IndexPath is not None else self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
         if IndexPath is not None:
-            self.UpdateBackAndForward(InitialSelection)
+            if not SkipUpdatingBackAndForward:
+                self.UpdateBackAndForward()
             self.TextWidgetInst.SetCurrentPage(self.Notebook.GetPageFromIndexPath(IndexPath))
 
-    def UpdateBackAndForward(self, InitialSelection):
-        if not self.BackNavigation and not InitialSelection:
+    def UpdateBackAndForward(self):
+        if not self.BackNavigation and self.TextWidgetInst.ReadMode:
             PreviousPageIndexPath = self.TextWidgetInst.CurrentPage["IndexPath"]
             if self.BackList != []:
                 if self.BackList[-1] != PreviousPageIndexPath:
@@ -514,14 +518,19 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             if len(self.BackList) > self.BackMaximum:
                 self.BackList = self.BackList[-self.BackMaximum:]
             self.ForwardList.clear()
-        self.BackAction.setEnabled(len(self.BackList) > 0)
-        self.ForwardAction.setEnabled(len(self.ForwardList) > 0)
+        self.BackAction.setEnabled(len(self.BackList) > 0 and self.TextWidgetInst.ReadMode)
+        self.ForwardAction.setEnabled(len(self.ForwardList) > 0 and self.TextWidgetInst.ReadMode)
+
+    def ClearBackAndForward(self):
+        self.BackList.clear()
+        self.ForwardList.clear()
+        self.BackAction.setEnabled(len(self.BackList) > 0 and self.TextWidgetInst.ReadMode)
+        self.ForwardAction.setEnabled(len(self.ForwardList) > 0 and self.TextWidgetInst.ReadMode)
 
     def Back(self):
         if len(self.BackList) > 0:
             self.BackNavigation = True
             TargetPageIndexPath = self.BackList[-1]
-            print(TargetPageIndexPath)
             del self.BackList[-1]
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
             self.ForwardList.append(CurrentPageIndexPath)
@@ -713,6 +722,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         for Action in self.ToggleReadModeActionsList:
             Action.setEnabled(not self.TextWidgetInst.ReadMode)
         self.NotebookDisplayWidgetInst.setFocus() if self.TextWidgetInst.ReadMode else self.TextWidgetInst.setFocus()
+        self.ClearBackAndForward()
 
     def ZoomOut(self):
         self.TextWidgetInst.zoomOut(1)
@@ -813,6 +823,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.NotebookDisplayWidgetInst.FillFromRootPage()
             self.Notebook.BuildSearchIndex()
             self.SearchWidgetInst.ClearSearch()
+            self.ClearBackAndForward()
             self.UpdateUnsavedChangesFlag(False)
         else:
             self.UpdateWindowTitle()
@@ -830,6 +841,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookDisplayWidgetInst.FillFromRootPage()
         self.Notebook.BuildSearchIndex()
         self.SearchWidgetInst.ClearSearch()
+        self.ClearBackAndForward()
         self.UpdateUnsavedChangesFlag(False)
 
     def closeEvent(self, event):

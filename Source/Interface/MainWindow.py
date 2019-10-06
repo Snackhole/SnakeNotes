@@ -6,25 +6,22 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QFileDialog, QAction, QSplitter, QApplication
 
-import MarkdownRenderers
-import Utility
-import ZimWikiConverters
-from DemotePageDialog import DemotePageDialog
-from EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
-from ExportErrorDialog import ExportErrorDialog
-from FavoritesDialog import FavoritesDialog
-from ImageManagerDialog import ImageManagerDialog
-from JSONSerializer import JSONSerializer
-from NewPageDialog import NewPageDialog
-from NotebookDisplayWidget import NotebookDisplayWidget
-from Page import Page
-from SearchIndexer import SearchIndexer
-from SearchWidget import SearchWidget
-from TemplateManagerDialog import TemplateManagerDialog
-from TextWidget import TextWidget
+from Core import MarkdownRenderers, Utility
+from Core.Notebook import Notebook
+from Interface.Dialogs.DemotePageDialog import DemotePageDialog
+from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
+from Interface.Dialogs.ExportErrorDialog import ExportErrorDialog
+from Interface.Dialogs.FavoritesDialog import FavoritesDialog
+from Interface.Dialogs.ImageManagerDialog import ImageManagerDialog
+from Interface.Dialogs.NewPageDialog import NewPageDialog
+from Interface.Dialogs.TemplateManagerDialog import TemplateManagerDialog
+from Interface.Widgets.NotebookDisplayWidget import NotebookDisplayWidget
+from Interface.Widgets.SearchWidget import SearchWidget
+from Interface.Widgets.TextWidget import TextWidget
+from SaveAndLoad.SaveAndOpenMixin import SaveAndOpenMixin
 
 
-class MainWindow(QMainWindow):
+class MainWindow(QMainWindow, SaveAndOpenMixin):
     # Initialization Methods
     def __init__(self, ScriptName):
         super().__init__()
@@ -33,13 +30,14 @@ class MainWindow(QMainWindow):
         self.ScriptName = ScriptName
 
         # Variables
-        self.CurrentOpenFileName = ""
-        self.FileExtension = ".ntbk"
-        self.UnsavedChanges = False
         self.CurrentZoomLevel = 0
+        self.BackList = []
+        self.BackMaximum = 50
+        self.ForwardList = []
+        self.BackNavigation = False
 
-        # Create JSONSerializer
-        self.JSONSerializer = JSONSerializer()
+        # Set Up Save and Open
+        self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
 
         # Load Favorites
         if os.path.isfile("Favorites.cfg"):
@@ -48,18 +46,79 @@ class MainWindow(QMainWindow):
         else:
             self.FavoritesData = {}
 
-        # Create Root Page
-        self.RootPage = self.NewRootPage()
-
-        # Create Search Indexer
-        self.SearchIndexer = SearchIndexer(self.RootPage)
+        # Create Notebook
+        self.Notebook = Notebook()
 
         # Create Interface
         self.CreateInterface()
         self.show()
 
     def CreateInterface(self):
-        # Icons
+        # Create Icons
+        self.CreateIcons()
+
+        # Window Icon and Title
+        self.setWindowIcon(self.WindowIcon)
+        self.UpdateWindowTitle()
+
+        # Toggle Read Mode Actions List
+        self.ToggleReadModeActionsList = []
+
+        # Create Notebook Display Widget
+        self.NotebookDisplayWidgetInst = NotebookDisplayWidget(self.Notebook, self)
+        self.NotebookDisplayWidgetInst.itemSelectionChanged.connect(self.PageSelected)
+
+        # Create Text Widget
+        self.TextWidgetInst = TextWidget(self.Notebook, self)
+        self.TextWidgetInst.textChanged.connect(self.TextChanged)
+
+        # Create Search Widget
+        self.SearchWidgetInst = SearchWidget(self.Notebook, self)
+
+        # Create and Populate Splitters
+        self.NotebookAndSearchSplitter = QSplitter(Qt.Vertical)
+        self.NotebookAndSearchSplitter.addWidget(self.NotebookDisplayWidgetInst)
+        self.NotebookAndSearchSplitter.addWidget(self.SearchWidgetInst)
+        self.NotebookAndTextSplitter = QSplitter(Qt.Horizontal)
+        self.NotebookAndTextSplitter.addWidget(self.NotebookAndSearchSplitter)
+        self.NotebookAndTextSplitter.addWidget(self.TextWidgetInst)
+        self.NotebookAndSearchSplitter.setStretchFactor(0, 1)
+        self.NotebookAndSearchSplitter.setMinimumWidth(274)
+        self.NotebookAndSearchSplitter.setChildrenCollapsible(False)
+        self.NotebookAndTextSplitter.setStretchFactor(1, 1)
+        self.setCentralWidget(self.NotebookAndTextSplitter)
+
+        # Create Actions
+        self.CreateActions()
+
+        # Disable Edit-Only Actions and Widgets
+        for Action in self.ToggleReadModeActionsList:
+            Action.setEnabled(not self.TextWidgetInst.ReadMode)
+
+        # Create Menu Bar
+        self.CreateMenuBar()
+
+        # Create Tool Bar
+        self.CreateToolBar()
+
+        # Create Status Bar
+        self.StatusBar = self.statusBar()
+
+        # Window Setup
+        self.WindowSetup()
+
+        # Initial Focus on NotebookDisplayWidgetInst
+        self.NotebookDisplayWidgetInst.setFocus()
+
+        # Initial Selection of Root Page
+        self.PageSelected(IndexPath=[0], SkipUpdatingBackAndForward=True)
+
+        # Set Up Tab Order
+        self.setTabOrder(self.NotebookDisplayWidgetInst, self.TextWidgetInst)
+        self.setTabOrder(self.TextWidgetInst, self.SearchWidgetInst)
+        self.setTabOrder(self.SearchWidgetInst, self.NotebookDisplayWidgetInst)
+
+    def CreateIcons(self):
         self.WindowIcon = QIcon("Assets/SerpentNotes Icon.png")
         self.NewPageIcon = QIcon("Assets/SerpentNotes New Page Icon.png")
         self.DeletePageIcon = QIcon("Assets/SerpentNotes Delete Page Icon.png")
@@ -69,6 +128,8 @@ class MainWindow(QMainWindow):
         self.DemotePageIcon = QIcon("Assets/SerpentNotes Demote Page Icon.png")
         self.RenamePageIcon = QIcon("Assets/SerpentNotes Rename Page Icon.png")
         self.ToggleReadModeIcon = QIcon("Assets/SerpentNotes Toggle Read Mode Icon.png")
+        self.BackIcon = QIcon("Assets/SerpentNotes Back Icon.png")
+        self.ForwardIcon = QIcon("Assets/SerpentNotes Forward Icon.png")
         self.ItalicsIcon = QIcon("Assets/SerpentNotes Italics Icon.png")
         self.BoldIcon = QIcon("Assets/SerpentNotes Bold Icon.png")
         self.StrikethroughIcon = QIcon("Assets/SerpentNotes Strikethrough Icon.png")
@@ -85,45 +146,14 @@ class MainWindow(QMainWindow):
         self.SearchIcon = QIcon("Assets/SerpentNotes Search Icon.png")
         self.ToggleSearchIcon = QIcon("Assets/SerpentNotes Toggle Search Icon.png")
 
-        # Window Icon and Title
-        self.setWindowIcon(self.WindowIcon)
-        self.UpdateWindowTitle()
-
-        # Toggle Read Mode Actions List
-        self.ToggleReadModeActionsList = []
-
-        # Create Notebook Display Widget
-        self.NotebookDisplayWidgetInst = NotebookDisplayWidget(self.RootPage, self.JSONSerializer, self)
-        self.NotebookDisplayWidgetInst.itemSelectionChanged.connect(self.PageSelected)
-
-        # Create Text Widget
-        self.TextWidgetInst = TextWidget(self.RootPage, self.NotebookDisplayWidgetInst, self.DisplayMessageBox, self.JSONSerializer, self.SearchIndexer, self.ScriptName, self.WindowIcon)
-        self.TextWidgetInst.textChanged.connect(self.TextChanged)
-
-        # Create Search Widget
-        self.SearchWidgetInst = SearchWidget(self.RootPage, self.SearchIndexer, self.NotebookDisplayWidgetInst, self.TextWidgetInst, self)
-
-        # Create and Populate Splitters
-        self.NotebookAndSearchSplitter = QSplitter(Qt.Vertical)
-        self.NotebookAndSearchSplitter.addWidget(self.NotebookDisplayWidgetInst)
-        self.NotebookAndSearchSplitter.addWidget(self.SearchWidgetInst)
-        self.NotebookAndTextSplitter = QSplitter(Qt.Horizontal)
-        self.NotebookAndTextSplitter.addWidget(self.NotebookAndSearchSplitter)
-        self.NotebookAndTextSplitter.addWidget(self.TextWidgetInst)
-        self.NotebookAndSearchSplitter.setStretchFactor(0, 1)
-        self.NotebookAndSearchSplitter.setMinimumWidth(274)
-        self.NotebookAndSearchSplitter.setChildrenCollapsible(False)
-        self.NotebookAndTextSplitter.setStretchFactor(1, 1)
-        self.setCentralWidget(self.NotebookAndTextSplitter)
-
-        # Create Actions
+    def CreateActions(self):
         self.NewAction = QAction("New")
         self.NewAction.setShortcut("Ctrl+Shift+N")
-        self.NewAction.triggered.connect(self.New)
+        self.NewAction.triggered.connect(self.NewActionTriggered)
 
         self.OpenAction = QAction("Open")
         self.OpenAction.setShortcut("Ctrl+O")
-        self.OpenAction.triggered.connect(lambda: self.Open())
+        self.OpenAction.triggered.connect(lambda: self.OpenActionTriggered())
 
         self.FavoritesAction = QAction(self.FavoritesIcon, "Favorites")
         self.FavoritesAction.setShortcut("Ctrl+Shift+O")
@@ -131,11 +161,11 @@ class MainWindow(QMainWindow):
 
         self.SaveAction = QAction("Save")
         self.SaveAction.setShortcut("Ctrl+S")
-        self.SaveAction.triggered.connect(lambda: self.Save())
+        self.SaveAction.triggered.connect(lambda: self.SaveActionTriggered())
 
         self.SaveAsAction = QAction("Save As")
         self.SaveAsAction.setShortcut("Ctrl+Shift+S")
-        self.SaveAsAction.triggered.connect(lambda: self.Save(SaveAs=True))
+        self.SaveAsAction.triggered.connect(lambda: self.SaveActionTriggered(SaveAs=True))
 
         self.ExitAction = QAction("Exit")
         self.ExitAction.setShortcut("Ctrl+Q")
@@ -144,6 +174,16 @@ class MainWindow(QMainWindow):
         self.ToggleReadModeAction = QAction(self.ToggleReadModeIcon, "Toggle Read Mode")
         self.ToggleReadModeAction.setShortcut("Ctrl+E")
         self.ToggleReadModeAction.triggered.connect(self.ToggleReadMode)
+
+        self.BackAction = QAction(self.BackIcon, "Back")
+        self.BackAction.setShortcut("Ctrl+,")
+        self.BackAction.triggered.connect(self.Back)
+        self.BackAction.setEnabled(False)
+
+        self.ForwardAction = QAction(self.ForwardIcon, "Forward")
+        self.ForwardAction.setShortcut("Ctrl+.")
+        self.ForwardAction.triggered.connect(self.Forward)
+        self.ForwardAction.setEnabled(False)
 
         self.NewPageAction = QAction(self.NewPageIcon, "New Page")
         self.NewPageAction.setShortcut("Ctrl+N")
@@ -195,28 +235,12 @@ class MainWindow(QMainWindow):
         self.ToggleReadModeActionsList.append(self.TemplateManagerAction)
 
         self.EditHeaderAction = QAction("Edit Header")
-        self.EditHeaderAction.triggered.connect(self.EditHeader)
+        self.EditHeaderAction.triggered.connect(lambda: self.EditHeaderOrFooter("Header"))
         self.ToggleReadModeActionsList.append(self.EditHeaderAction)
 
         self.EditFooterAction = QAction("Edit Footer")
-        self.EditFooterAction.triggered.connect(self.EditFooter)
+        self.EditFooterAction.triggered.connect(lambda: self.EditHeaderOrFooter("Footer"))
         self.ToggleReadModeActionsList.append(self.EditFooterAction)
-
-        self.ImportPlainTextAction = QAction("Import Plain Text Files")
-        self.ImportPlainTextAction.triggered.connect(self.ImportPlainText)
-        self.ToggleReadModeActionsList.append(self.ImportPlainTextAction)
-
-        self.ExportPlainTextAction = QAction("Export Plain Text Files")
-        self.ExportPlainTextAction.triggered.connect(self.ExportPlainText)
-        self.ToggleReadModeActionsList.append(self.ExportPlainTextAction)
-
-        self.ImportZimWikiAction = QAction("Import Zim Wiki Notebook")
-        self.ImportZimWikiAction.triggered.connect(self.ImportZimWiki)
-        self.ToggleReadModeActionsList.append(self.ImportZimWikiAction)
-
-        self.ExportZimWikiAction = QAction("Export Zim Wiki Notebook")
-        self.ExportZimWikiAction.triggered.connect(self.ExportZimWiki)
-        self.ToggleReadModeActionsList.append(self.ExportZimWikiAction)
 
         self.ExportHTMLAction = QAction("Export HTML Files")
         self.ExportHTMLAction.triggered.connect(self.ExportHTML)
@@ -314,7 +338,7 @@ class MainWindow(QMainWindow):
         self.ToggleReadModeActionsList.append(self.InsertTableAction)
 
         self.InsertImageAction = QAction(self.InsertImageIcon, "Insert Image")
-        self.InsertImageAction.triggered.connect(self.InsertImage)
+        self.InsertImageAction.triggered.connect(self.TextWidgetInst.InsertImage)
         self.ToggleReadModeActionsList.append(self.InsertImageAction)
 
         self.MoveLineUpAction = QAction("Move Line Up")
@@ -337,10 +361,6 @@ class MainWindow(QMainWindow):
         self.DeleteLineAction.triggered.connect(self.TextWidgetInst.DeleteLine)
         self.ToggleReadModeActionsList.append(self.DeleteLineAction)
 
-        self.ConvertZimWikiSyntaxAction = QAction("Convert Zim Wiki Syntax")
-        self.ConvertZimWikiSyntaxAction.triggered.connect(self.TextWidgetInst.ConvertZimWikiSyntax)
-        self.ToggleReadModeActionsList.append(self.ConvertZimWikiSyntaxAction)
-
         self.ZoomOutAction = QAction(self.ZoomOutIcon, "Zoom Out")
         self.ZoomOutAction.setShortcut("Ctrl+-")
         self.ZoomOutAction.triggered.connect(self.ZoomOut)
@@ -361,11 +381,7 @@ class MainWindow(QMainWindow):
         self.ToggleSearchAction.setShortcut("Ctrl+Shift+F")
         self.ToggleSearchAction.triggered.connect(self.SearchWidgetInst.ToggleVisibility)
 
-        # Disable Edit-Only Actions and Widgets
-        for Action in self.ToggleReadModeActionsList:
-            Action.setEnabled(not self.TextWidgetInst.ReadMode)
-
-        # Menu Bar
+    def CreateMenuBar(self):
         self.MenuBar = self.menuBar()
 
         self.FileMenu = self.MenuBar.addMenu("File")
@@ -411,10 +427,11 @@ class MainWindow(QMainWindow):
         self.EditMenu.addAction(self.MoveLineDownAction)
         self.EditMenu.addAction(self.DuplicateLinesAction)
         self.EditMenu.addAction(self.DeleteLineAction)
-        self.EditMenu.addSeparator()
-        self.EditMenu.addAction(self.ConvertZimWikiSyntaxAction)
 
         self.ViewMenu = self.MenuBar.addMenu("View")
+        self.ViewMenu.addAction(self.BackAction)
+        self.ViewMenu.addAction(self.ForwardAction)
+        self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.SearchAction)
         self.ViewMenu.addAction(self.ToggleSearchAction)
         self.ViewMenu.addSeparator()
@@ -441,17 +458,13 @@ class MainWindow(QMainWindow):
         self.NotebookMenu.addAction(self.EditHeaderAction)
         self.NotebookMenu.addAction(self.EditFooterAction)
         self.NotebookMenu.addSeparator()
-        self.NotebookMenu.addAction(self.ImportPlainTextAction)
-        self.NotebookMenu.addAction(self.ExportPlainTextAction)
-        self.NotebookMenu.addSeparator()
-        self.NotebookMenu.addAction(self.ImportZimWikiAction)
-        self.NotebookMenu.addAction(self.ExportZimWikiAction)
-        self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.ExportHTMLAction)
 
-        # Tool Bar
+    def CreateToolBar(self):
         self.ToolBar = self.addToolBar("Actions")
         self.ToolBar.addAction(self.ToggleReadModeAction)
+        self.ToolBar.addAction(self.BackAction)
+        self.ToolBar.addAction(self.ForwardAction)
         self.ToolBar.addSeparator()
         self.ToolBar.addAction(self.NewPageAction)
         self.ToolBar.addAction(self.DeletePageAction)
@@ -483,49 +496,69 @@ class MainWindow(QMainWindow):
         self.ToolBar.addSeparator()
         self.ToolBar.addAction(self.FavoritesAction)
 
-        # Create Status Bar
-        self.StatusBar = self.statusBar()
-        self.StatusBar.showMessage("Status")
-
-        # Window Setup
-        self.WindowSetup()
-
-        # Initial Focus on NotebookDisplayWidgetInst
-        self.NotebookDisplayWidgetInst.setFocus()
-
-        # Initial Selection of Root Page
-        self.PageSelected([0])
-
-        # Set Up Tab Order
-        self.setTabOrder(self.NotebookDisplayWidgetInst, self.TextWidgetInst)
-        self.setTabOrder(self.TextWidgetInst, self.SearchWidgetInst)
-        self.setTabOrder(self.SearchWidgetInst, self.NotebookDisplayWidgetInst)
-
     # Notebook Methods
-    def NewRootPage(self):
-        return Page(0, "New Notebook", "", self.JSONSerializer.ObjectTypeCalls, IsRootPage=True)
+    def UpdateNotebook(self, Notebook):
+        self.Notebook = Notebook
+        self.NotebookDisplayWidgetInst.Notebook = self.Notebook
+        self.TextWidgetInst.Notebook = self.Notebook
+        self.TextWidgetInst.Renderer.Notebook = self.Notebook
+        self.SearchWidgetInst.Notebook = self.Notebook
 
-    def UpdateRootPage(self, RootPage):
-        self.RootPage = RootPage
-        self.NotebookDisplayWidgetInst.RootPage = self.RootPage
-        self.TextWidgetInst.RootPage = self.RootPage
-        self.TextWidgetInst.Renderer.RootPage = self.RootPage
-        self.SearchIndexer.RootPage = self.RootPage
-        self.SearchWidgetInst.RootPage = self.RootPage
+    def PageSelected(self, IndexPath=None, SkipUpdatingBackAndForward=False):
+        IndexPath = IndexPath if IndexPath is not None else self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+        if IndexPath is not None:
+            if not SkipUpdatingBackAndForward:
+                self.UpdateBackAndForward()
+            self.TextWidgetInst.SetCurrentPage(self.Notebook.GetPageFromIndexPath(IndexPath))
 
-    def PageSelected(self, IndexPath=None):
-        Path = IndexPath if IndexPath is not None else self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-        if Path is not None:
-            self.TextWidgetInst.SetCurrentPage(self.RootPage.GetSubPageByIndexPath(Path))
+    def UpdateBackAndForward(self):
+        if not self.BackNavigation and self.TextWidgetInst.ReadMode:
+            PreviousPageIndexPath = self.TextWidgetInst.CurrentPage["IndexPath"]
+            if self.BackList != []:
+                if self.BackList[-1] != PreviousPageIndexPath:
+                    self.BackList.append(PreviousPageIndexPath)
+            else:
+                self.BackList.append(PreviousPageIndexPath)
+            if len(self.BackList) > self.BackMaximum:
+                self.BackList = self.BackList[-self.BackMaximum:]
+            self.ForwardList.clear()
+        self.BackAction.setEnabled(len(self.BackList) > 0 and self.TextWidgetInst.ReadMode)
+        self.ForwardAction.setEnabled(len(self.ForwardList) > 0 and self.TextWidgetInst.ReadMode)
+
+    def ClearBackAndForward(self):
+        self.BackList.clear()
+        self.ForwardList.clear()
+        self.BackAction.setEnabled(len(self.BackList) > 0 and self.TextWidgetInst.ReadMode)
+        self.ForwardAction.setEnabled(len(self.ForwardList) > 0 and self.TextWidgetInst.ReadMode)
+
+    def Back(self):
+        if len(self.BackList) > 0:
+            self.BackNavigation = True
+            TargetPageIndexPath = self.BackList[-1]
+            del self.BackList[-1]
+            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            self.ForwardList.append(CurrentPageIndexPath)
+            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
+            self.BackNavigation = False
+
+    def Forward(self):
+        if len(self.ForwardList) > 0:
+            self.BackNavigation = True
+            TargetPageIndexPath = self.ForwardList[-1]
+            del self.ForwardList[-1]
+            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            self.BackList.append(CurrentPageIndexPath)
+            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
+            self.BackNavigation = False
 
     def NewPage(self):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
-            NewPageDialogInst = NewPageDialog(CurrentPage.Title, self.ScriptName, self.WindowIcon, self.DisplayMessageBox, self.RootPage.GetTemplateNames(), self)
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+            NewPageDialogInst = NewPageDialog(CurrentPage["Title"], self.Notebook.GetTemplateNames(), self)
             if NewPageDialogInst.NewPageAdded:
                 OldLinkData = self.GetLinkData()
-                CurrentPage.AddSubPage(NewPageDialogInst.NewPageName, "" if NewPageDialogInst.TemplateName == "None" else self.RootPage.GetTemplate(NewPageDialogInst.TemplateName))
+                self.Notebook.AddSubPage(NewPageDialogInst.NewPageName, "" if NewPageDialogInst.TemplateName == "None" else self.Notebook.GetTemplate(NewPageDialogInst.TemplateName), CurrentPageIndexPath)
                 NewLinkData = self.GetLinkData()
                 self.UpdateLinks(OldLinkData, NewLinkData)
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
@@ -537,22 +570,21 @@ class MainWindow(QMainWindow):
     def DeletePage(self):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
-            if CurrentPage.IsRootPage:
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+            if CurrentPage["IndexPath"] == [0]:
                 self.DisplayMessageBox("The root page of a notebook cannot be deleted.")
             elif self.DisplayMessageBox("Are you sure you want to delete this page?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.Yes:
-                CurrentPageSuper = self.RootPage.GetSuperOfSubPageByIndexPath(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath())
                 OldLinkData = self.GetLinkData()
-                CurrentPageSuper.DeleteSubPage(self.NotebookDisplayWidgetInst.GetCurrentPageIndex())
+                self.Notebook.DeleteSubPage(CurrentPageIndexPath)
                 NewLinkData = self.GetLinkData()
                 self.UpdateLinks(OldLinkData, NewLinkData)
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
                 SelectParent = False
                 SelectDelta = 0
-                CurrentPageSuperSubPagesLength = len(CurrentPageSuper.SubPages)
+                CurrentPageSuperSubPagesLength = len(self.Notebook.GetSuperOfPageFromIndexPath(CurrentPageIndexPath)["SubPages"])
                 if CurrentPageSuperSubPagesLength < 1:
                     SelectParent = True
-                elif CurrentPageSuperSubPagesLength == CurrentPage.PageIndex:
+                elif CurrentPageSuperSubPagesLength == CurrentPageIndexPath[-1]:
                     SelectDelta = -1
                 self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath, SelectParent=SelectParent, SelectDelta=SelectDelta)
                 self.SearchWidgetInst.RefreshSearch()
@@ -562,11 +594,11 @@ class MainWindow(QMainWindow):
     def MovePage(self, Delta):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
             OldLinkData = self.GetLinkData()
-            if CurrentPage.IsRootPage:
+            if CurrentPage["IndexPath"] == [0]:
                 self.DisplayMessageBox("The root page of a notebook cannot be moved.")
-            elif self.RootPage.GetSuperOfSubPageByIndexPath(CurrentPageIndexPath).MovePage(self.NotebookDisplayWidgetInst.GetCurrentPageIndex(), Delta):
+            elif self.Notebook.MoveSubPage(CurrentPageIndexPath, Delta):
                 NewLinkData = self.GetLinkData()
                 self.UpdateLinks(OldLinkData, NewLinkData)
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
@@ -578,21 +610,19 @@ class MainWindow(QMainWindow):
     def PromotePage(self):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
-            SuperOfCurrentPage = self.RootPage.GetSuperOfSubPageByIndexPath(CurrentPageIndexPath)
-            if CurrentPage.IsRootPage:
+            SuperOfCurrentPageIndexPath = self.Notebook.GetSuperOfPageFromIndexPath(CurrentPageIndexPath)["IndexPath"]
+            if CurrentPageIndexPath == [0]:
                 self.DisplayMessageBox("The root page of a notebook cannot be promoted.")
-            elif SuperOfCurrentPage.IsRootPage:
+            elif SuperOfCurrentPageIndexPath == [0]:
                 self.DisplayMessageBox("A page cannot be promoted to the same level as the root page.")
             else:
-                SuperOfSuper = self.RootPage.GetSuperOfSubPageByIndexPath(SuperOfCurrentPage.GetFullIndexPath())
+                CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
                 OldLinkData = self.GetLinkData()
-                SuperOfCurrentPage.DeleteSubPage(CurrentPage.PageIndex)
-                SuperOfSuper.AppendSubPage(CurrentPage)
+                self.Notebook.PromoteSubPage(CurrentPageIndexPath)
                 NewLinkData = self.GetLinkData()
                 self.UpdateLinks(OldLinkData, NewLinkData)
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
-                self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage.GetFullIndexPath())
+                self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
                 self.SearchWidgetInst.RefreshSearch()
                 self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
@@ -600,28 +630,24 @@ class MainWindow(QMainWindow):
     def DemotePage(self):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
-            SuperOfCurrentPage = self.RootPage.GetSuperOfSubPageByIndexPath(CurrentPageIndexPath)
-            if CurrentPage.IsRootPage:
+            SuperOfCurrentPage = self.Notebook.GetSuperOfPageFromIndexPath(CurrentPageIndexPath)
+            if CurrentPageIndexPath == [0]:
                 self.DisplayMessageBox("The root page of a notebook cannot be demoted.")
-            elif len(SuperOfCurrentPage.SubPages) < 2:
+            elif len(SuperOfCurrentPage["SubPages"]) < 2:
                 self.DisplayMessageBox("No valid page to demote to.")
             else:
-                SiblingPages = SuperOfCurrentPage.SubPages.copy()
+                CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+                SiblingPages = SuperOfCurrentPage["SubPages"].copy()
                 SiblingPages.remove(CurrentPage)
-                SiblingPageTitles = []
-                for Sibling in SiblingPages:
-                    SiblingPageTitles.append(Sibling.Title)
-                SiblingPageIndex = DemotePageDialog(CurrentPage.Title, CurrentPage.PageIndex, self.ScriptName, self.WindowIcon, SiblingPageTitles, self).SiblingPageIndex
+                SiblingPageTitles = [Sibling["Title"] for Sibling in SiblingPages]
+                SiblingPageIndex = DemotePageDialog(CurrentPage, SiblingPageTitles, self).SiblingPageIndex
                 if SiblingPageIndex is not None:
-                    TargetSiblingPage = SuperOfCurrentPage.SubPages[SiblingPageIndex]
                     OldLinkData = self.GetLinkData()
-                    SuperOfCurrentPage.DeleteSubPage(CurrentPage.PageIndex)
-                    TargetSiblingPage.AppendSubPage(CurrentPage)
+                    self.Notebook.DemoteSubPage(CurrentPageIndexPath, SiblingPageIndex)
                     NewLinkData = self.GetLinkData()
                     self.UpdateLinks(OldLinkData, NewLinkData)
                     self.NotebookDisplayWidgetInst.FillFromRootPage()
-                    self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage.GetFullIndexPath())
+                    self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
                     self.SearchWidgetInst.RefreshSearch()
                     self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
@@ -629,13 +655,13 @@ class MainWindow(QMainWindow):
     def RenamePage(self):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.RootPage.GetSubPageByIndexPath(CurrentPageIndexPath)
-            NewName, OK = QInputDialog.getText(self, "Rename " + CurrentPage.Title, "Enter a title:", text=CurrentPage.Title)
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+            NewName, OK = QInputDialog.getText(self, "Rename " + CurrentPage["Title"], "Enter a title:", text=CurrentPage["Title"])
             if OK:
                 if NewName == "":
                     self.DisplayMessageBox("Page names cannot be blank.")
                 else:
-                    CurrentPage.Title = NewName
+                    CurrentPage["Title"] = NewName
                     self.NotebookDisplayWidgetInst.FillFromRootPage()
                     self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
                     self.SearchWidgetInst.RefreshSearch()
@@ -644,13 +670,13 @@ class MainWindow(QMainWindow):
 
     def GetLinkData(self):
         LinkData = {}
-        LinkData[id(self.RootPage)] = "](" + self.JSONSerializer.SerializeDataToJSONString(self.RootPage.GetFullIndexPath(), Indent=None) + ")"
-        self.AddSubPageLinkData(self.RootPage, LinkData)
+        LinkData[id(self.Notebook.RootPage)] = "](" + json.dumps(self.Notebook.RootPage["IndexPath"], indent=None) + ")"
+        self.AddSubPageLinkData(self.Notebook.RootPage, LinkData)
         return LinkData
 
     def AddSubPageLinkData(self, CurrentPage, LinkData):
-        for SubPage in CurrentPage.SubPages:
-            LinkData[id(SubPage)] = "](" + self.JSONSerializer.SerializeDataToJSONString(SubPage.GetFullIndexPath(), Indent=None) + ")"
+        for SubPage in CurrentPage["SubPages"]:
+            LinkData[id(SubPage)] = "](" + json.dumps(SubPage["IndexPath"], indent=None) + ")"
             self.AddSubPageLinkData(SubPage, LinkData)
 
     def UpdateLinks(self, OldLinkData, NewLinkData):
@@ -667,38 +693,32 @@ class MainWindow(QMainWindow):
 
     def ImageManager(self):
         if not self.TextWidgetInst.ReadMode:
-            ImageManagerDialogInst = ImageManagerDialog(self.RootPage, self.ScriptName, self.WindowIcon, self.DisplayMessageBox, self)
+            ImageManagerDialogInst = ImageManagerDialog(self.Notebook, self)
             if ImageManagerDialogInst.UnsavedChanges:
                 self.UpdateUnsavedChangesFlag(True)
 
     def TemplateManager(self):
         if not self.TextWidgetInst.ReadMode:
-            TemplateManagerDialogInst = TemplateManagerDialog(self.RootPage, self.ScriptName, self.WindowIcon, self.DisplayMessageBox, self)
+            TemplateManagerDialogInst = TemplateManagerDialog(self.Notebook, self)
             if TemplateManagerDialogInst.UnsavedChanges:
                 self.UpdateUnsavedChangesFlag(True)
 
-    def EditHeader(self):
-        self.EditHeaderOrFooter("Header")
-
-    def EditFooter(self):
-        self.EditHeaderOrFooter("Footer")
-
     def EditHeaderOrFooter(self, Mode):
         if not self.TextWidgetInst.ReadMode:
-            EditHeaderOrFooterDialogInst = EditHeaderOrFooterDialog(Mode, self.RootPage, self.WindowIcon, self)
+            EditHeaderOrFooterDialogInst = EditHeaderOrFooterDialog(Mode, self.Notebook, self)
             if EditHeaderOrFooterDialogInst.UnsavedChanges:
                 if EditHeaderOrFooterDialogInst.Mode == "Header":
-                    self.RootPage.Header = EditHeaderOrFooterDialogInst.HeaderOrFooterString
+                    self.Notebook.Header = EditHeaderOrFooterDialogInst.HeaderOrFooterString
                 elif EditHeaderOrFooterDialogInst.Mode == "Footer":
-                    self.RootPage.Footer = EditHeaderOrFooterDialogInst.HeaderOrFooterString
+                    self.Notebook.Footer = EditHeaderOrFooterDialogInst.HeaderOrFooterString
                 self.UpdateUnsavedChangesFlag(True)
 
     # Text Methods
     def TextChanged(self):
         if self.TextWidgetInst.DisplayChanging or self.TextWidgetInst.ReadMode:
             return
-        self.TextWidgetInst.CurrentPage.Content = self.TextWidgetInst.toPlainText()
-        self.SearchIndexer.IndexUpToDate = False
+        self.TextWidgetInst.CurrentPage["Content"] = self.TextWidgetInst.toPlainText()
+        self.Notebook.SearchIndexUpToDate = False
         self.UpdateUnsavedChangesFlag(True)
 
     def ToggleReadMode(self):
@@ -706,6 +726,7 @@ class MainWindow(QMainWindow):
         for Action in self.ToggleReadModeActionsList:
             Action.setEnabled(not self.TextWidgetInst.ReadMode)
         self.NotebookDisplayWidgetInst.setFocus() if self.TextWidgetInst.ReadMode else self.TextWidgetInst.setFocus()
+        self.ClearBackAndForward()
 
     def ZoomOut(self):
         self.TextWidgetInst.zoomOut(1)
@@ -723,19 +744,6 @@ class MainWindow(QMainWindow):
             self.TextWidgetInst.zoomIn(-self.CurrentZoomLevel)
             self.CurrentZoomLevel = 0
 
-    # Image Methods
-    def InsertImage(self):
-        if not self.TextWidgetInst.ReadMode and self.TextWidgetInst.hasFocus():
-            AttachedImages = self.RootPage.GetImageNames()
-            if len(AttachedImages) < 1:
-                self.DisplayMessageBox("No images are attached to the notebook.\n\nUse the Image Manager in the Notebook menu to add images to the notebook.")
-            else:
-                ImageFileName, OK = QInputDialog.getItem(self, "Select Image", "Image file:", AttachedImages, editable=False)
-                if OK:
-                    self.TextWidgetInst.InsertImage(ImageFileName)
-                else:
-                    self.FlashStatusBar("No image inserted.")
-
     # Interface Methods
     def DisplayMessageBox(self, Message, Icon=QMessageBox.Information, Buttons=QMessageBox.Ok, Parent=None):
         MessageBox = QMessageBox(self if Parent is None else Parent)
@@ -748,115 +756,12 @@ class MainWindow(QMainWindow):
 
     def FlashStatusBar(self, Status, Duration=2000):
         self.StatusBar.showMessage(Status)
-        QTimer.singleShot(Duration, lambda: self.StatusBar.showMessage("Status"))
+        QTimer.singleShot(Duration, self.StatusBar.clearMessage)
 
     def UpdateWindowTitle(self):
         self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + (" *" if self.UnsavedChanges else ""))
 
-    # Import and Export Methods
-    def ImportPlainText(self, ZimWikiCompatible=False):
-        ImportDirectory = QFileDialog.getExistingDirectory(caption="Import " + ("Plain Text" if not ZimWikiCompatible else "Zim Wiki"))
-        if ImportDirectory != "":
-            ImportedPlainTextPage = self.CreatePagesFromPlainText(ImportDirectory, ZimWikiCompatible=ZimWikiCompatible)
-            self.RootPage.AppendSubPage(ImportedPlainTextPage)
-            self.NotebookDisplayWidgetInst.FillFromRootPage()
-            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(self.RootPage.SubPages[-1].GetFullIndexPath())
-            self.SearchWidgetInst.RefreshSearch()
-            self.UpdateUnsavedChangesFlag(True)
-            self.NotebookDisplayWidgetInst.setFocus()
-
-    def ImportZimWiki(self):
-        self.ImportPlainText(ZimWikiCompatible=True)
-
-    def CreatePagesFromPlainText(self, CurrentDirectory, ZimWikiCompatible=False):
-        CurrentPage = Page(0, os.path.split(CurrentDirectory)[1], "Imported pages from " + ("plain text" if not ZimWikiCompatible else "Zim Wiki") + " files.", self.JSONSerializer.ObjectTypeCalls)
-        self.CreateSubPagesFromPlainText(CurrentDirectory, CurrentPage, ZimWikiCompatible=ZimWikiCompatible)
-        return CurrentPage
-
-    def CreateSubPagesFromPlainText(self, CurrentDirectory, CurrentPage, ZimWikiCompatible=False):
-        Files = os.listdir(CurrentDirectory)
-        TextFiles = []
-        Directories = []
-        Pages = {}
-        for File in Files:
-            FilePath = os.path.join(CurrentDirectory, File)
-            if os.path.isfile(FilePath):
-                if os.path.splitext(FilePath)[1] == ".txt":
-                    TextFiles.append((File, FilePath))
-            elif os.path.isdir(FilePath):
-                Directories.append((File, FilePath))
-        for TextFile in TextFiles:
-            PageTitle = os.path.splitext(TextFile[0])[0]
-            if ZimWikiCompatible:
-                PageTitle = PageTitle.replace("_", " ")
-            with open(TextFile[1], "r") as OpenFile:
-                PageContents = OpenFile.read()
-            if ZimWikiCompatible:
-                PageContents = ZimWikiConverters.ConvertFromZimWikiPage(PageContents)
-            SubPage = Page(0, PageTitle, PageContents, self.JSONSerializer.ObjectTypeCalls)
-            Pages[PageTitle] = SubPage
-            CurrentPage.AppendSubPage(SubPage)
-        for Directory in Directories:
-            PageTitle = Directory[0]
-            if ZimWikiCompatible:
-                PageTitle = PageTitle.replace("_", " ")
-            if PageTitle in Pages:
-                self.CreateSubPagesFromPlainText(Directory[1], Pages[PageTitle], ZimWikiCompatible=ZimWikiCompatible)
-
-    def ExportPlainText(self, ZimWikiCompatible=False):
-        ExportDirectory = QFileDialog.getExistingDirectory(caption="Export " + ("Plain Text" if not ZimWikiCompatible else "Zim Wiki"))
-        if ExportDirectory != "":
-            if len(os.listdir(ExportDirectory)) > 0:
-                self.DisplayMessageBox(("Plain text" if not ZimWikiCompatible else "Zim Wiki") + " files must be exported to an empty folder.")
-                return
-            ErrorList = []
-            self.ExportPagesToPlainText(ExportDirectory, ErrorList, ZimWikiCompatible=ZimWikiCompatible)
-            if len(ErrorList) > 0:
-                CombinedErrorString = ""
-                for ErrorString in ErrorList:
-                    CombinedErrorString += ErrorString + "\n\n"
-                CombinedErrorString = CombinedErrorString.rstrip()
-                ExportErrorDialog(CombinedErrorString, self.WindowIcon, self)
-            self.FlashStatusBar("Exported notebook to:  " + ExportDirectory)
-
-    def ExportZimWiki(self):
-        if self.DisplayMessageBox("Warning:  Exporting to Zim Wiki will create files that Zim Wiki can read, but no syntax conversion will take place.  Formatting errors may result.\n\nProceed?", Icon=QMessageBox.Question,
-                                  Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.Yes:
-            self.ExportPlainText(ZimWikiCompatible=True)
-
-    def ExportPagesToPlainText(self, ExportDirectory, ErrorList, ZimWikiCompatible=False):
-        RootPageTitle = str(self.RootPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(self.RootPage.Title)
-        if ZimWikiCompatible:
-            RootPageTitle = RootPageTitle.replace(" ", "_")
-        with open(os.path.join(ExportDirectory, RootPageTitle) + ".txt", "w") as ExportFile:
-            MarkdownString = MarkdownRenderers.ConstructMarkdownStringFromPage(self.RootPage, self.RootPage)
-            try:
-                ExportFile.write(MarkdownString)
-            except Exception as Error:
-                ErrorString = RootPageTitle + ":  " + str(Error)
-                ErrorList.append(ErrorString)
-        self.ExportSubPagesToPlainText(ExportDirectory, self.RootPage, ErrorList, ZimWikiCompatible=ZimWikiCompatible)
-
-    def ExportSubPagesToPlainText(self, CurrentDirectory, CurrentPage, ErrorList, ZimWikiCompatible=False):
-        CurrentPageTitle = str(CurrentPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(CurrentPage.Title)
-        if ZimWikiCompatible:
-            CurrentPageTitle = CurrentPageTitle.replace(" ", "_")
-        CurrentPageDirectory = os.path.join(CurrentDirectory, CurrentPageTitle)
-        for SubPage in CurrentPage.SubPages:
-            if not os.path.isdir(CurrentPageDirectory):
-                os.makedirs(CurrentPageDirectory, exist_ok=True)
-            SubPageTitle = str(SubPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(SubPage.Title)
-            if ZimWikiCompatible:
-                SubPageTitle = SubPageTitle.replace(" ", "_")
-            with open(os.path.join(CurrentPageDirectory, SubPageTitle + ".txt"), "w") as ExportFile:
-                MarkdownString = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.RootPage)
-                try:
-                    ExportFile.write(MarkdownString)
-                except Exception as Error:
-                    ErrorString = SubPageTitle + ":  " + str(Error)
-                    ErrorList.append(ErrorString)
-            self.ExportSubPagesToPlainText(CurrentPageDirectory, SubPage, ErrorList, ZimWikiCompatible=ZimWikiCompatible)
-
+    # HTML Export Methods
     def ExportHTML(self):
         ExportDirectory = QFileDialog.getExistingDirectory(caption="Export HTML")
         if ExportDirectory != "":
@@ -870,33 +775,33 @@ class MainWindow(QMainWindow):
                 for ErrorString in ErrorList:
                     CombinedErrorString += ErrorString + "\n\n"
                 CombinedErrorString = CombinedErrorString.rstrip()
-                ExportErrorDialog(CombinedErrorString, self.WindowIcon, self)
+                ExportErrorDialog(CombinedErrorString, self)
             self.FlashStatusBar("Exported notebook to:  " + ExportDirectory)
 
     def ExportPagesToHTML(self, ExportDirectory, ErrorList):
-        RootPageTitle = str(self.RootPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(self.RootPage.Title)
-        HTMLExportRenderer = MarkdownRenderers.HTMLExportRenderer(self.RootPage, self.NotebookDisplayWidgetInst, self.JSONSerializer)
+        RootPageTitle = str(self.Notebook.RootPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(self.Notebook.RootPage["Title"])
+        HTMLExportRenderer = MarkdownRenderers.HTMLExportRenderer(self.Notebook)
         HTMLExportMarkdownParser = mistune.Markdown(renderer=HTMLExportRenderer)
         with open(os.path.join(ExportDirectory, RootPageTitle) + ".html", "w") as ExportFile:
-            MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.RootPage, self.RootPage)
-            HTMLExportRenderer.CurrentPage = self.RootPage
+            MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.Notebook.RootPage, self.Notebook)
+            HTMLExportRenderer.CurrentPage = self.Notebook.RootPage
             HTMLText = HTMLExportMarkdownParser(MarkdownText)
             try:
                 ExportFile.write(HTMLText)
             except Exception as Error:
                 ErrorString = RootPageTitle + ":  " + str(Error)
                 ErrorList.append(ErrorString)
-        self.ExportSubPagesToHTML(ExportDirectory, self.RootPage, HTMLExportMarkdownParser, HTMLExportRenderer, ErrorList)
+        self.ExportSubPagesToHTML(ExportDirectory, self.Notebook.RootPage, HTMLExportMarkdownParser, HTMLExportRenderer, ErrorList)
 
     def ExportSubPagesToHTML(self, CurrentDirectory, CurrentPage, MarkdownParser, HTMLExportRenderer, ErrorList):
-        CurrentPageTitle = str(CurrentPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(CurrentPage.Title)
+        CurrentPageTitle = str(CurrentPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(CurrentPage["Title"])
         CurrentPageDirectory = os.path.join(CurrentDirectory, CurrentPageTitle)
-        for SubPage in CurrentPage.SubPages:
+        for SubPage in CurrentPage["SubPages"]:
             if not os.path.isdir(CurrentPageDirectory):
                 os.makedirs(CurrentPageDirectory, exist_ok=True)
-            SubPageTitle = str(SubPage.PageIndex) + " - " + Utility.GetSafeFileNameFromPageTitle(SubPage.Title)
+            SubPageTitle = str(SubPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(SubPage["Title"])
             with open(os.path.join(CurrentPageDirectory, SubPageTitle) + ".html", "w") as ExportFile:
-                MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.RootPage)
+                MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.Notebook)
                 HTMLExportRenderer.CurrentPage = SubPage
                 HTMLText = MarkdownParser(MarkdownText)
                 try:
@@ -907,74 +812,40 @@ class MainWindow(QMainWindow):
             self.ExportSubPagesToHTML(CurrentPageDirectory, SubPage, MarkdownParser, HTMLExportRenderer, ErrorList)
 
     # Save and Open Methods
-    def Save(self, SaveAs=False):
-        SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs else QFileDialog.getSaveFileName(caption="Save Notebook File", filter="Notebook files (*" + self.FileExtension + ")")[0]
-        if SaveFileName != "":
-            JSONString = self.JSONSerializer.SerializeDataToJSONString(self.RootPage)
-            with open(SaveFileName, "w") as SaveFile:
-                SaveFile.write(JSONString)
-            self.CurrentOpenFileName = SaveFileName
-            SaveFileNameShort = os.path.basename(SaveFileName)
-            self.FlashStatusBar("File saved as:  " + SaveFileNameShort)
-            self.SearchIndexer.BuildIndex()
+    def SaveActionTriggered(self, SaveAs=False):
+        if self.Save(self.Notebook, SaveAs=SaveAs):
+            self.Notebook.BuildSearchIndex()
             self.SearchWidgetInst.RefreshSearch()
             self.UpdateUnsavedChangesFlag(False)
-            return True
         else:
-            self.FlashStatusBar("No file saved.")
-            return False
+            self.UpdateWindowTitle()
 
-    def Open(self, FilePath=None):
-        if self.UnsavedChanges:
-            SavePrompt = self.DisplayMessageBox("Save unsaved work before opening another notebook?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
-            if SavePrompt == QMessageBox.Yes:
-                if not self.Save():
-                    return
-            elif SavePrompt == QMessageBox.No:
-                pass
-            elif SavePrompt == QMessageBox.Cancel:
-                return
-        OpenFileName = FilePath if FilePath is not None else QFileDialog.getOpenFileName(caption="Open Notebook File", filter="Notebook files (*" + self.FileExtension + ")")[0]
-        if OpenFileName != "":
-            with open(OpenFileName, "r") as LoadFile:
-                JSONString = LoadFile.read()
-            OpenFileNameShort = os.path.basename(OpenFileName)
-            try:
-                Data = self.JSONSerializer.DeserializeDataFromJSONString(JSONString)
-            except KeyError:
-                self.DisplayMessageBox("There was an error opening " + OpenFileNameShort + ".\n\nTry using the Update Notebook Format option in the Notebook menu.", Icon=QMessageBox.Warning)
-                return
-            self.UpdateRootPage(Data)
+    def OpenActionTriggered(self, FilePath=None):
+        NewNotebook = self.Open(self.Notebook, FilePath=FilePath)
+        if NewNotebook is not None:
+            self.UpdateNotebook(NewNotebook)
             self.NotebookDisplayWidgetInst.FillFromRootPage()
-            self.SearchIndexer.BuildIndex()
+            self.Notebook.BuildSearchIndex()
             self.SearchWidgetInst.ClearSearch()
-            self.CurrentOpenFileName = OpenFileName
-            self.FlashStatusBar("Opened file:  " + OpenFileNameShort)
+            self.ClearBackAndForward()
             self.UpdateUnsavedChangesFlag(False)
         else:
-            self.FlashStatusBar("No file opened.")
+            self.UpdateWindowTitle()
 
     def Favorites(self):
-        FavoritesDialogInst = FavoritesDialog(self.ScriptName, self.WindowIcon, self.DisplayMessageBox, self.FavoritesData, self)
+        FavoritesDialogInst = FavoritesDialog(self.FavoritesData, self)
         if FavoritesDialogInst.OpenFilePath is not None:
-            self.Open(FavoritesDialogInst.OpenFilePath)
+            self.OpenActionTriggered(FavoritesDialogInst.OpenFilePath)
 
-    def New(self):
-        if self.UnsavedChanges:
-            SavePrompt = self.DisplayMessageBox("Save unsaved work before starting a new notebook?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
-            if SavePrompt == QMessageBox.Yes:
-                if not self.Save():
-                    return
-            elif SavePrompt == QMessageBox.No:
-                pass
-            elif SavePrompt == QMessageBox.Cancel:
-                return
-        self.UpdateRootPage(self.NewRootPage())
+    def NewActionTriggered(self):
+        if not self.New(self.Notebook):
+            self.UpdateWindowTitle()
+            return
+        self.UpdateNotebook(Notebook())
         self.NotebookDisplayWidgetInst.FillFromRootPage()
-        self.SearchIndexer.BuildIndex()
+        self.Notebook.BuildSearchIndex()
         self.SearchWidgetInst.ClearSearch()
-        self.CurrentOpenFileName = ""
-        self.FlashStatusBar("New notebook opened.")
+        self.ClearBackAndForward()
         self.UpdateUnsavedChangesFlag(False)
 
     def closeEvent(self, event):
@@ -982,7 +853,7 @@ class MainWindow(QMainWindow):
         if self.UnsavedChanges:
             SavePrompt = self.DisplayMessageBox("Save unsaved work before closing?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
             if SavePrompt == QMessageBox.Yes:
-                if not self.Save():
+                if not self.Save(self.Notebook):
                     Close = False
             elif SavePrompt == QMessageBox.No:
                 pass
@@ -992,7 +863,7 @@ class MainWindow(QMainWindow):
             event.ignore()
         else:
             with open("Favorites.cfg", "w") as ConfigFile:
-                ConfigFile.write(self.JSONSerializer.SerializeDataToJSONString(self.FavoritesData))
+                ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
             event.accept()
 
     def UpdateUnsavedChangesFlag(self, UnsavedChanges):

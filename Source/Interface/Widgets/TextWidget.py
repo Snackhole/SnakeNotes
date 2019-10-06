@@ -1,3 +1,4 @@
+import json
 import webbrowser
 
 import mistune
@@ -6,33 +7,27 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QTextCursor, QTextCharFormat
 from PyQt5.QtWidgets import QTextEdit, QInputDialog, QMessageBox
 
-import MarkdownRenderers
-import ZimWikiConverters
-from InsertLinksDialog import InsertLinksDialog
-from InsertTableDialog import InsertTableDialog, TableDimensionsDialog
+from Core import MarkdownRenderers
+from Interface.Dialogs.InsertLinksDialog import InsertLinksDialog
+from Interface.Dialogs.InsertTableDialog import InsertTableDialog, TableDimensionsDialog
 
 
 class TextWidget(QTextEdit):
-    def __init__(self, RootPage, NotebookDisplayWidget, DisplayMessageBox, JSONSerializer, SearchIndexer, ScriptName, Icon):
+    def __init__(self, Notebook, MainWindow):
         super().__init__()
 
         # Store Parameters
-        self.RootPage = RootPage
-        self.NotebookDisplayWidget = NotebookDisplayWidget
-        self.DisplayMessageBox = DisplayMessageBox
-        self.JSONSerializer = JSONSerializer
-        self.SearchIndexer = SearchIndexer
-        self.ScriptName = ScriptName
-        self.Icon = Icon
+        self.Notebook = Notebook
+        self.MainWindow = MainWindow
 
         # Variables
-        self.CurrentPage = self.RootPage
+        self.CurrentPage = self.Notebook.RootPage
         self.DisplayChanging = False
         self.ReadMode = True
         self.DefaultCharacterFormat = QTextCharFormat()
 
         # Create Markdown Parser
-        self.Renderer = MarkdownRenderers.Renderer(self.RootPage)
+        self.Renderer = MarkdownRenderers.Renderer(self.Notebook)
         self.MarkdownParser = mistune.Markdown(renderer=self.Renderer)
 
         # Tab Behavior
@@ -47,12 +42,12 @@ class TextWidget(QTextEdit):
     def UpdateText(self):
         self.DisplayChanging = True
         if self.ReadMode:
-            DisplayText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.CurrentPage, self.RootPage)
+            DisplayText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.CurrentPage, self.Notebook)
             HTMLText = self.MarkdownParser(DisplayText)
             self.setHtml(HTMLText)
         else:
             self.setCurrentCharFormat(self.DefaultCharacterFormat)
-            self.setPlainText(self.CurrentPage.Content)
+            self.setPlainText(self.CurrentPage["Content"])
         self.DisplayChanging = False
 
     def SetCurrentPage(self, Page):
@@ -189,7 +184,7 @@ class TextWidget(QTextEdit):
             FootnoteLabel, OK = QInputDialog.getText(self, "Add Footnote", "Enter a footnote label:")
             if OK:
                 if FootnoteLabel == "":
-                    self.DisplayMessageBox("Footnote labels cannot be blank.")
+                    self.MainWindow.DisplayMessageBox("Footnote labels cannot be blank.")
                 else:
                     FootnoteSymbol = "[^" + FootnoteLabel + "]"
                     Cursor = self.textCursor()
@@ -206,16 +201,16 @@ class TextWidget(QTextEdit):
 
     def InsertLinks(self):
         if not self.ReadMode and self.hasFocus():
-            InsertLinksDialogInst = InsertLinksDialog(self.RootPage, self.ScriptName, self.Icon, self)
+            InsertLinksDialogInst = InsertLinksDialog(self.Notebook, self.MainWindow, self)
             if InsertLinksDialogInst.InsertAccepted:
                 Cursor = self.textCursor()
                 Cursor.beginEditBlock()
                 if InsertLinksDialogInst.InsertIndexPath is not None:
-                    self.SelectionSpanWrap("[", "](" + self.JSONSerializer.SerializeDataToJSONString(InsertLinksDialogInst.InsertIndexPath, Indent=None) + ")")
+                    self.SelectionSpanWrap("[", "](" + json.dumps(InsertLinksDialogInst.InsertIndexPath, indent=None) + ")")
                 elif InsertLinksDialogInst.InsertIndexPaths is not None and InsertLinksDialogInst.SubPageLinksSeparator is not None:
                     InsertString = ""
                     for SubPagePath in InsertLinksDialogInst.InsertIndexPaths:
-                        InsertString += "[" + SubPagePath[0] + "](" + self.JSONSerializer.SerializeDataToJSONString(SubPagePath[1], Indent=None) + ")" + InsertLinksDialogInst.SubPageLinksSeparator
+                        InsertString += "[" + SubPagePath[0] + "](" + json.dumps(SubPagePath[1], indent=None) + ")" + InsertLinksDialogInst.SubPageLinksSeparator
                     InsertString = InsertString.rstrip()
                     self.InsertOnBlankLine(InsertString)
                     self.MakeCursorVisible()
@@ -232,38 +227,37 @@ class TextWidget(QTextEdit):
             Cursor = self.textCursor()
             SearchText = Cursor.selectedText()
             if SearchText != "" and "\u2029" not in SearchText:
-                SearchResults = self.SearchIndexer.GetSearchResults(SearchText, ExactTitleOnly=True)
+                SearchResults = self.Notebook.GetSearchResults(SearchText, ExactTitleOnly=True)
                 SearchResultsLength = len(SearchResults)
                 if SearchResultsLength > 0:
                     if SearchResultsLength > 1:
-                        self.DisplayMessageBox("Multiple pages found.  Use the full link dialog to insert a link.", Icon=QMessageBox.Warning)
+                        self.MainWindow.DisplayMessageBox("Multiple pages found.  Use the full link dialog to insert a link.", Icon=QMessageBox.Warning)
                     else:
                         TopResultIndexPath = SearchResults[0][1]
-                        self.SelectionSpanWrap("[", "](" + self.JSONSerializer.SerializeDataToJSONString(TopResultIndexPath, Indent=None) + ")")
+                        self.SelectionSpanWrap("[", "](" + json.dumps(TopResultIndexPath, indent=None) + ")")
 
     def InsertTable(self):
         Cursor = self.textCursor()
         if self.CursorOnBlankLine(Cursor) and self.hasFocus():
-            TableDimensionsDialogInst = TableDimensionsDialog(self.ScriptName, self.Icon, self)
+            TableDimensionsDialogInst = TableDimensionsDialog(self.MainWindow, self)
             if TableDimensionsDialogInst.ContinueTable:
-                InsertTableDialogInst = InsertTableDialog(TableDimensionsDialogInst.Rows, TableDimensionsDialogInst.Columns, self.ScriptName, self.Icon, self)
+                InsertTableDialogInst = InsertTableDialog(TableDimensionsDialogInst.Rows, TableDimensionsDialogInst.Columns, self.MainWindow, self)
                 if InsertTableDialogInst.InsertTable:
                     self.InsertOnBlankLine(InsertTableDialogInst.TableString)
                     self.MakeCursorVisible()
 
-    def InsertImage(self, ImageName):
-        self.insertPlainText("![](" + ImageName + ")")
-        self.MakeCursorVisible()
-
-    def ConvertZimWikiSyntax(self):
+    def InsertImage(self):
         if not self.ReadMode and self.hasFocus():
-            Cursor = self.textCursor()
-            SelectedText = Cursor.selectedText()
-            SelectedText = ZimWikiConverters.ConvertFromZimWikiSyntax(SelectedText)
-            Cursor.beginEditBlock()
-            self.insertPlainText(SelectedText)
-            self.MakeCursorVisible()
-            Cursor.endEditBlock()
+            AttachedImages = self.Notebook.GetImageNames()
+            if len(AttachedImages) < 1:
+                self.MainWindow.DisplayMessageBox("No images are attached to the notebook.\n\nUse the Image Manager in the Notebook menu to add images to the notebook.")
+            else:
+                ImageFileName, OK = QInputDialog.getItem(self, "Select Image", "Image file:", AttachedImages, editable=False)
+                if OK:
+                    self.insertPlainText("![](" + ImageFileName + ")")
+                    self.MakeCursorVisible()
+                else:
+                    self.MainWindow.FlashStatusBar("No image inserted.")
 
     def MoveLineUp(self):
         self.MoveLine(-1)
@@ -352,8 +346,8 @@ class TextWidget(QTextEdit):
     def mouseDoubleClickEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
         if Anchor != "":
-            if self.NotebookDisplayWidget.StringIsValidIndexPath(Anchor):
-                self.NotebookDisplayWidget.SelectTreeItemFromIndexPathString(Anchor)
+            if self.Notebook.StringIsValidIndexPath(Anchor):
+                self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(Anchor)
                 QMouseEvent.accept()
             else:
                 webbrowser.open(Anchor)

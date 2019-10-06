@@ -3,12 +3,11 @@ from PyQt5.QtWidgets import QDialog, QLineEdit, QGridLayout, QComboBox, QLabel, 
 
 
 class InsertTableDialog(QDialog):
-    def __init__(self, Rows, Columns, ScriptName, Icon, Parent):
+    def __init__(self, Rows, Columns, MainWindow, Parent):
         # Store Parameters
         self.Rows = Rows
         self.Columns = Columns
-        self.ScriptName = ScriptName
-        self.Icon = Icon
+        self.MainWindow = MainWindow
         self.Parent = Parent
 
         # QDialog Init
@@ -80,8 +79,8 @@ class InsertTableDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.ScriptName)
-        self.setWindowIcon(self.Icon)
+        self.setWindowTitle(self.MainWindow.ScriptName)
+        self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize
         self.Resize()
@@ -120,12 +119,11 @@ class InsertTableDialog(QDialog):
 
 
 class TableDimensionsDialog(QDialog):
-    def __init__(self, ScriptName, Icon, Parent):
+    def __init__(self, MainWindow, Parent):
         super().__init__(parent=Parent)
 
         # Store Parameters
-        self.ScriptName = ScriptName
-        self.Icon = Icon
+        self.MainWindow = MainWindow
 
         # Variables
         self.Rows = 1
@@ -163,8 +161,8 @@ class TableDimensionsDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.ScriptName)
-        self.setWindowIcon(self.Icon)
+        self.setWindowTitle(self.MainWindow.ScriptName)
+        self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog
         self.exec_()

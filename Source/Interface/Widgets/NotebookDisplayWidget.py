@@ -1,15 +1,14 @@
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QHeaderView, QMenu
+import json
 
-from Page import Page
+from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QHeaderView, QMenu
 
 
 class NotebookDisplayWidget(QTreeWidget):
-    def __init__(self, RootPage, JSONSerializer, MainWindow):
+    def __init__(self, Notebook, MainWindow):
         super().__init__()
 
         # Store Parameters
-        self.RootPage = RootPage
-        self.JSONSerializer = JSONSerializer
+        self.Notebook = Notebook
         self.MainWindow = MainWindow
 
         # Header Setup
@@ -22,16 +21,14 @@ class NotebookDisplayWidget(QTreeWidget):
 
     def FillFromRootPage(self):
         self.clear()
-        self.FillNotebookWidgetItem(self.invisibleRootItem(), self.RootPage, IsRootPage=True)
+        self.FillNotebookWidgetItem(self.invisibleRootItem(), self.Notebook.RootPage, IsRootPage=True)
         self.setFocus()
 
     def FillNotebookWidgetItem(self, CurrentTreeItem, CurrentPage, IsRootPage=False):
-        assert isinstance(CurrentPage, Page)
-
-        ChildTreeItem = NotebookDisplayWidgetItem(CurrentPage.Title, CurrentPage.Path, CurrentPage.PageIndex)
+        ChildTreeItem = NotebookDisplayWidgetItem(CurrentPage["Title"], CurrentPage["IndexPath"])
         CurrentTreeItem.addChild(ChildTreeItem)
 
-        for SubPage in CurrentPage.SubPages:
+        for SubPage in CurrentPage["SubPages"]:
             self.FillNotebookWidgetItem(ChildTreeItem, SubPage)
 
         if IsRootPage:
@@ -43,14 +40,7 @@ class NotebookDisplayWidget(QTreeWidget):
         if len(SelectedItems) < 1:
             return None
         SelectedItem = SelectedItems[0]
-        CurrentPageIndexPath = SelectedItem.Path.copy()
-        CurrentPageIndexPath.append(SelectedItem.PageIndex)
-        return CurrentPageIndexPath
-
-    def GetCurrentPageIndex(self):
-        SelectedItem = self.selectedItems()[0]
-        PageIndex = SelectedItem.PageIndex
-        return PageIndex
+        return SelectedItem.IndexPath
 
     def SelectTreeItemFromIndexPath(self, IndexPath, SelectParent=False, ScrollToLastChild=False, SelectDelta=0):
         if SelectParent:
@@ -64,35 +54,8 @@ class NotebookDisplayWidget(QTreeWidget):
         self.scrollToItem(self.currentItem() if not ScrollToLastChild else self.currentItem().child(self.currentItem().childCount() - 1), self.PositionAtCenter)
 
     def SelectTreeItemFromIndexPathString(self, IndexPathString, SelectParent=False, ScrollToLastChild=False, SelectDelta=0):
-        IndexPath = self.JSONSerializer.DeserializeDataFromJSONString(IndexPathString)
+        IndexPath = json.loads(IndexPathString)
         self.SelectTreeItemFromIndexPath(IndexPath, SelectParent=SelectParent, ScrollToLastChild=ScrollToLastChild, SelectDelta=SelectDelta)
-
-    def StringIsValidIndexPath(self, IndexPathString):
-        try:
-            IndexPath = self.JSONSerializer.DeserializeDataFromJSONString(IndexPathString)
-        except:
-            return False
-        if not isinstance(IndexPath, list):
-            return False
-        if len(IndexPath) < 1:
-            return False
-        if IndexPath[0] != 0:
-            return False
-        for Element in IndexPath:
-            if not isinstance(Element, int):
-                return False
-            if Element < 0:
-                return False
-        try:
-            DestinationIndex = self.model().index(0, 0)
-            for Element in IndexPath[1:]:
-                DestinationIndex = DestinationIndex.child(Element, 0)
-            DestinationItem = self.itemFromIndex(DestinationIndex)
-        except:
-            return False
-        if DestinationItem is None:
-            return False
-        return True
 
     def contextMenuEvent(self, event):
         ContextMenu = QMenu(self)
@@ -116,8 +79,7 @@ class NotebookDisplayWidget(QTreeWidget):
 
 
 class NotebookDisplayWidgetItem(QTreeWidgetItem):
-    def __init__(self, Title, Path, PageIndex):
+    def __init__(self, Title, IndexPath):
         super().__init__()
         self.setText(0, Title)
-        self.Path = Path
-        self.PageIndex = PageIndex
+        self.IndexPath = IndexPath

@@ -4,16 +4,12 @@ from PyQt5.QtWidgets import QDialog, QListWidget, QPushButton, QGridLayout, QLis
 
 
 class FavoritesDialog(QDialog):
-    def __init__(self, ScriptName, Icon, DisplayMessageBox, FavoritesData, Parent):
-        # Store Parameters
-        self.ScriptName = ScriptName
-        self.Icon = Icon
-        self.DisplayMessageBox = DisplayMessageBox
-        self.FavoritesData = FavoritesData
-        self.Parent = Parent
+    def __init__(self, FavoritesData, MainWindow):
+        super().__init__(parent=MainWindow)
 
-        # QDialog Init
-        super().__init__(parent=self.Parent)
+        # Store Parameters
+        self.FavoritesData = FavoritesData
+        self.MainWindow = MainWindow
 
         # Variables
         self.OpenFilePath = None
@@ -45,8 +41,8 @@ class FavoritesDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.ScriptName + " Favorites")
-        self.setWindowIcon(self.Icon)
+        self.setWindowTitle(self.MainWindow.ScriptName + " Favorites")
+        self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize
         self.Resize()
@@ -61,20 +57,20 @@ class FavoritesDialog(QDialog):
         SelectedItems = self.FavoritesList.selectedItems()
         if len(SelectedItems) > 0:
             if not os.path.isfile(SelectedItems[0].FavoritePath):
-                self.DisplayMessageBox(SelectedItems[0].FavoriteName + " is not a notebook file.\n\nCheck whether it has been moved, deleted, or renamed.")
+                self.MainWindow.DisplayMessageBox(SelectedItems[0].FavoriteName + " is not a notebook file.\n\nCheck whether it has been moved, deleted, or renamed.")
                 return
             self.OpenFilePath = SelectedItems[0].FavoritePath
             self.close()
 
     def AddCurrentNotebookAsFavorite(self):
-        CurrentOpenFileName = self.Parent.CurrentOpenFileName
+        CurrentOpenFileName = self.MainWindow.CurrentOpenFileName
         if CurrentOpenFileName == "":
-            self.DisplayMessageBox("Save or open a notebook first.")
+            self.MainWindow.DisplayMessageBox("Save or open a notebook first.")
             return
         CurrentOpenFileNameShort = os.path.splitext(os.path.basename(CurrentOpenFileName))[0]
         if CurrentOpenFileNameShort in self.FavoritesData:
-            if self.DisplayMessageBox("There is already a notebook called " + CurrentOpenFileNameShort + " in your favorites.\n\nOverwrite?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No)) == \
-                    QMessageBox.No:
+            if self.MainWindow.DisplayMessageBox("There is already a notebook called " + CurrentOpenFileNameShort + " in your favorites.\n\nOverwrite?", Icon=QMessageBox.Question,
+                                                 Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.No:
                 return
         self.FavoritesData[CurrentOpenFileNameShort] = CurrentOpenFileName
         self.PopulateFavoritesList()
@@ -82,7 +78,7 @@ class FavoritesDialog(QDialog):
     def DeleteFavorite(self):
         SelectedItems = self.FavoritesList.selectedItems()
         if len(SelectedItems) > 0:
-            if self.DisplayMessageBox("Delete " + SelectedItems[0].FavoriteName + " from your favorites?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.Yes:
+            if self.MainWindow.DisplayMessageBox("Delete " + SelectedItems[0].FavoriteName + " from your favorites?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.Yes:
                 del self.FavoritesData[SelectedItems[0].FavoriteName]
                 self.PopulateFavoritesList()
 

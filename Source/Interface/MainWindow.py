@@ -53,6 +53,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CreateInterface()
         self.show()
 
+        # Load Display Settings
+        if os.path.isfile("DisplaySettings.cfg"):
+            with open("DisplaySettings.cfg", "r") as ConfigFile:
+                DisplaySettings = json.loads(ConfigFile.read())
+                self.LoadDisplaySettings(DisplaySettings)
+
     def CreateInterface(self):
         # Create Icons
         self.CreateIcons()
@@ -117,12 +123,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.setTabOrder(self.NotebookDisplayWidgetInst, self.TextWidgetInst)
         self.setTabOrder(self.TextWidgetInst, self.SearchWidgetInst)
         self.setTabOrder(self.SearchWidgetInst, self.NotebookDisplayWidgetInst)
-
-        # Load Display Settings
-        if os.path.isfile("DisplaySettings.cfg"):
-            with open("DisplaySettings.cfg", "r") as ConfigFile:
-                DisplaySettings = json.loads(ConfigFile.read())
-                self.LoadDisplaySettings(DisplaySettings)
 
     def CreateIcons(self):
         self.WindowIcon = QIcon("Assets/SerpentNotes Icon.png")
@@ -768,12 +768,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + (" *" if self.UnsavedChanges else ""))
 
     def LoadDisplaySettings(self, DisplaySettings):
-        if DisplaySettings["CurrentZoomLevel"] > 0:
-            for ZoomLevel in range(DisplaySettings["CurrentZoomLevel"]):
-                self.ZoomIn()
-        elif DisplaySettings["CurrentZoomLevel"] < 0:
-            for ZoomLevel in range(-DisplaySettings["CurrentZoomLevel"]):
-                self.ZoomOut()
+        if "CurrentZoomLevel" in DisplaySettings:
+            if DisplaySettings["CurrentZoomLevel"] > 0:
+                for ZoomLevel in range(DisplaySettings["CurrentZoomLevel"]):
+                    self.ZoomIn()
+            elif DisplaySettings["CurrentZoomLevel"] < 0:
+                for ZoomLevel in range(-DisplaySettings["CurrentZoomLevel"]):
+                    self.ZoomOut()
+        if "HorizontalSplit" in DisplaySettings:
+            self.NotebookAndTextSplitter.setSizes(DisplaySettings["HorizontalSplit"])
 
     # HTML Export Methods
     def ExportHTML(self):
@@ -880,6 +883,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
             DisplaySettings = {}
             DisplaySettings["CurrentZoomLevel"] = self.CurrentZoomLevel
+            DisplaySettings["HorizontalSplit"] = self.NotebookAndTextSplitter.sizes()
             with open("DisplaySettings.cfg", "w") as ConfigFile:
                 ConfigFile.write(json.dumps(DisplaySettings, indent=2))
             event.accept()

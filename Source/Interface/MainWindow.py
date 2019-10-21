@@ -118,6 +118,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.setTabOrder(self.TextWidgetInst, self.SearchWidgetInst)
         self.setTabOrder(self.SearchWidgetInst, self.NotebookDisplayWidgetInst)
 
+        # Load Display Settings
+        if os.path.isfile("DisplaySettings.cfg"):
+            with open("DisplaySettings.cfg", "r") as ConfigFile:
+                DisplaySettings = json.loads(ConfigFile.read())
+                self.LoadDisplaySettings(DisplaySettings)
+
     def CreateIcons(self):
         self.WindowIcon = QIcon("Assets/SerpentNotes Icon.png")
         self.NewPageIcon = QIcon("Assets/SerpentNotes New Page Icon.png")
@@ -761,6 +767,14 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def UpdateWindowTitle(self):
         self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + (" *" if self.UnsavedChanges else ""))
 
+    def LoadDisplaySettings(self, DisplaySettings):
+        if DisplaySettings["CurrentZoomLevel"] > 0:
+            for ZoomLevel in range(DisplaySettings["CurrentZoomLevel"]):
+                self.ZoomIn()
+        elif DisplaySettings["CurrentZoomLevel"] < 0:
+            for ZoomLevel in range(-DisplaySettings["CurrentZoomLevel"]):
+                self.ZoomOut()
+
     # HTML Export Methods
     def ExportHTML(self):
         ExportDirectory = QFileDialog.getExistingDirectory(caption="Export HTML")
@@ -864,6 +878,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         else:
             with open("Favorites.cfg", "w") as ConfigFile:
                 ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
+            DisplaySettings = {}
+            DisplaySettings["CurrentZoomLevel"] = self.CurrentZoomLevel
+            with open("DisplaySettings.cfg", "w") as ConfigFile:
+                ConfigFile.write(json.dumps(DisplaySettings, indent=2))
             event.accept()
 
     def UpdateUnsavedChangesFlag(self, UnsavedChanges):

@@ -280,6 +280,7 @@ class TextWidget(QTextEdit):
                 Cursor = self.textCursor()
                 Cursor.setPosition(NewPosition)
                 self.setTextCursor(Cursor)
+            self.VerticallyCenterCursor()
 
     def DuplicateLines(self):
         if not self.ReadMode and self.hasFocus():
@@ -336,6 +337,12 @@ class TextWidget(QTextEdit):
         Cursor.select(QTextCursor.LineUnderCursor)
         LineText = Cursor.selectedText()
         return LineText == ""
+
+    def VerticallyCenterCursor(self):
+        CursorVerticalPosition = self.cursorRect().top()
+        ViewportHeight = self.viewport().height()
+        VerticalScrollBar = self.verticalScrollBar()
+        VerticalScrollBar.setValue(VerticalScrollBar.value() + CursorVerticalPosition - (ViewportHeight / 2))
 
     def wheelEvent(self, QWheelEvent):
         if QWheelEvent.modifiers() == QtCore.Qt.ControlModifier:

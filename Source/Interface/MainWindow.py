@@ -520,11 +520,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def UpdateBackAndForward(self):
         if not self.BackNavigation and self.TextWidgetInst.ReadMode:
             PreviousPageIndexPath = self.TextWidgetInst.CurrentPage["IndexPath"]
+            PreviousPageScrollPosition = self.TextWidgetInst.verticalScrollBar().value()
+            PreviousPageData = (PreviousPageIndexPath, PreviousPageScrollPosition)
             if self.BackList != []:
-                if self.BackList[-1] != PreviousPageIndexPath:
-                    self.BackList.append(PreviousPageIndexPath)
+                if self.BackList[-1][0] != PreviousPageIndexPath:
+                    self.BackList.append(PreviousPageData)
             else:
-                self.BackList.append(PreviousPageIndexPath)
+                self.BackList.append(PreviousPageData)
             if len(self.BackList) > self.BackMaximum:
                 self.BackList = self.BackList[-self.BackMaximum:]
             self.ForwardList.clear()
@@ -540,21 +542,29 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def Back(self):
         if len(self.BackList) > 0:
             self.BackNavigation = True
-            TargetPageIndexPath = self.BackList[-1]
+            TargetPageIndexPath = self.BackList[-1][0]
+            TargetPageScrollPosition = self.BackList[-1][1]
             del self.BackList[-1]
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            self.ForwardList.append(CurrentPageIndexPath)
+            CurrentPageScrollPosition = self.TextWidgetInst.verticalScrollBar().value()
+            CurrentPageData = (CurrentPageIndexPath, CurrentPageScrollPosition)
+            self.ForwardList.append(CurrentPageData)
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
+            self.TextWidgetInst.verticalScrollBar().setValue(TargetPageScrollPosition)
             self.BackNavigation = False
 
     def Forward(self):
         if len(self.ForwardList) > 0:
             self.BackNavigation = True
-            TargetPageIndexPath = self.ForwardList[-1]
+            TargetPageIndexPath = self.ForwardList[-1][0]
+            TargetPageScrollPosition = self.ForwardList[-1][1]
             del self.ForwardList[-1]
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            self.BackList.append(CurrentPageIndexPath)
+            CurrentPageScrollPosition = self.TextWidgetInst.verticalScrollBar().value()
+            CurrentPageData = (CurrentPageIndexPath, CurrentPageScrollPosition)
+            self.BackList.append(CurrentPageData)
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
+            self.TextWidgetInst.verticalScrollBar().setValue(TargetPageScrollPosition)
             self.BackNavigation = False
 
     def NewPage(self):

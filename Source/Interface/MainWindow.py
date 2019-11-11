@@ -1,12 +1,11 @@
 import json
 import os
 
-import mistune
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QFileDialog, QAction, QSplitter, QApplication
 
-from Core import MarkdownRenderers, Utility
+from Core.MarkdownRenderers import ConstructHTMLExportString
 from Core.Notebook import Notebook
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
@@ -248,7 +247,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditFooterAction.triggered.connect(lambda: self.EditHeaderOrFooter("Footer"))
         self.ToggleReadModeActionsList.append(self.EditFooterAction)
 
-        self.ExportHTMLAction = QAction("Export HTML Files")
+        self.ExportHTMLAction = QAction("Export HTML File")
         self.ExportHTMLAction.triggered.connect(self.ExportHTML)
         self.ToggleReadModeActionsList.append(self.ExportHTMLAction)
 
@@ -790,53 +789,66 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     # HTML Export Methods
     def ExportHTML(self):
-        ExportDirectory = QFileDialog.getExistingDirectory(caption="Export HTML")
-        if ExportDirectory != "":
-            if len(os.listdir(ExportDirectory)) > 0:
-                self.DisplayMessageBox("HTML files must be exported to an empty folder.")
-                return
-            ErrorList = []
-            self.ExportPagesToHTML(ExportDirectory, ErrorList)
-            if len(ErrorList) > 0:
-                CombinedErrorString = ""
-                for ErrorString in ErrorList:
-                    CombinedErrorString += ErrorString + "\n\n"
-                CombinedErrorString = CombinedErrorString.rstrip()
-                ExportErrorDialog(CombinedErrorString, self)
-            self.FlashStatusBar("Exported notebook to:  " + ExportDirectory)
-
-    def ExportPagesToHTML(self, ExportDirectory, ErrorList):
-        RootPageTitle = str(self.Notebook.RootPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(self.Notebook.RootPage["Title"])
-        HTMLExportRenderer = MarkdownRenderers.HTMLExportRenderer(self.Notebook)
-        HTMLExportMarkdownParser = mistune.Markdown(renderer=HTMLExportRenderer)
-        with open(os.path.join(ExportDirectory, RootPageTitle) + ".html", "w") as ExportFile:
-            MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.Notebook.RootPage, self.Notebook)
-            HTMLExportRenderer.CurrentPage = self.Notebook.RootPage
-            HTMLText = HTMLExportMarkdownParser(MarkdownText)
+        ExportFileName = QFileDialog.getSaveFileName(caption="Export HTML", filter="HTML file (*.html)")[0]
+        if ExportFileName != "":
+            HTMLText = ConstructHTMLExportString(self.Notebook)
             try:
-                ExportFile.write(HTMLText)
-            except Exception as Error:
-                ErrorString = RootPageTitle + ":  " + str(Error)
-                ErrorList.append(ErrorString)
-        self.ExportSubPagesToHTML(ExportDirectory, self.Notebook.RootPage, HTMLExportMarkdownParser, HTMLExportRenderer, ErrorList)
-
-    def ExportSubPagesToHTML(self, CurrentDirectory, CurrentPage, MarkdownParser, HTMLExportRenderer, ErrorList):
-        CurrentPageTitle = str(CurrentPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(CurrentPage["Title"])
-        CurrentPageDirectory = os.path.join(CurrentDirectory, CurrentPageTitle)
-        for SubPage in CurrentPage["SubPages"]:
-            if not os.path.isdir(CurrentPageDirectory):
-                os.makedirs(CurrentPageDirectory, exist_ok=True)
-            SubPageTitle = str(SubPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(SubPage["Title"])
-            with open(os.path.join(CurrentPageDirectory, SubPageTitle) + ".html", "w") as ExportFile:
-                MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.Notebook)
-                HTMLExportRenderer.CurrentPage = SubPage
-                HTMLText = MarkdownParser(MarkdownText)
-                try:
+                with open(ExportFileName, "w") as ExportFile:
                     ExportFile.write(HTMLText)
-                except Exception as Error:
-                    ErrorString = SubPageTitle + ":  " + str(Error)
-                    ErrorList.append(ErrorString)
-            self.ExportSubPagesToHTML(CurrentPageDirectory, SubPage, MarkdownParser, HTMLExportRenderer, ErrorList)
+                    self.FlashStatusBar("Exported notebook to:  " + os.path.basename(ExportFileName))
+            except Exception as Error:
+                ExportErrorDialog(str(Error), self)
+        else:
+            self.FlashStatusBar("No file exported.")
+
+    # def ExportHTML(self):
+    #     ExportDirectory = QFileDialog.getExistingDirectory(caption="Export HTML")
+    #     if ExportDirectory != "":
+    #         if len(os.listdir(ExportDirectory)) > 0:
+    #             self.DisplayMessageBox("HTML files must be exported to an empty folder.")
+    #             return
+    #         ErrorList = []
+    #         self.ExportPagesToHTML(ExportDirectory, ErrorList)
+    #         if len(ErrorList) > 0:
+    #             CombinedErrorString = ""
+    #             for ErrorString in ErrorList:
+    #                 CombinedErrorString += ErrorString + "\n\n"
+    #             CombinedErrorString = CombinedErrorString.rstrip()
+    #             ExportErrorDialog(CombinedErrorString, self)
+    #         self.FlashStatusBar("Exported notebook to:  " + ExportDirectory)
+    #
+    # def ExportPagesToHTML(self, ExportDirectory, ErrorList):
+    #     RootPageTitle = str(self.Notebook.RootPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(self.Notebook.RootPage["Title"])
+    #     HTMLExportRenderer = MarkdownRenderers.HTMLExportRenderer(self.Notebook)
+    #     HTMLExportMarkdownParser = mistune.Markdown(renderer=HTMLExportRenderer)
+    #     with open(os.path.join(ExportDirectory, RootPageTitle) + ".html", "w") as ExportFile:
+    #         MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.Notebook.RootPage, self.Notebook)
+    #         HTMLExportRenderer.CurrentPage = self.Notebook.RootPage
+    #         HTMLText = HTMLExportMarkdownParser(MarkdownText)
+    #         try:
+    #             ExportFile.write(HTMLText)
+    #         except Exception as Error:
+    #             ErrorString = RootPageTitle + ":  " + str(Error)
+    #             ErrorList.append(ErrorString)
+    #     self.ExportSubPagesToHTML(ExportDirectory, self.Notebook.RootPage, HTMLExportMarkdownParser, HTMLExportRenderer, ErrorList)
+    #
+    # def ExportSubPagesToHTML(self, CurrentDirectory, CurrentPage, MarkdownParser, HTMLExportRenderer, ErrorList):
+    #     CurrentPageTitle = str(CurrentPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(CurrentPage["Title"])
+    #     CurrentPageDirectory = os.path.join(CurrentDirectory, CurrentPageTitle)
+    #     for SubPage in CurrentPage["SubPages"]:
+    #         if not os.path.isdir(CurrentPageDirectory):
+    #             os.makedirs(CurrentPageDirectory, exist_ok=True)
+    #         SubPageTitle = str(SubPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(SubPage["Title"])
+    #         with open(os.path.join(CurrentPageDirectory, SubPageTitle) + ".html", "w") as ExportFile:
+    #             MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.Notebook)
+    #             HTMLExportRenderer.CurrentPage = SubPage
+    #             HTMLText = MarkdownParser(MarkdownText)
+    #             try:
+    #                 ExportFile.write(HTMLText)
+    #             except Exception as Error:
+    #                 ErrorString = SubPageTitle + ":  " + str(Error)
+    #                 ErrorList.append(ErrorString)
+    #         self.ExportSubPagesToHTML(CurrentPageDirectory, SubPage, MarkdownParser, HTMLExportRenderer, ErrorList)
 
     # Save and Open Methods
     def SaveActionTriggered(self, SaveAs=False):

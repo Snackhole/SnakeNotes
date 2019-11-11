@@ -2,19 +2,19 @@ from PyQt5.QtWidgets import QDialog, QLabel, QTextEdit, QPushButton, QGridLayout
 
 
 class ExportErrorDialog(QDialog):
-    def __init__(self, CombinedErrorString, MainWindow):
+    def __init__(self, ErrorString, MainWindow):
         super().__init__(parent=MainWindow)
 
         # Store Parameters
         self.MainWindow = MainWindow
-        self.CombinedErrorString = CombinedErrorString
+        self.ErrorString = ErrorString
 
         # Label
-        self.Label = QLabel("The following errors were encountered while exporting pages in this notebook:")
+        self.Label = QLabel("The following error was encountered while exporting this notebook:")
 
         # Text
         self.Text = QTextEdit()
-        self.Text.setPlainText(self.CombinedErrorString)
+        self.Text.setPlainText(self.ErrorString)
         self.Text.setReadOnly(True)
 
         # Buttons
@@ -32,14 +32,14 @@ class ExportErrorDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle("Export Errors")
+        self.setWindowTitle("Export Error")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog
         self.exec_()
 
     def Copy(self):
-        QApplication.clipboard().setText(self.CombinedErrorString)
+        QApplication.clipboard().setText(self.ErrorString)
 
     def Done(self):
         self.close()

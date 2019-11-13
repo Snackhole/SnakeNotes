@@ -51,14 +51,17 @@ class HTMLExportRenderer(Renderer):
         super().__init__(Notebook)
 
     def link(self, Link, Title, Text):
+        Link = mistune.escape_link(Link)
+        if Title:
+            Title = mistune.escape(Title, quote=True)
         if self.Notebook.StringIsValidIndexPath(Link):
-            Link = mistune.escape_link(Link)
             if not Title:
                 return "<a href=\"\" onclick=\"return SelectPage(&quot;" + Link + "&quot;);\">" + Text + "</a>"
-            Title = mistune.escape(Title, quote=True)
             return "<a href=\"\" onclick=\"return SelectPage(&quot;" + Link + "&quot;);\" title=\"" + Title + "\">" + Text + "</a>"
         else:
-            return super().link(Link, Title, Text)
+            if not Title:
+                return "<a href=\"" + Link + "\" target=\"_blank\">" + Text + "</a>"
+            return "<a href=\"" + Link + "\" title=\"" + Title + "\" target=\"_blank\">" + Text + "</a>"
 
 
 def ConstructMarkdownStringFromPage(Page, Notebook):

@@ -280,7 +280,7 @@ class TextWidget(QTextEdit):
                 Cursor = self.textCursor()
                 Cursor.setPosition(NewPosition)
                 self.setTextCursor(Cursor)
-            self.VerticallyCenterCursor()
+                self.VerticallyCenterCursor()
 
     def DuplicateLines(self):
         if not self.ReadMode and self.hasFocus():
@@ -293,6 +293,7 @@ class TextWidget(QTextEdit):
             Cursor = self.textCursor()
             Cursor.setPosition(NewPosition)
             self.setTextCursor(Cursor)
+            self.VerticallyCenterCursor()
 
     def DeleteLine(self):
         if not self.ReadMode and self.hasFocus():

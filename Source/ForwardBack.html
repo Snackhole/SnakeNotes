@@ -277,7 +277,15 @@
 	function Back() {
 		if (BackList.length > 0) {
 			BackNavigation = true;
-			console.log("Back");
+			var TargetPageIndexPath = BackList[BackList.length - 1][0];
+			var TargetPageScrollPosition = BackList[BackList.length - 1][1];
+			BackList.length = BackList.length - 1;
+			var PageDisplay = document.getElementById("PageDisplay");
+			var CurrentPageScrollPosition = PageDisplay.scrollTop;
+			var CurrentPageData = [CurrentPage, CurrentPageScrollPosition];
+			ForwardList.push(CurrentPageData);
+			SelectPage(TargetPageIndexPath);
+			PageDisplay.scrollTop = TargetPageScrollPosition;
 			BackNavigation = false;
 		}
 	}
@@ -285,7 +293,15 @@
 	function Forward() {
 		if (ForwardList.length > 0) {
 			BackNavigation = true;
-			console.log("Forward");
+			var TargetPageIndexPath = ForwardList[ForwardList.length - 1][0];
+			var TargetPageScrollPosition = ForwardList[ForwardList.length - 1][1];
+			ForwardList.length = ForwardList.length - 1;
+			var PageDisplay = document.getElementById("PageDisplay");
+			var CurrentPageScrollPosition = PageDisplay.scrollTop;
+			var CurrentPageData = [CurrentPage, CurrentPageScrollPosition];
+			BackList.push(CurrentPageData);
+			SelectPage(TargetPageIndexPath);
+			PageDisplay.scrollTop = TargetPageScrollPosition;
 			BackNavigation = false;
 		}
 	}

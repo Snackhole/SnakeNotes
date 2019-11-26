@@ -886,6 +886,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(self.Notebook.RootPage["IndexPath"], ScrollToLastChild=True)
             self.SearchWidgetInst.RefreshSearch()
             self.UpdateUnsavedChangesFlag(True)
+            self.DisplayMessageBox("Check page links in imported pages carefully!  Some may point to unexpected pages.")
 
     # Window Management Methods
     def WindowSetup(self):

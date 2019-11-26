@@ -692,10 +692,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                     self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
-    def GetLinkData(self):
+    def GetLinkData(self, Page=None):
         LinkData = {}
-        LinkData[id(self.Notebook.RootPage)] = "](" + json.dumps(self.Notebook.RootPage["IndexPath"], indent=None) + ")"
-        self.AddSubPageLinkData(self.Notebook.RootPage, LinkData)
+        Page = Page if Page is not None else self.Notebook.RootPage
+        LinkData[id(Page)] = "](" + json.dumps(Page["IndexPath"], indent=None) + ")"
+        self.AddSubPageLinkData(Page, LinkData)
         return LinkData
 
     def AddSubPageLinkData(self, CurrentPage, LinkData):
@@ -703,17 +704,23 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             LinkData[id(SubPage)] = "](" + json.dumps(SubPage["IndexPath"], indent=None) + ")"
             self.AddSubPageLinkData(SubPage, LinkData)
 
-    def UpdateLinks(self, OldLinkData, NewLinkData):
+    def UpdateLinks(self, OldLinkData, NewLinkData, Page=None):
         ReplaceQueue = []
         for PageID in NewLinkData:
             if PageID in OldLinkData:
                 if NewLinkData[PageID] != OldLinkData[PageID]:
-                    ReplaceStrings = (OldLinkData[PageID], "<<LINK UPDATE TOKEN" + str(PageID) + ">>", NewLinkData[PageID])
+                    ReplaceStrings = (OldLinkData[PageID], "<<LINK UPDATE TOKEN " + str(PageID) + ">>", NewLinkData[PageID])
                     ReplaceQueue.append(ReplaceStrings)
         for ReplaceStrings in ReplaceQueue:
-            self.SearchWidgetInst.ReplaceAllInNotebook(SearchText=ReplaceStrings[0], ReplaceText=ReplaceStrings[1], MatchCase=True, DelayTextUpdate=True)
+            if Page is None:
+                self.SearchWidgetInst.ReplaceAllInNotebook(SearchText=ReplaceStrings[0], ReplaceText=ReplaceStrings[1], MatchCase=True, DelayTextUpdate=True)
+            else:
+                self.SearchWidgetInst.ReplaceAllInPageAndSubPages(Page, SearchText=ReplaceStrings[0], ReplaceText=ReplaceStrings[1], MatchCase=True)
         for ReplaceStrings in ReplaceQueue:
-            self.SearchWidgetInst.ReplaceAllInNotebook(SearchText=ReplaceStrings[1], ReplaceText=ReplaceStrings[2], MatchCase=True, DelayTextUpdate=True)
+            if Page is None:
+                self.SearchWidgetInst.ReplaceAllInNotebook(SearchText=ReplaceStrings[1], ReplaceText=ReplaceStrings[2], MatchCase=True, DelayTextUpdate=True)
+            else:
+                self.SearchWidgetInst.ReplaceAllInPageAndSubPages(Page, SearchText=ReplaceStrings[1], ReplaceText=ReplaceStrings[2], MatchCase=True)
 
     def ImageManager(self):
         if not self.TextWidgetInst.ReadMode:
@@ -871,18 +878,14 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def ImportPage(self):
         ImportedPage = self.Open(None, RespectUnsavedChanges=False, AlternateFileDescription="Page", AlternateFileExtension=".ntbkpg", ImportMode=True)
         if ImportedPage is not None:
+            OldLinkData = self.GetLinkData(ImportedPage)
             self.Notebook.AddSubPage(PageToAdd=ImportedPage)
-            self.UpdateImportedPageLinks(ImportedPage, len(self.Notebook.RootPage["SubPages"]) - 1)
+            NewLinkData = self.GetLinkData(ImportedPage)
+            self.UpdateLinks(OldLinkData, NewLinkData, ImportedPage)
             self.NotebookDisplayWidgetInst.FillFromRootPage()
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(self.Notebook.RootPage["IndexPath"], ScrollToLastChild=True)
             self.SearchWidgetInst.RefreshSearch()
             self.UpdateUnsavedChangesFlag(True)
-
-    def UpdateImportedPageLinks(self, ImportedPage, ImportedPageIndex):
-        ImportedPage["Content"] = ImportedPage["Content"].replace("]([0,", "]([0, " + str(ImportedPageIndex) + ",")
-        print(ImportedPage["Content"])
-        for SubPage in ImportedPage["SubPages"]:
-            self.UpdateImportedPageLinks(SubPage, ImportedPageIndex)
 
     # Window Management Methods
     def WindowSetup(self):

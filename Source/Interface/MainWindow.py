@@ -3,13 +3,12 @@ import os
 
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QFileDialog, QAction, QSplitter, QApplication
+from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QAction, QSplitter, QApplication
 
 from Core.MarkdownRenderers import ConstructHTMLExportString
 from Core.Notebook import Notebook
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
-from Interface.Dialogs.ExportErrorDialog import ExportErrorDialog
 from Interface.Dialogs.FavoritesDialog import FavoritesDialog
 from Interface.Dialogs.ImageManagerDialog import ImageManagerDialog
 from Interface.Dialogs.NewPageDialog import NewPageDialog

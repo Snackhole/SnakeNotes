@@ -9,6 +9,15 @@ class Renderer(mistune.Renderer):
         super().__init__()
         self.Notebook = Notebook
 
+    def link(self, Link, Title, Text):
+        Link = mistune.escape_link(Link)
+        if Link.startswith("[0,") and not self.Notebook.StringIsValidIndexPath(Link):
+            return Text + " (LINKED PAGE NOT FOUND)"
+        if not Title:
+            return "<a href=\"" + Link + "\">" + Text + "</a>"
+        Title = mistune.escape(Title, quote=True)
+        return "<a href=\"" + Link + "\" title=\"" + Title + "\">" + Text + "</a>"
+
     def strikethrough(self, Text):
         return "<s>" + Text + "</s>"
 
@@ -52,9 +61,12 @@ class HTMLExportRenderer(Renderer):
 
     def link(self, Link, Title, Text):
         Link = mistune.escape_link(Link)
+        ValidIndexPath = self.Notebook.StringIsValidIndexPath(Link)
+        if Link.startswith("[0,") and not ValidIndexPath:
+            return Text + " (LINKED PAGE NOT FOUND)"
         if Title:
             Title = mistune.escape(Title, quote=True)
-        if self.Notebook.StringIsValidIndexPath(Link):
+        if ValidIndexPath:
             if not Title:
                 return "<a href=\"\" onclick=\"return SelectPage(&quot;" + Link + "&quot;);\">" + Text + "</a>"
             return "<a href=\"\" onclick=\"return SelectPage(&quot;" + Link + "&quot;);\" title=\"" + Title + "\">" + Text + "</a>"

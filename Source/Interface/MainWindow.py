@@ -180,6 +180,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         self.ImportPageAction = QAction("Import Page File")
         self.ImportPageAction.triggered.connect(self.ImportPage)
+        self.ToggleReadModeActionsList.append(self.ImportPageAction)
 
         self.ExitAction = QAction("Exit")
         self.ExitAction.setShortcut("Ctrl+Q")

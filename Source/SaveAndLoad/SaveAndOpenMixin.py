@@ -11,38 +11,45 @@ class SaveAndOpenMixin:
         self.UnsavedChanges = False
         self.CurrentOpenFileName = ""
 
-    def Save(self, ObjectToSerialize, SaveAs=False, AlternateFileDescription=None, AlternateFileExtension=None):
+    def Save(self, ObjectToSave, SaveAs=False, AlternateFileDescription=None, AlternateFileExtension=None, SkipSerialization=False, ExportMode=False):
         from Interface.MainWindow import MainWindow
         assert isinstance(self, MainWindow)
-        Caption = "Save " + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
+        ActionString = "Save " if not ExportMode else "Export "
+        ActionDoneString = "saved" if not ExportMode else "exported"
+        Caption = ActionString + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
         Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + (self.FileExtension if AlternateFileExtension is None else AlternateFileExtension) + ")"
         SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs else QFileDialog.getSaveFileName(caption=Caption, filter=Filter)[0]
         if SaveFileName != "":
-            JSONString = self.JSONSerializer.SerializeDataToJSONString(ObjectToSerialize)
+            SaveString = self.JSONSerializer.SerializeDataToJSONString(ObjectToSave) if not SkipSerialization else ObjectToSave
             with open(SaveFileName, "w") as SaveFile:
-                SaveFile.write(JSONString)
-            self.CurrentOpenFileName = SaveFileName
+                SaveFile.write(SaveString)
             SaveFileNameShort = os.path.basename(SaveFileName)
-            self.FlashStatusBar("File saved as:  " + SaveFileNameShort)
-            self.UnsavedChanges = False
+            self.FlashStatusBar("File " + ActionDoneString + " as:  " + SaveFileNameShort)
+            if not ExportMode:
+                self.CurrentOpenFileName = SaveFileName
+                self.UnsavedChanges = False
             return True
         else:
-            self.FlashStatusBar("No file saved.")
+            self.FlashStatusBar("No file " + ActionDoneString + ".")
             return False
 
-    def Open(self, ObjectToSerialize, FilePath=None, RespectUnsavedChanges=True, AlternateFileDescription=None, AlternateFileExtension=None):
+    def Open(self, ObjectToSave, FilePath=None, RespectUnsavedChanges=True, AlternateFileDescription=None, AlternateFileExtension=None, ImportMode=False):
         from Interface.MainWindow import MainWindow
         assert isinstance(self, MainWindow)
+        ActionString = "Open " if not ImportMode else "Import "
+        ActionInProgressString = "opening" if not ImportMode else "importing"
+        ActionDoneString = "opened" if not ImportMode else "imported"
+        ActionDoneStringCapitalized = "Opened" if not ImportMode else "Imported"
         if self.UnsavedChanges and RespectUnsavedChanges:
-            SavePrompt = self.DisplayMessageBox("Save unsaved work before opening?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
+            SavePrompt = self.DisplayMessageBox("Save unsaved work before " + ActionInProgressString + "?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
             if SavePrompt == QMessageBox.Yes:
-                if not self.Save(ObjectToSerialize):
+                if not self.Save(ObjectToSave):
                     return None
             elif SavePrompt == QMessageBox.No:
                 pass
             elif SavePrompt == QMessageBox.Cancel:
                 return None
-        Caption = "Open " + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
+        Caption = ActionString + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
         Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + (self.FileExtension if AlternateFileExtension is None else AlternateFileExtension) + ")"
         OpenFileName = FilePath if FilePath is not None else QFileDialog.getOpenFileName(caption=Caption, filter=Filter)[0]
         if OpenFileName != "":
@@ -52,23 +59,24 @@ class SaveAndOpenMixin:
             try:
                 Data = self.JSONSerializer.DeserializeDataFromJSONString(JSONString)
             except KeyError:
-                self.DisplayMessageBox("There was an error opening " + OpenFileNameShort + ".")
+                self.DisplayMessageBox("There was an error " + ActionInProgressString + " " + OpenFileNameShort + ".")
                 return None
-            self.CurrentOpenFileName = OpenFileName
-            self.FlashStatusBar("Opened file:  " + OpenFileNameShort)
-            self.UnsavedChanges = False
+            self.FlashStatusBar(ActionDoneStringCapitalized + " file:  " + OpenFileNameShort)
+            if not ImportMode:
+                self.CurrentOpenFileName = OpenFileName
+                self.UnsavedChanges = False
             return Data
         else:
-            self.FlashStatusBar("No file opened.")
+            self.FlashStatusBar("No file " + ActionDoneString + ".")
             return None
 
-    def New(self, ObjectToSerialize, RespectUnsavedChanges=True):
+    def New(self, ObjectToSave, RespectUnsavedChanges=True):
         from Interface.MainWindow import MainWindow
         assert isinstance(self, MainWindow)
         if self.UnsavedChanges and RespectUnsavedChanges:
             SavePrompt = self.DisplayMessageBox("Save unsaved work before starting a new file?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
             if SavePrompt == QMessageBox.Yes:
-                if not self.Save(ObjectToSerialize):
+                if not self.Save(ObjectToSave):
                     return False
             elif SavePrompt == QMessageBox.No:
                 pass

@@ -796,26 +796,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if "HorizontalSplit" in DisplaySettings:
             self.NotebookAndTextSplitter.setSizes(DisplaySettings["HorizontalSplit"])
 
-    # Import and Export Methods
-    def ExportHTML(self):
-        ExportFileName = QFileDialog.getSaveFileName(caption="Export HTML", filter="HTML file (*.html)")[0]
-        if ExportFileName != "":
-            HTMLText = ConstructHTMLExportString(self.Notebook)
-            try:
-                with open(ExportFileName, "w") as ExportFile:
-                    ExportFile.write(HTMLText)
-                    self.FlashStatusBar("Exported notebook to:  " + os.path.basename(ExportFileName))
-            except Exception as Error:
-                ExportErrorDialog(str(Error), self)
-        else:
-            self.FlashStatusBar("No file exported.")
-
-    def  ImportPage(self):
-        pass
-
-    def ExportPage(self):
-        pass
-
     # Save and Open Methods
     def SaveActionTriggered(self, SaveAs=False):
         if self.Save(self.Notebook, SaveAs=SaveAs):
@@ -879,6 +859,30 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def UpdateUnsavedChangesFlag(self, UnsavedChanges):
         self.UnsavedChanges = UnsavedChanges
         self.UpdateWindowTitle()
+
+    # Import and Export Methods
+    def ExportHTML(self):
+        HTMLText = ConstructHTMLExportString(self.Notebook)
+        self.Save(HTMLText, SaveAs=True, AlternateFileDescription="HTML", AlternateFileExtension=".html", SkipSerialization=True, ExportMode=True)
+
+    def ExportPage(self):
+        self.Save(self.TextWidgetInst.CurrentPage, SaveAs=True, AlternateFileDescription="Page", AlternateFileExtension=".ntbkpg", ExportMode=True)
+
+    def ImportPage(self):
+        ImportedPage = self.Open(None, RespectUnsavedChanges=False, AlternateFileDescription="Page", AlternateFileExtension=".ntbkpg", ImportMode=True)
+        if ImportedPage is not None:
+            self.Notebook.AddSubPage(PageToAdd=ImportedPage)
+            self.UpdateImportedPageLinks(ImportedPage, len(self.Notebook.RootPage["SubPages"]) - 1)
+            self.NotebookDisplayWidgetInst.FillFromRootPage()
+            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(self.Notebook.RootPage["IndexPath"], ScrollToLastChild=True)
+            self.SearchWidgetInst.RefreshSearch()
+            self.UpdateUnsavedChangesFlag(True)
+
+    def UpdateImportedPageLinks(self, ImportedPage, ImportedPageIndex):
+        ImportedPage["Content"] = ImportedPage["Content"].replace("]([0,", "]([0, " + str(ImportedPageIndex) + ",")
+        print(ImportedPage["Content"])
+        for SubPage in ImportedPage["SubPages"]:
+            self.UpdateImportedPageLinks(SubPage, ImportedPageIndex)
 
     # Window Management Methods
     def WindowSetup(self):

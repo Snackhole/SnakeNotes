@@ -172,6 +172,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SaveAsAction.setShortcut("Ctrl+Shift+S")
         self.SaveAsAction.triggered.connect(lambda: self.SaveActionTriggered(SaveAs=True))
 
+        self.ExportHTMLAction = QAction("Export HTML File")
+        self.ExportHTMLAction.triggered.connect(self.ExportHTML)
+
+        self.ExportPageAction = QAction("Export Page File")
+        self.ExportPageAction.triggered.connect(self.ExportPage)
+
+        self.ImportPageAction = QAction("Import Page File")
+        self.ImportPageAction.triggered.connect(self.ImportPage)
+
         self.ExitAction = QAction("Exit")
         self.ExitAction.setShortcut("Ctrl+Q")
         self.ExitAction.triggered.connect(self.close)
@@ -246,10 +255,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditFooterAction = QAction("Edit Footer")
         self.EditFooterAction.triggered.connect(lambda: self.EditHeaderOrFooter("Footer"))
         self.ToggleReadModeActionsList.append(self.EditFooterAction)
-
-        self.ExportHTMLAction = QAction("Export HTML File")
-        self.ExportHTMLAction.triggered.connect(self.ExportHTML)
-        self.ToggleReadModeActionsList.append(self.ExportHTMLAction)
 
         self.ItalicsAction = QAction(self.ItalicsIcon, "Italics")
         self.ItalicsAction.setShortcut("Ctrl+I")
@@ -397,6 +402,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.FileMenu.addAction(self.SaveAction)
         self.FileMenu.addAction(self.SaveAsAction)
         self.FileMenu.addSeparator()
+        self.FileMenu.addAction(self.ExportHTMLAction)
+        self.FileMenu.addSeparator()
+        self.FileMenu.addAction(self.ExportPageAction)
+        self.FileMenu.addAction(self.ImportPageAction)
+        self.FileMenu.addSeparator()
         self.FileMenu.addAction(self.ExitAction)
 
         self.EditMenu = self.MenuBar.addMenu("Edit")
@@ -462,8 +472,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.EditHeaderAction)
         self.NotebookMenu.addAction(self.EditFooterAction)
-        self.NotebookMenu.addSeparator()
-        self.NotebookMenu.addAction(self.ExportHTMLAction)
 
     def CreateToolBar(self):
         self.ToolBar = self.addToolBar("Actions")
@@ -787,7 +795,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if "HorizontalSplit" in DisplaySettings:
             self.NotebookAndTextSplitter.setSizes(DisplaySettings["HorizontalSplit"])
 
-    # HTML Export Methods
+    # Import and Export Methods
     def ExportHTML(self):
         ExportFileName = QFileDialog.getSaveFileName(caption="Export HTML", filter="HTML file (*.html)")[0]
         if ExportFileName != "":
@@ -801,54 +809,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         else:
             self.FlashStatusBar("No file exported.")
 
-    # def ExportHTML(self):
-    #     ExportDirectory = QFileDialog.getExistingDirectory(caption="Export HTML")
-    #     if ExportDirectory != "":
-    #         if len(os.listdir(ExportDirectory)) > 0:
-    #             self.DisplayMessageBox("HTML files must be exported to an empty folder.")
-    #             return
-    #         ErrorList = []
-    #         self.ExportPagesToHTML(ExportDirectory, ErrorList)
-    #         if len(ErrorList) > 0:
-    #             CombinedErrorString = ""
-    #             for ErrorString in ErrorList:
-    #                 CombinedErrorString += ErrorString + "\n\n"
-    #             CombinedErrorString = CombinedErrorString.rstrip()
-    #             ExportErrorDialog(CombinedErrorString, self)
-    #         self.FlashStatusBar("Exported notebook to:  " + ExportDirectory)
-    #
-    # def ExportPagesToHTML(self, ExportDirectory, ErrorList):
-    #     RootPageTitle = str(self.Notebook.RootPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(self.Notebook.RootPage["Title"])
-    #     HTMLExportRenderer = MarkdownRenderers.HTMLExportRenderer(self.Notebook)
-    #     HTMLExportMarkdownParser = mistune.Markdown(renderer=HTMLExportRenderer)
-    #     with open(os.path.join(ExportDirectory, RootPageTitle) + ".html", "w") as ExportFile:
-    #         MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.Notebook.RootPage, self.Notebook)
-    #         HTMLExportRenderer.CurrentPage = self.Notebook.RootPage
-    #         HTMLText = HTMLExportMarkdownParser(MarkdownText)
-    #         try:
-    #             ExportFile.write(HTMLText)
-    #         except Exception as Error:
-    #             ErrorString = RootPageTitle + ":  " + str(Error)
-    #             ErrorList.append(ErrorString)
-    #     self.ExportSubPagesToHTML(ExportDirectory, self.Notebook.RootPage, HTMLExportMarkdownParser, HTMLExportRenderer, ErrorList)
-    #
-    # def ExportSubPagesToHTML(self, CurrentDirectory, CurrentPage, MarkdownParser, HTMLExportRenderer, ErrorList):
-    #     CurrentPageTitle = str(CurrentPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(CurrentPage["Title"])
-    #     CurrentPageDirectory = os.path.join(CurrentDirectory, CurrentPageTitle)
-    #     for SubPage in CurrentPage["SubPages"]:
-    #         if not os.path.isdir(CurrentPageDirectory):
-    #             os.makedirs(CurrentPageDirectory, exist_ok=True)
-    #         SubPageTitle = str(SubPage["IndexPath"][-1]) + " - " + Utility.GetSafeFileNameFromPageTitle(SubPage["Title"])
-    #         with open(os.path.join(CurrentPageDirectory, SubPageTitle) + ".html", "w") as ExportFile:
-    #             MarkdownText = MarkdownRenderers.ConstructMarkdownStringFromPage(SubPage, self.Notebook)
-    #             HTMLExportRenderer.CurrentPage = SubPage
-    #             HTMLText = MarkdownParser(MarkdownText)
-    #             try:
-    #                 ExportFile.write(HTMLText)
-    #             except Exception as Error:
-    #                 ErrorString = SubPageTitle + ":  " + str(Error)
-    #                 ErrorList.append(ErrorString)
-    #         self.ExportSubPagesToHTML(CurrentPageDirectory, SubPage, MarkdownParser, HTMLExportRenderer, ErrorList)
+    def  ImportPage(self):
+        pass
+
+    def ExportPage(self):
+        pass
 
     # Save and Open Methods
     def SaveActionTriggered(self, SaveAs=False):

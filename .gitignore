@@ -156,7 +156,7 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-# SerpentNotes Runtime Files
+# SerpentNotes Runtime Files and Compiled Versions
 Favorites.cfg
 DisplaySettings.cfg
 Versions/

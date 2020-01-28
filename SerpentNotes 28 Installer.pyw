@@ -67,7 +67,7 @@ class InstallerWindow(QWidget):
         try:
             for File in os.listdir(InstallLocation):
                 FilePath = os.path.join(InstallLocation, File)
-                if os.path.isfile(FilePath) and File != "Favorites.cfg" and File != "DisplaySettings.cfg":
+                if os.path.isfile(FilePath) and File != "Favorites.cfg" and File != "DisplaySettings.cfg" and File != "LastOpenedDirectory.cfg":
                     os.unlink(FilePath)
                 elif os.path.isdir(FilePath):
                     shutil.rmtree(FilePath)

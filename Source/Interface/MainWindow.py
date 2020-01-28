@@ -860,6 +860,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             DisplaySettings["HorizontalSplit"] = self.NotebookAndTextSplitter.sizes()
             with open("DisplaySettings.cfg", "w") as ConfigFile:
                 ConfigFile.write(json.dumps(DisplaySettings, indent=2))
+            self.SaveLastOpenedDirectory()
             event.accept()
 
     def UpdateUnsavedChangesFlag(self, UnsavedChanges):

@@ -10,6 +10,10 @@ class SaveAndOpenMixin:
         # Variables
         self.UnsavedChanges = False
         self.CurrentOpenFileName = ""
+        self.LastOpenedDirectory = None
+
+        # Load from Config
+        self.LoadLastOpenedDirectory()
 
     def Save(self, ObjectToSave, SaveAs=False, AlternateFileDescription=None, AlternateFileExtension=None, SkipSerialization=False, ExportMode=False):
         from Interface.MainWindow import MainWindow
@@ -18,12 +22,13 @@ class SaveAndOpenMixin:
         ActionDoneString = "saved" if not ExportMode else "exported"
         Caption = ActionString + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
         Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + (self.FileExtension if AlternateFileExtension is None else AlternateFileExtension) + ")"
-        SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs else QFileDialog.getSaveFileName(caption=Caption, filter=Filter)[0]
+        SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs else QFileDialog.getSaveFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
         if SaveFileName != "":
             SaveString = self.JSONSerializer.SerializeDataToJSONString(ObjectToSave) if not SkipSerialization else ObjectToSave
             with open(SaveFileName, "w") as SaveFile:
                 SaveFile.write(SaveString)
             SaveFileNameShort = os.path.basename(SaveFileName)
+            self.LastOpenedDirectory = os.path.dirname(SaveFileName)
             self.FlashStatusBar("File " + ActionDoneString + " as:  " + SaveFileNameShort)
             if not ExportMode:
                 self.CurrentOpenFileName = SaveFileName
@@ -51,7 +56,7 @@ class SaveAndOpenMixin:
                 return None
         Caption = ActionString + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
         Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + (self.FileExtension if AlternateFileExtension is None else AlternateFileExtension) + ")"
-        OpenFileName = FilePath if FilePath is not None else QFileDialog.getOpenFileName(caption=Caption, filter=Filter)[0]
+        OpenFileName = FilePath if FilePath is not None else QFileDialog.getOpenFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
         if OpenFileName != "":
             with open(OpenFileName, "r") as LoadFile:
                 JSONString = LoadFile.read()
@@ -61,6 +66,7 @@ class SaveAndOpenMixin:
             except KeyError:
                 self.DisplayMessageBox("There was an error " + ActionInProgressString + " " + OpenFileNameShort + ".")
                 return None
+            self.LastOpenedDirectory = os.path.dirname(OpenFileName)
             self.FlashStatusBar(ActionDoneStringCapitalized + " file:  " + OpenFileNameShort)
             if not ImportMode:
                 self.CurrentOpenFileName = OpenFileName
@@ -93,13 +99,30 @@ class SaveAndOpenMixin:
         if self.UnsavedChanges:
             SavePrompt = self.DisplayMessageBox("There are unsaved changes.  Close anyway?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No))
             if SavePrompt == QMessageBox.Yes:
+                self.SaveLastOpenedDirectory()
                 event.accept()
             elif SavePrompt == QMessageBox.No:
                 event.ignore()
         else:
+            self.SaveLastOpenedDirectory()
             event.accept()
 
     def SetUpSaveAndOpen(self, FileExtension, FileDescription, ObjectClasses):
         self.FileExtension = FileExtension
         self.FileDescription = FileDescription
         self.JSONSerializer = JSONSerializer(ObjectClasses)
+
+    def LoadLastOpenedDirectory(self):
+        FileSavingConfig = "LastOpenedDirectory.cfg"
+        if os.path.isfile(FileSavingConfig):
+            with open(FileSavingConfig, "r") as OpenedConfig:
+                LastOpenedDirectory = OpenedConfig.read()
+                if os.path.isdir(LastOpenedDirectory):
+                    self.LastOpenedDirectory = LastOpenedDirectory
+
+    def SaveLastOpenedDirectory(self):
+        FileSavingConfig = "LastOpenedDirectory.cfg"
+        if type(self.LastOpenedDirectory) == str:
+            if os.path.isdir(self.LastOpenedDirectory):
+                with open(FileSavingConfig, "w") as OpenedConfig:
+                    OpenedConfig.write(self.LastOpenedDirectory)

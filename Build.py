@@ -3,6 +3,7 @@ import shutil
 
 from PyInstaller import __main__ as PyInstall
 
+# Built with Python 3.6.3 and dependencies in requirements.txt
 
 def Build():
     # Version String

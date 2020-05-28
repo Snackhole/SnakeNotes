@@ -3,10 +3,10 @@ future==0.18.2
 macholib==1.14
 mistune==0.8.4
 pefile==2019.4.18
-PyInstaller==3.4
-PyQt5==5.11.3
-PyQt5-sip==4.19.19
-PyQt5-stubs==5.11.3.3
-pywin32==223
+PyInstaller==3.6
+PyQt5==5.14.2
+PyQt5-sip==12.7.2
+PyQt5-stubs==5.14.2.2
+pywin32==227
 pywin32-ctypes==0.2.0
 winshell==0.6

@@ -1,3 +1,8 @@
+# Build Variables
+Version = "30"
+AppName = "SerpentNotes"
+VersionedAppName = AppName + " " + Version
+
 # import os
 # import shutil
 #

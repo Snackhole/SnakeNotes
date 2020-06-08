@@ -1,4 +1,5 @@
 import os
+import platform
 import shutil
 import zipapp
 
@@ -7,16 +8,19 @@ Version = "30"
 AppName = "SerpentNotes"
 VersionedAppName = AppName + " " + Version
 
-CodeFiles = ["Core", "Interface", "SaveAndLoad", "Build.py", "SerpentNotes.py"]
-AssetFiles = ["Assets"]
-
-ExecutableZipName = AppName + ".pyzw"
-Interpreter = "python3"
-Main = AppName + ":StartApp"
-
 
 def Build():
     # Additional Build Variables
+    OS = platform.system()
+    CodeFiles = ["Core", "Interface", "SaveAndLoad", "Build.py", "SerpentNotes.py"]
+    AssetFiles = ["Assets"]
+    if OS == "Linux":
+        AssetFiles.append("CreateGNOMEDesktopFile.py")
+
+    ExecutableZipName = AppName + ".pyzw"
+    Interpreter = "python3"
+    Main = AppName + ":StartApp"
+
     BuildFolder = "BUILD - " + VersionedAppName
 
     # Build Functions
@@ -47,7 +51,14 @@ def Build():
     print("Executable archive moved to build folder.")
 
     # Prompt to Install Dependencies
-    ProceedPrompt = "\n---\nInstall dependencies to build folder (" + BuildFolder + ") using a command prompt:\n\n    python -m pip install -r \"" + os.getcwd() + "\\requirements.txt\" --target \"" + os.getcwd() + "\\" + BuildFolder + "\"\n\nOnce all dependencies are installed, input \"PROCEED\" to continue with build or \"CANCEL\" to cancel and clean up build files:\n---\n"
+    CurrentWorkingDirectory = os.getcwd()
+    if OS == "Linux":
+        CommandPrompt = "pip3 install -r \"" + CurrentWorkingDirectory + "/requirements.txt\" --target \"" + CurrentWorkingDirectory + "/" + BuildFolder + "\""
+    elif OS == "Windows":
+        CommandPrompt = "python -m pip install -r \"" + CurrentWorkingDirectory + "\\requirements.txt\" --target \"" + CurrentWorkingDirectory + "\\" + BuildFolder + "\""
+    else:
+        CommandPrompt = "OS unsupported; unknown command to install dependencies."
+    ProceedPrompt = "\n---\nInstall dependencies to build folder (" + BuildFolder + ") using a command prompt:\n\n    " + CommandPrompt + "\n\nOnce all dependencies are installed, input \"PROCEED\" to continue with build or \"CANCEL\" to cancel and clean up build files:\n---\n"
     ProceedResponse = input(ProceedPrompt)
     if ProceedResponse == "PROCEED":
         pass
@@ -59,7 +70,7 @@ def Build():
         return
 
     # Zip Build
-    shutil.make_archive(VersionedAppName, "zip", BuildFolder)
+    shutil.make_archive(VersionedAppName + " - " + OS, "zip", BuildFolder)
     print("Build zipped.")
 
     # Clean Up

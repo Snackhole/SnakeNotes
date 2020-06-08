@@ -4,7 +4,7 @@ import shutil
 import zipapp
 
 # Build Variables
-Version = "30"
+Version = "31"
 AppName = "SerpentNotes"
 VersionedAppName = AppName + " " + Version
 

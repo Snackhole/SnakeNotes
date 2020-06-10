@@ -10,14 +10,14 @@ if sys.path[0] != AbsoluteDirectoryPath:
 from PyQt5.QtWidgets import QApplication
 
 from Interface.MainWindow import MainWindow
-from Build import VersionedAppName
+from Build import BuildVariables
 
 
 def StartApp():
     AppInst = QApplication(sys.argv)
 
     # Main Window Interface
-    ScriptName = VersionedAppName
+    ScriptName = BuildVariables["VersionedAppName"]
     MainWindowInst = MainWindow(ScriptName)
 
     # Enter Main Loop

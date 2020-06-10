@@ -22,11 +22,11 @@ from SaveAndLoad.SaveAndOpenMixin import SaveAndOpenMixin
 class MainWindow(QMainWindow, SaveAndOpenMixin):
     # Initialization Methods
     def __init__(self, ScriptName, AbsoluteDirectoryPath):
-        super().__init__()
-
         # Store Parameters
         self.ScriptName = ScriptName
         self.AbsoluteDirectoryPath = AbsoluteDirectoryPath
+
+        super().__init__()
 
         # Variables
         self.CurrentZoomLevel = 0

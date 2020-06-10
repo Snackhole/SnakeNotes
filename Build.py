@@ -42,7 +42,7 @@ def Build():
     if BuildVariables["OS"] == "Windows":
         BuildVariables["CommandPrompt"] = "python -m pip install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "\\requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "\\" + BuildVariables["BuildFolder"] + "\""
     # Linux-Specific Build Variables
-    elif BuildVariables["OS"] == "Linux":
+    if BuildVariables["OS"] == "Linux":
         BuildVariables["CommandPrompt"] = "pip3 install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "/requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "/" + BuildVariables["BuildFolder"] + "\""
         BuildVariables["AssetFiles"].append("CreateGNOMEDesktopFile.py")
 

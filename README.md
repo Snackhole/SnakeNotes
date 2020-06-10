@@ -14,29 +14,24 @@ A shortcut to SerpentNotes can be created on Windows by right-clicking on Serpen
 ### Linux
 On Linux, SerpentNotes has only been built and tested for Ubuntu 20.04.  It probably runs just fine on many other distros, but you're on your own as far as resolving any problems or differences.
 
-It is generally assumed that you already have Python 3 installed as part of your distro.  If your distro has 3.8, you should be fine; otherwise, you may or may not need to install 3.8.  Either way, you will likely still need to resolve some dependencies before running the app.
+It is generally assumed that you already have Python 3 installed as part of your distro.  If your distro has 3.8, you should be fine; otherwise, you may or may not need to install 3.8.
 
-First, install pip if you don't already have it:
+First, download the .zip file of the latest Linux release from this repository, and unzip it wherever you like (probably easiest somewhere in your Home).  To run the app, open a terminal in the app's directory and use the following command:
 
-    sudo apt install python3-pip
+```
+python3 SerpentNotes.pyzw
+```
 
-Then, install PyQT5 in both pip and APT:
+However, for convenience, consider running `python3 CreateGNOMEDesktopFile.py` (also in the app's directory; it will not work properly with any other working directory).  This will generate a .desktop file, which you should then copy to `usr/share/applications`  with `sudo cp SerpentNotes.desktop /usr/share/applications`.  Now SerpentNotes should show up along with your other apps in the GNOME desktop menus.
 
-    pip3 install pyqt5
-    sudo apt install python3-pyqt5
-
-Now, download the .zip file of the latest Linux release from this repository, and unzip it wherever you like.  To run the app, open a terminal in the app's directory and use the following command:
-
-    python3 SerpentNotes.pyzw
-
-However, for convenience, consider running `python3 CreateGNOMEDesktopFile.py`.  This will generate a .desktop file, which you should then copy to `usr/share/applications`  with `sudo cp SerpentNotes.desktop /usr/share/applications`.  Now SerpentNotes should show up along with your other apps in the GNOME desktop menus.
+If SerpentNotes does not run at first, you might need to resolve some dependencies.  First, try installing PyQT5 with `sudo apt install python3-pyqt5`; if this resolves the issue, you might even be able to uninstall it with `sudo apt remove python3-pyqt5` and still run SerpentNotes.  If installing PyQT5 through APT doesn't work, try installing it through pip; if you don't have pip already, use `sudo apt install python3-pip`, then run `pip3 install pyqt5`.  Other issues have not yet been encountered and will require you to do some research and troubleshooting to resolve on your system.
 
 ## Updates
 Updating SerpentNotes is as simple as deleting all files wherever you installed it *except* .cfg files, and then extracting the contents of the latest release to the same folder.  Any shortcuts in place should resolve without issue to the updated version.
 
-The .cfg files should be left as they store settings and contexts between uses of the app.
+The .cfg files should be left in place as they store settings and contexts between uses of the app.
 
 ## Uninstallation
-Uninstalling SerpentNotes is as simple as deleting the directory you extracted it to, along with any shortcuts you created.
+Uninstalling SerpentNotes itself only requires deleting the directory you extracted it to, along with any shortcuts you created.
 
 If you need to uninstall Python 3.8 or, on Linux, PyQT5, consult their documentation.

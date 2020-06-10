@@ -113,7 +113,9 @@ class SaveAndOpenMixin:
         self.JSONSerializer = JSONSerializer(ObjectClasses)
 
     def LoadLastOpenedDirectory(self):
-        FileSavingConfig = "LastOpenedDirectory.cfg"
+        from Interface.MainWindow import MainWindow
+        assert isinstance(self, MainWindow)
+        FileSavingConfig = self.GetResourcePath("LastOpenedDirectory.cfg")
         if os.path.isfile(FileSavingConfig):
             with open(FileSavingConfig, "r") as OpenedConfig:
                 LastOpenedDirectory = OpenedConfig.read()
@@ -121,7 +123,9 @@ class SaveAndOpenMixin:
                     self.LastOpenedDirectory = LastOpenedDirectory
 
     def SaveLastOpenedDirectory(self):
-        FileSavingConfig = "LastOpenedDirectory.cfg"
+        from Interface.MainWindow import MainWindow
+        assert isinstance(self, MainWindow)
+        FileSavingConfig = self.GetResourcePath("LastOpenedDirectory.cfg")
         if type(self.LastOpenedDirectory) == str:
             if os.path.isdir(self.LastOpenedDirectory):
                 with open(FileSavingConfig, "w") as OpenedConfig:

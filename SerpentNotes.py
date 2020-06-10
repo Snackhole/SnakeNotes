@@ -18,7 +18,7 @@ def StartApp():
 
     # Main Window Interface
     ScriptName = BuildVariables["VersionedAppName"]
-    MainWindowInst = MainWindow(ScriptName)
+    MainWindowInst = MainWindow(ScriptName, AbsoluteDirectoryPath)
 
     # Enter Main Loop
     sys.exit(AppInst.exec_())

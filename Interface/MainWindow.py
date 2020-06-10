@@ -21,11 +21,12 @@ from SaveAndLoad.SaveAndOpenMixin import SaveAndOpenMixin
 
 class MainWindow(QMainWindow, SaveAndOpenMixin):
     # Initialization Methods
-    def __init__(self, ScriptName):
+    def __init__(self, ScriptName, AbsoluteDirectoryPath):
         super().__init__()
 
         # Store Parameters
         self.ScriptName = ScriptName
+        self.AbsoluteDirectoryPath = AbsoluteDirectoryPath
 
         # Variables
         self.CurrentZoomLevel = 0
@@ -38,8 +39,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
 
         # Load Favorites
-        if os.path.isfile("Favorites.cfg"):
-            with open("Favorites.cfg", "r") as ConfigFile:
+        FavoritesFile = self.GetResourcePath("Favorites.cfg")
+        if os.path.isfile(FavoritesFile):
+            with open(FavoritesFile, "r") as ConfigFile:
                 self.FavoritesData = self.JSONSerializer.DeserializeDataFromJSONString(ConfigFile.read())
         else:
             self.FavoritesData = {}
@@ -52,8 +54,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.show()
 
         # Load Display Settings
-        if os.path.isfile("DisplaySettings.cfg"):
-            with open("DisplaySettings.cfg", "r") as ConfigFile:
+        DisplaySettingsFile = self.GetResourcePath("DisplaySettings.cfg")
+        if os.path.isfile(DisplaySettingsFile):
+            with open(DisplaySettingsFile, "r") as ConfigFile:
                 DisplaySettings = json.loads(ConfigFile.read())
                 self.LoadDisplaySettings(DisplaySettings)
 
@@ -123,32 +126,32 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.setTabOrder(self.SearchWidgetInst, self.NotebookDisplayWidgetInst)
 
     def CreateIcons(self):
-        self.WindowIcon = QIcon("Assets/SerpentNotes Icon.png")
-        self.NewPageIcon = QIcon("Assets/SerpentNotes New Page Icon.png")
-        self.DeletePageIcon = QIcon("Assets/SerpentNotes Delete Page Icon.png")
-        self.MovePageUpIcon = QIcon("Assets/SerpentNotes Move Page Up Icon.png")
-        self.MovePageDownIcon = QIcon("Assets/SerpentNotes Move Page Down Icon.png")
-        self.PromotePageIcon = QIcon("Assets/SerpentNotes Promote Page Icon.png")
-        self.DemotePageIcon = QIcon("Assets/SerpentNotes Demote Page Icon.png")
-        self.RenamePageIcon = QIcon("Assets/SerpentNotes Rename Page Icon.png")
-        self.ToggleReadModeIcon = QIcon("Assets/SerpentNotes Toggle Read Mode Icon.png")
-        self.BackIcon = QIcon("Assets/SerpentNotes Back Icon.png")
-        self.ForwardIcon = QIcon("Assets/SerpentNotes Forward Icon.png")
-        self.ItalicsIcon = QIcon("Assets/SerpentNotes Italics Icon.png")
-        self.BoldIcon = QIcon("Assets/SerpentNotes Bold Icon.png")
-        self.StrikethroughIcon = QIcon("Assets/SerpentNotes Strikethrough Icon.png")
-        self.BulletListIcon = QIcon("Assets/SerpentNotes Bullet List Icon.png")
-        self.NumberListIcon = QIcon("Assets/SerpentNotes Number List Icon.png")
-        self.QuoteIcon = QIcon("Assets/SerpentNotes Quote Icon.png")
-        self.InsertLinksIcon = QIcon("Assets/SerpentNotes Insert Link(s) Icon.png")
-        self.InsertExternalLinkIcon = QIcon("Assets/SerpentNotes Insert External Link Icon.png")
-        self.InsertTableIcon = QIcon("Assets/SerpentNotes Insert Table Icon.png")
-        self.InsertImageIcon = QIcon("Assets/SerpentNotes Insert Image Icon.png")
-        self.ZoomOutIcon = QIcon("Assets/SerpentNotes Zoom Out Icon.png")
-        self.ZoomInIcon = QIcon("Assets/SerpentNotes Zoom In Icon.png")
-        self.FavoritesIcon = QIcon("Assets/SerpentNotes Favorites Icon.png")
-        self.SearchIcon = QIcon("Assets/SerpentNotes Search Icon.png")
-        self.ToggleSearchIcon = QIcon("Assets/SerpentNotes Toggle Search Icon.png")
+        self.WindowIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Icon.png"))
+        self.NewPageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes New Page Icon.png"))
+        self.DeletePageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Delete Page Icon.png"))
+        self.MovePageUpIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Move Page Up Icon.png"))
+        self.MovePageDownIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Move Page Down Icon.png"))
+        self.PromotePageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Promote Page Icon.png"))
+        self.DemotePageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Demote Page Icon.png"))
+        self.RenamePageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Rename Page Icon.png"))
+        self.ToggleReadModeIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Toggle Read Mode Icon.png"))
+        self.BackIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Back Icon.png"))
+        self.ForwardIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Forward Icon.png"))
+        self.ItalicsIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Italics Icon.png"))
+        self.BoldIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Bold Icon.png"))
+        self.StrikethroughIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Strikethrough Icon.png"))
+        self.BulletListIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Bullet List Icon.png"))
+        self.NumberListIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Number List Icon.png"))
+        self.QuoteIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Quote Icon.png"))
+        self.InsertLinksIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Insert Link(s) Icon.png"))
+        self.InsertExternalLinkIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Insert External Link Icon.png"))
+        self.InsertTableIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Insert Table Icon.png"))
+        self.InsertImageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Insert Image Icon.png"))
+        self.ZoomOutIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Zoom Out Icon.png"))
+        self.ZoomInIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Zoom In Icon.png"))
+        self.FavoritesIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Favorites Icon.png"))
+        self.SearchIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Search Icon.png"))
+        self.ToggleSearchIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Toggle Search Icon.png"))
 
     def CreateActions(self):
         self.NewAction = QAction("New")
@@ -509,6 +512,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToolBar.addSeparator()
         self.ToolBar.addAction(self.FavoritesAction)
 
+    def GetResourcePath(self, RelativeLocation):
+        return self.AbsoluteDirectoryPath + "/" + RelativeLocation
+
     # Notebook Methods
     def UpdateNotebook(self, Notebook):
         self.Notebook = Notebook
@@ -853,12 +859,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if not Close:
             event.ignore()
         else:
-            with open("Favorites.cfg", "w") as ConfigFile:
+            with open(self.GetResourcePath("Favorites.cfg"), "w") as ConfigFile:
                 ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
             DisplaySettings = {}
             DisplaySettings["CurrentZoomLevel"] = self.CurrentZoomLevel
             DisplaySettings["HorizontalSplit"] = self.NotebookAndTextSplitter.sizes()
-            with open("DisplaySettings.cfg", "w") as ConfigFile:
+            with open(self.GetResourcePath("DisplaySettings.cfg"), "w") as ConfigFile:
                 ConfigFile.write(json.dumps(DisplaySettings, indent=2))
             self.SaveLastOpenedDirectory()
             event.accept()

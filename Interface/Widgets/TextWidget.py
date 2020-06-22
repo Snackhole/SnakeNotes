@@ -59,30 +59,29 @@ class TextWidget(QTextEdit):
         self.setReadOnly(self.ReadMode)
         self.UpdateText()
 
+    # Internal Text and Cursor Methods
     def SelectionSpanWrap(self, WrapPrefix, WrapSuffix):
-        if not self.ReadMode and self.hasFocus():
-            Cursor = self.textCursor()
-            TextToWrap = Cursor.selectedText()
-            if "\u2029" in TextToWrap:
-                return
-            Cursor.beginEditBlock()
-            WrappedText = WrapPrefix + TextToWrap + WrapSuffix
-            self.insertPlainText(WrappedText)
-            for Character in range(len(WrapSuffix)):
-                self.moveCursor(QTextCursor.Left)
-            Cursor.endEditBlock()
+        Cursor = self.textCursor()
+        TextToWrap = Cursor.selectedText()
+        if "\u2029" in TextToWrap:
+            return
+        Cursor.beginEditBlock()
+        WrappedText = WrapPrefix + TextToWrap + WrapSuffix
+        self.insertPlainText(WrappedText)
+        for Character in range(len(WrapSuffix)):
+            self.moveCursor(QTextCursor.Left)
+        Cursor.endEditBlock()
 
     def SingleBlockPrefix(self, Prefix):
-        if not self.ReadMode and self.hasFocus():
-            Cursor = self.textCursor()
-            SelectedText = Cursor.selectedText()
-            if "\u2029" in SelectedText:
-                return
-            Cursor.beginEditBlock()
-            Cursor.movePosition(QTextCursor.StartOfBlock)
-            Cursor.insertText(Prefix)
-            self.MakeCursorVisible()
-            Cursor.endEditBlock()
+        Cursor = self.textCursor()
+        SelectedText = Cursor.selectedText()
+        if "\u2029" in SelectedText:
+            return
+        Cursor.beginEditBlock()
+        Cursor.movePosition(QTextCursor.StartOfBlock)
+        Cursor.insertText(Prefix)
+        self.MakeCursorVisible()
+        Cursor.endEditBlock()
 
     def SelectBlocks(self, Cursor):
         CursorPosition = Cursor.position()
@@ -103,81 +102,165 @@ class TextWidget(QTextEdit):
         Cursor.setPosition(BlockEndPosition, QTextCursor.KeepAnchor)
 
     def MultipleBlockPrefix(self, Prefix):
-        if not self.ReadMode and self.hasFocus():
-            Cursor = self.textCursor()
-            self.SelectBlocks(Cursor)
-            Blocks = Cursor.selectedText().split("\u2029")
-            PrefixedText = ""
+        Cursor = self.textCursor()
+        self.SelectBlocks(Cursor)
+        Blocks = Cursor.selectedText().split("\u2029")
+        PrefixedText = ""
 
-            if Prefix == "1. ":
-                CurrentPrefixInt = 1
-                for Block in Blocks:
-                    if Block != "":
-                        PrefixedText += str(CurrentPrefixInt) + ". " + Block + "\u2029"
-                        CurrentPrefixInt += 1
-                    else:
-                        PrefixedText += Block + "\u2029"
-            else:
-                for Block in Blocks:
-                    PrefixedText += (Prefix if Block != "" else "") + Block + "\u2029"
+        if Prefix == "1. ":
+            CurrentPrefixInt = 1
+            for Block in Blocks:
+                if Block != "":
+                    PrefixedText += str(CurrentPrefixInt) + ". " + Block + "\u2029"
+                    CurrentPrefixInt += 1
+                else:
+                    PrefixedText += Block + "\u2029"
+        else:
+            for Block in Blocks:
+                PrefixedText += (Prefix if Block != "" else "") + Block + "\u2029"
 
-            Cursor.beginEditBlock()
-            Cursor.insertText(PrefixedText[:-1])
-            self.MakeCursorVisible()
-            Cursor.endEditBlock()
+        Cursor.beginEditBlock()
+        Cursor.insertText(PrefixedText[:-1])
+        self.MakeCursorVisible()
+        Cursor.endEditBlock()
 
     def MultipleBlockWrap(self, WrapSymbol):
-        if not self.ReadMode and self.hasFocus():
-            Cursor = self.textCursor()
-            self.SelectBlocks(Cursor)
-            SelectedBlocksText = Cursor.selectedText()
-            WrappedText = WrapSymbol + "\u2029" + SelectedBlocksText + "\u2029" + WrapSymbol
+        Cursor = self.textCursor()
+        self.SelectBlocks(Cursor)
+        SelectedBlocksText = Cursor.selectedText()
+        WrappedText = WrapSymbol + "\u2029" + SelectedBlocksText + "\u2029" + WrapSymbol
 
+        Cursor.beginEditBlock()
+        Cursor.insertText(WrappedText)
+        for Character in range(len(WrapSymbol) + 1):
+            self.moveCursor(QTextCursor.Left)
+        self.MakeCursorVisible()
+        Cursor.endEditBlock()
+
+    def InsertOnBlankLine(self, InsertSymbol):
+        Cursor = self.textCursor()
+        if self.CursorOnBlankLine(Cursor):
             Cursor.beginEditBlock()
-            Cursor.insertText(WrappedText)
-            for Character in range(len(WrapSymbol) + 1):
-                self.moveCursor(QTextCursor.Left)
+            self.insertPlainText(InsertSymbol)
             self.MakeCursorVisible()
             Cursor.endEditBlock()
 
-    def InsertOnBlankLine(self, InsertSymbol):
-        if not self.ReadMode and self.hasFocus():
-            Cursor = self.textCursor()
-            if self.CursorOnBlankLine(Cursor):
-                Cursor.beginEditBlock()
-                self.insertPlainText(InsertSymbol)
-                self.MakeCursorVisible()
-                Cursor.endEditBlock()
+    def MoveLine(self, Delta):
+        if Delta != 0:
+            LineData = self.GetLineData()
+            if (Delta < 0 and LineData[1] > 0) or (Delta > 0 and LineData[1] < len(LineData[0]) - 1):
+                CurrentLine = LineData[0][LineData[1]]
+                TargetIndex = LineData[1] + (-1 if Delta < 0 else 1)
+                TargetLine = LineData[0][TargetIndex]
+                LineData[0][LineData[1]] = TargetLine
+                LineData[0][TargetIndex] = CurrentLine
+                Text = self.GetTextFromLineData(LineData)
+                NewPosition = LineData[2] + ((len(TargetLine) + 1) * (-1 if Delta < 0 else 1))
+                self.setPlainText(Text)
+                Cursor = self.textCursor()
+                Cursor.setPosition(NewPosition)
+                self.setTextCursor(Cursor)
+                self.VerticallyCenterCursor()
 
+    def GetLineData(self):
+        Text = self.toPlainText()
+        Lines = Text.splitlines()
+        if Text.endswith("\n"):
+            Lines.append("")
+        Cursor = self.textCursor()
+        AbsolutePosition = Cursor.position()
+        BlockPosition = Cursor.positionInBlock()
+        LineIndex = 0
+        CurrentPosition = AbsolutePosition
+        for Index in range(len(Lines)):
+            LineLength = len(Lines[Index])
+            if LineLength < CurrentPosition:
+                CurrentPosition -= LineLength + 1
+            else:
+                LineIndex = Index
+                break
+        LineData = (Lines, LineIndex, AbsolutePosition, BlockPosition)
+        return LineData
+
+    def GetTextFromLineData(self, LineData):
+        Text = "\n".join(LineData[0])
+        return Text
+
+    def CursorOnBlankLine(self, Cursor):
+        Cursor.select(QTextCursor.LineUnderCursor)
+        LineText = Cursor.selectedText()
+        return LineText == ""
+
+    def VerticallyCenterCursor(self):
+        CursorVerticalPosition = self.cursorRect().top()
+        ViewportHeight = self.viewport().height()
+        VerticalScrollBar = self.verticalScrollBar()
+        VerticalScrollBar.setValue(VerticalScrollBar.value() + CursorVerticalPosition - (ViewportHeight / 2))
+
+    def MakeCursorVisible(self):
+        QTimer.singleShot(0, self.ensureCursorVisible)
+
+    # Events
+    def insertFromMimeData(self, QMimeData):
+        self.insertPlainText(QMimeData.text())
+
+    def wheelEvent(self, QWheelEvent):
+        if QWheelEvent.modifiers() == QtCore.Qt.ControlModifier:
+            QWheelEvent.accept()
+        else:
+            super().wheelEvent(QWheelEvent)
+
+    def mouseDoubleClickEvent(self, QMouseEvent):
+        Anchor = self.anchorAt(QMouseEvent.pos())
+        if Anchor != "":
+            if self.Notebook.StringIsValidIndexPath(Anchor):
+                self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(Anchor)
+                QMouseEvent.accept()
+            else:
+                webbrowser.open(Anchor)
+        else:
+            super().mouseDoubleClickEvent(QMouseEvent)
+
+    # Action Methods
     def Italics(self):
-        self.SelectionSpanWrap("*", "*")
+        if not self.ReadMode and self.hasFocus():
+            self.SelectionSpanWrap("*", "*")
 
     def Bold(self):
-        self.SelectionSpanWrap("**", "**")
+        if not self.ReadMode and self.hasFocus():
+            self.SelectionSpanWrap("**", "**")
 
     def Strikethrough(self):
-        self.SelectionSpanWrap("~~", "~~")
+        if not self.ReadMode and self.hasFocus():
+            self.SelectionSpanWrap("~~", "~~")
 
     def CodeSpan(self):
-        self.SelectionSpanWrap("`", "`")
+        if not self.ReadMode and self.hasFocus():
+            self.SelectionSpanWrap("`", "`")
 
     def Header(self, Level):
-        self.SingleBlockPrefix(("#" * Level) + " ")
+        if not self.ReadMode and self.hasFocus():
+            self.SingleBlockPrefix(("#" * Level) + " ")
 
     def BulletList(self):
-        self.MultipleBlockPrefix("* ")
+        if not self.ReadMode and self.hasFocus():
+            self.MultipleBlockPrefix("* ")
 
     def NumberList(self):
-        self.MultipleBlockPrefix("1. ")
+        if not self.ReadMode and self.hasFocus():
+            self.MultipleBlockPrefix("1. ")
 
     def Quote(self):
-        self.MultipleBlockPrefix("> ")
+        if not self.ReadMode and self.hasFocus():
+            self.MultipleBlockPrefix("> ")
 
     def CodeBlock(self):
-        self.MultipleBlockWrap("```")
+        if not self.ReadMode and self.hasFocus():
+            self.MultipleBlockWrap("```")
 
     def HorizontalRule(self):
-        self.InsertOnBlankLine("***")
+        if not self.ReadMode and self.hasFocus():
+            self.InsertOnBlankLine("***")
 
     def Footnote(self):
         if not self.ReadMode and self.hasFocus():
@@ -195,9 +278,6 @@ class TextWidget(QTextEdit):
                     self.moveCursor(QTextCursor.End)
                     self.MakeCursorVisible()
                     Cursor.endEditBlock()
-
-    def insertFromMimeData(self, QMimeData):
-        self.insertPlainText(QMimeData.text())
 
     def InsertLinks(self):
         if not self.ReadMode and self.hasFocus():
@@ -237,14 +317,15 @@ class TextWidget(QTextEdit):
                         self.SelectionSpanWrap("[", "](" + json.dumps(TopResultIndexPath, indent=None) + ")")
 
     def InsertTable(self):
-        Cursor = self.textCursor()
-        if self.CursorOnBlankLine(Cursor) and self.hasFocus():
-            TableDimensionsDialogInst = TableDimensionsDialog(self.MainWindow, self)
-            if TableDimensionsDialogInst.ContinueTable:
-                InsertTableDialogInst = InsertTableDialog(TableDimensionsDialogInst.Rows, TableDimensionsDialogInst.Columns, self.MainWindow, self)
-                if InsertTableDialogInst.InsertTable:
-                    self.InsertOnBlankLine(InsertTableDialogInst.TableString)
-                    self.MakeCursorVisible()
+        if not self.ReadMode and self.hasFocus():
+            Cursor = self.textCursor()
+            if self.CursorOnBlankLine(Cursor):
+                TableDimensionsDialogInst = TableDimensionsDialog(self.MainWindow, self)
+                if TableDimensionsDialogInst.ContinueTable:
+                    InsertTableDialogInst = InsertTableDialog(TableDimensionsDialogInst.Rows, TableDimensionsDialogInst.Columns, self.MainWindow, self)
+                    if InsertTableDialogInst.InsertTable:
+                        self.InsertOnBlankLine(InsertTableDialogInst.TableString)
+                        self.MakeCursorVisible()
 
     def InsertImage(self):
         if not self.ReadMode and self.hasFocus():
@@ -260,27 +341,12 @@ class TextWidget(QTextEdit):
                     self.MainWindow.FlashStatusBar("No image inserted.")
 
     def MoveLineUp(self):
-        self.MoveLine(-1)
+        if not self.ReadMode and self.hasFocus():
+            self.MoveLine(-1)
 
     def MoveLineDown(self):
-        self.MoveLine(1)
-
-    def MoveLine(self, Delta):
-        if Delta != 0 and not self.ReadMode and self.hasFocus():
-            LineData = self.GetLineData()
-            if (Delta < 0 and LineData[1] > 0) or (Delta > 0 and LineData[1] < len(LineData[0]) - 1):
-                CurrentLine = LineData[0][LineData[1]]
-                TargetIndex = LineData[1] + (-1 if Delta < 0 else 1)
-                TargetLine = LineData[0][TargetIndex]
-                LineData[0][LineData[1]] = TargetLine
-                LineData[0][TargetIndex] = CurrentLine
-                Text = self.GetTextFromLineData(LineData)
-                NewPosition = LineData[2] + ((len(TargetLine) + 1) * (-1 if Delta < 0 else 1))
-                self.setPlainText(Text)
-                Cursor = self.textCursor()
-                Cursor.setPosition(NewPosition)
-                self.setTextCursor(Cursor)
-                self.VerticallyCenterCursor()
+        if not self.ReadMode and self.hasFocus():
+            self.MoveLine(1)
 
     def DuplicateLines(self):
         if not self.ReadMode and self.hasFocus():
@@ -298,69 +364,16 @@ class TextWidget(QTextEdit):
     def DeleteLine(self):
         if not self.ReadMode and self.hasFocus():
             LineData = self.GetLineData()
-            del LineData[0][LineData[1]]
-            Text = self.GetTextFromLineData(LineData)
-            self.setPlainText(Text)
-            PositionOfLineStart = LineData[2] - LineData[3]
-            if LineData[1] < len(LineData[0]):
-                NewPosition = PositionOfLineStart + len(LineData[0][LineData[1]])
-            else:
-                NewPosition = PositionOfLineStart - 1
-            Cursor = self.textCursor()
-            Cursor.setPosition(NewPosition)
-            self.setTextCursor(Cursor)
-
-    def GetLineData(self):
-        Text = self.toPlainText()
-        Lines = Text.splitlines()
-        if Text.endswith("\n"):
-            Lines.append("")
-        Cursor = self.textCursor()
-        AbsolutePosition = Cursor.position()
-        BlockPosition = Cursor.positionInBlock()
-        LineIndex = 0
-        CurrentPosition = AbsolutePosition
-        for Index in range(len(Lines)):
-            LineLength = len(Lines[Index])
-            if LineLength < CurrentPosition:
-                CurrentPosition -= LineLength + 1
-            else:
-                LineIndex = Index
-                break
-        LineData = (Lines, LineIndex, AbsolutePosition, BlockPosition)
-        return LineData
-
-    def GetTextFromLineData(self, LineData):
-        Text = "\n".join(LineData[0])
-        return Text
-
-    def CursorOnBlankLine(self, Cursor):
-        Cursor.select(QTextCursor.LineUnderCursor)
-        LineText = Cursor.selectedText()
-        return LineText == ""
-
-    def VerticallyCenterCursor(self):
-        CursorVerticalPosition = self.cursorRect().top()
-        ViewportHeight = self.viewport().height()
-        VerticalScrollBar = self.verticalScrollBar()
-        VerticalScrollBar.setValue(VerticalScrollBar.value() + CursorVerticalPosition - (ViewportHeight / 2))
-
-    def wheelEvent(self, QWheelEvent):
-        if QWheelEvent.modifiers() == QtCore.Qt.ControlModifier:
-            QWheelEvent.accept()
-        else:
-            super().wheelEvent(QWheelEvent)
-
-    def mouseDoubleClickEvent(self, QMouseEvent):
-        Anchor = self.anchorAt(QMouseEvent.pos())
-        if Anchor != "":
-            if self.Notebook.StringIsValidIndexPath(Anchor):
-                self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(Anchor)
-                QMouseEvent.accept()
-            else:
-                webbrowser.open(Anchor)
-        else:
-            super().mouseDoubleClickEvent(QMouseEvent)
-
-    def MakeCursorVisible(self):
-        QTimer.singleShot(0, self.ensureCursorVisible)
+            if len(LineData[0]) > 0:
+                del LineData[0][LineData[1]]
+                Text = self.GetTextFromLineData(LineData)
+                self.setPlainText(Text)
+                PositionOfLineStart = LineData[2] - LineData[3]
+                if LineData[1] < len(LineData[0]):
+                    NewPosition = PositionOfLineStart + len(LineData[0][LineData[1]])
+                else:
+                    NewPosition = PositionOfLineStart - 1
+                NewPosition = max(0, NewPosition)
+                Cursor = self.textCursor()
+                Cursor.setPosition(NewPosition)
+                self.setTextCursor(Cursor)

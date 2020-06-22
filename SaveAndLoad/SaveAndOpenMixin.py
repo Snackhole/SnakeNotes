@@ -21,9 +21,12 @@ class SaveAndOpenMixin:
         ActionString = "Save " if not ExportMode else "Export "
         ActionDoneString = "saved" if not ExportMode else "exported"
         Caption = ActionString + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
-        Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + (self.FileExtension if AlternateFileExtension is None else AlternateFileExtension) + ")"
+        Extension = self.FileExtension if AlternateFileExtension is None else AlternateFileExtension
+        Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + Extension + ")"
         SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs else QFileDialog.getSaveFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
         if SaveFileName != "":
+            if not SaveFileName.endswith(Extension):
+                SaveFileName += Extension
             SaveString = self.JSONSerializer.SerializeDataToJSONString(ObjectToSave) if not SkipSerialization else ObjectToSave
             with open(SaveFileName, "w") as SaveFile:
                 SaveFile.write(SaveString)

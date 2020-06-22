@@ -758,10 +758,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.UpdateUnsavedChangesFlag(True)
 
     def ToggleReadMode(self):
+        self.TextWidgetInst.setFocus() if self.TextWidgetInst.ReadMode else self.NotebookDisplayWidgetInst.setFocus()
         self.TextWidgetInst.SetReadMode(not self.TextWidgetInst.ReadMode)
         for Action in self.ToggleReadModeActionsList:
             Action.setEnabled(not self.TextWidgetInst.ReadMode)
-        self.NotebookDisplayWidgetInst.setFocus() if self.TextWidgetInst.ReadMode else self.TextWidgetInst.setFocus()
         self.ClearBackAndForward()
 
     def ZoomOut(self):

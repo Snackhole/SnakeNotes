@@ -55,11 +55,11 @@ class SearchWidget(QFrame):
         self.Layout.addWidget(self.SearchButton, 1, 0)
         self.Layout.addWidget(self.FindInPageButton, 1, 1)
         self.Layout.addWidget(self.MatchCaseCheckBox, 1, 2)
-        self.Layout.addWidget(self.ResultsList, 2, 0, 1, 3)
-        self.Layout.addWidget(self.ReplaceTextLineEdit, 3, 0, 1, 3)
-        self.Layout.addWidget(self.ReplaceButton, 4, 0)
-        self.Layout.addWidget(self.ReplaceAllInPageButton, 4, 1)
-        self.Layout.addWidget(self.ReplaceAllInNotebookButton, 4, 2)
+        self.Layout.addWidget(self.ReplaceTextLineEdit, 2, 0, 1, 3)
+        self.Layout.addWidget(self.ReplaceButton, 3, 0)
+        self.Layout.addWidget(self.ReplaceAllInPageButton, 3, 1)
+        self.Layout.addWidget(self.ReplaceAllInNotebookButton, 3, 2)
+        self.Layout.addWidget(self.ResultsList, 0, 4, 4, 1)
         self.setLayout(self.Layout)
 
         # Start Invisible

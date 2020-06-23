@@ -83,17 +83,17 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SearchWidgetInst = SearchWidget(self.Notebook, self)
 
         # Create and Populate Splitters
-        self.NotebookAndSearchSplitter = QSplitter(Qt.Vertical)
-        self.NotebookAndSearchSplitter.addWidget(self.NotebookDisplayWidgetInst)
-        self.NotebookAndSearchSplitter.addWidget(self.SearchWidgetInst)
         self.NotebookAndTextSplitter = QSplitter(Qt.Horizontal)
-        self.NotebookAndTextSplitter.addWidget(self.NotebookAndSearchSplitter)
+        self.NotebookAndTextSplitter.addWidget(self.NotebookDisplayWidgetInst)
         self.NotebookAndTextSplitter.addWidget(self.TextWidgetInst)
-        self.NotebookAndSearchSplitter.setStretchFactor(0, 1)
-        self.NotebookAndSearchSplitter.setMinimumWidth(274)
-        self.NotebookAndSearchSplitter.setChildrenCollapsible(False)
         self.NotebookAndTextSplitter.setStretchFactor(1, 1)
-        self.setCentralWidget(self.NotebookAndTextSplitter)
+        self.NotebookAndTextSplitter.setChildrenCollapsible(False)
+        self.NotebookAndSearchSplitter = QSplitter(Qt.Vertical)
+        self.NotebookAndSearchSplitter.addWidget(self.NotebookAndTextSplitter)
+        self.NotebookAndSearchSplitter.addWidget(self.SearchWidgetInst)
+        self.NotebookAndSearchSplitter.setStretchFactor(0, 1)
+        self.NotebookAndSearchSplitter.setChildrenCollapsible(False)
+        self.setCentralWidget(self.NotebookAndSearchSplitter)
 
         # Create Actions
         self.CreateActions()

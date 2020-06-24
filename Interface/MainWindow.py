@@ -753,9 +753,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def TextChanged(self):
         if self.TextWidgetInst.DisplayChanging or self.TextWidgetInst.ReadMode:
             return
-        self.TextWidgetInst.CurrentPage["Content"] = self.TextWidgetInst.toPlainText()
-        self.Notebook.SearchIndexUpToDate = False
-        self.UpdateUnsavedChangesFlag(True)
+        CurrentText = self.TextWidgetInst.toPlainText()
+        if CurrentText != self.TextWidgetInst.CurrentPage["Content"]:
+            self.TextWidgetInst.CurrentPage["Content"] = CurrentText
+            self.Notebook.SearchIndexUpToDate = False
+            self.UpdateUnsavedChangesFlag(True)
 
     def ToggleReadMode(self):
         self.TextWidgetInst.setFocus() if self.TextWidgetInst.ReadMode else self.NotebookDisplayWidgetInst.setFocus()

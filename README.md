@@ -2,10 +2,10 @@
 SerpentNotes is a searchable notes application with hierarchical pages and markdown formatting, written in Python 3.8 with PyQT5.
 
 ## Installation
-Because SerpentNotes is written in Python and packaged as an executable zip, a Python 3 installation is required to run it.  It was written and tested in Python 3.8, though it may or may not run in other versions of Python 3.
+Because SerpentNotes is written in 64-bit Python and packaged as an executable zip, a 64-bit Python 3 installation is required to run it.  It was written and tested in Python 3.8, though it may or may not run in other versions of Python 3.
 
 ### Windows
-On Windows, Python 3.8 can be installed by downloading the installer from [python.org](https://www.python.org/).  Make sure to include the py launcher, associate files with Python, and add Python to the environment variables.
+On Windows, Python 3.8 can be installed by downloading the installer from [python.org](https://www.python.org/).  Make sure to include the py launcher, associate files with Python, and add Python to the environment variables.  Make sure you're installing the 64-bit version.
 
 At this point, you should be able to download the .zip file of the latest Windows release from this repository, unzip it wherever you like, and double-click on SerpentNotes.pyzw to run the app.
 
@@ -14,7 +14,7 @@ A shortcut to SerpentNotes can be created on Windows by right-clicking on Serpen
 ### Linux
 On Linux, SerpentNotes has only been built and tested for Ubuntu 20.04.  It probably runs just fine on many other distros, but you're on your own as far as resolving any problems or differences.
 
-It is generally assumed that you already have Python 3 installed as part of your distro.  If your distro has 3.8, you should be fine; otherwise, you may or may not need to install 3.8.
+It is generally assumed that you already have 64-bit Python 3 installed as part of your distro.  If your distro has 3.8, you should be fine; otherwise, you may or may not need to install 3.8.
 
 First, download the .zip file of the latest Linux release from this repository, and unzip it wherever you like (probably easiest somewhere in your Home).  To run the app, open a terminal in the app's directory and use the following command:
 

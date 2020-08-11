@@ -877,7 +877,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     # Import and Export Methods
     def ExportHTML(self):
-        HTMLText = ConstructHTMLExportString(self.Notebook, self.GetResourcePath("Assets/HTMLExportTemplate.template"))
+        AssetPaths = {}
+        AssetPaths["TemplatePath"] = self.GetResourcePath("Assets/HTMLExportTemplate.template")
+        AssetPaths["BackButtonPath"] = self.GetResourcePath("Assets/SerpentNotes Back Icon.png")
+        AssetPaths["ForwardButtonPath"] = self.GetResourcePath("Assets/SerpentNotes Forward Icon.png")
+        HTMLText = ConstructHTMLExportString(self.Notebook, AssetPaths)
         self.Save(HTMLText, SaveAs=True, AlternateFileDescription="HTML", AlternateFileExtension=".html", SkipSerialization=True, ExportMode=True)
 
     def ExportPage(self):

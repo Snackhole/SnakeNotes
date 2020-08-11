@@ -3,6 +3,7 @@ import os
 
 import mistune
 
+from Core import Base64Converters
 
 class Renderer(mistune.Renderer):
     def __init__(self, Notebook):
@@ -109,17 +110,21 @@ def ConstructSubPageOfLink(Page, Notebook):
     return LinkString
 
 
-def ConstructHTMLExportString(Notebook, TemplatePath):
-    with open(TemplatePath, "r") as TemplateFile:
+def ConstructHTMLExportString(Notebook, AssetPaths):
+    with open(AssetPaths["TemplatePath"], "r") as TemplateFile:
         TemplateText = TemplateFile.read()
     TemplateTextSplit = TemplateText.split("[[SPLIT]]")
     HTMLExportString = TemplateTextSplit[0]
     HTMLExportString += Notebook.RootPage["Title"]
     HTMLExportString += TemplateTextSplit[1]
-    HTMLExportString += GeneratePageListItemHTML(Notebook.RootPage, Root=True)
+    HTMLExportString += Base64Converters.GetBase64StringFromFilePath(AssetPaths["BackButtonPath"])
     HTMLExportString += TemplateTextSplit[2]
-    HTMLExportString += GeneratePageDictionaryJavaScript(Notebook)
+    HTMLExportString += Base64Converters.GetBase64StringFromFilePath(AssetPaths["ForwardButtonPath"])
     HTMLExportString += TemplateTextSplit[3]
+    HTMLExportString += GeneratePageListItemHTML(Notebook.RootPage, Root=True)
+    HTMLExportString += TemplateTextSplit[4]
+    HTMLExportString += GeneratePageDictionaryJavaScript(Notebook)
+    HTMLExportString += TemplateTextSplit[5]
     return HTMLExportString
 
 

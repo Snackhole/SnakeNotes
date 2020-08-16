@@ -134,6 +134,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.PromotePageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Promote Page Icon.png"))
         self.DemotePageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Demote Page Icon.png"))
         self.RenamePageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Rename Page Icon.png"))
+        self.ExpandAllIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Expand All Icon.png"))
+        self.CollapseAllIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Collapse All Icon.png"))
         self.ToggleReadModeIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Toggle Read Mode Icon.png"))
         self.BackIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Back Icon.png"))
         self.ForwardIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Forward Icon.png"))
@@ -237,10 +239,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.RenamePageAction.triggered.connect(self.RenamePage)
         self.ToggleReadModeActionsList.append(self.RenamePageAction)
 
-        self.ExpandAllAction = QAction("Expand All")
+        self.ExpandAllAction = QAction(self.ExpandAllIcon, "Expand All")
         self.ExpandAllAction.triggered.connect(self.NotebookDisplayWidgetInst.expandAll)
 
-        self.CollapseAllAction = QAction("Collapse All")
+        self.CollapseAllAction = QAction(self.CollapseAllIcon, "Collapse All")
         self.CollapseAllAction.triggered.connect(self.NotebookDisplayWidgetInst.collapseAll)
 
         self.ImageManagerAction = QAction("Image Manager")

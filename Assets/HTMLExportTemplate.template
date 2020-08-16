@@ -95,6 +95,10 @@
             cursor: default;
         }
 
+        img.ExpandCollapse {
+            cursor: pointer;
+        }
+
         /* Page Display */
 
         #PageDisplay {
@@ -223,7 +227,11 @@
                 src="data:image/png;base64,[[SPLIT]]"
                 alt="Back"><img id="ForwardButton" class="ForwardBack ForwardBackDisabled" onclick="Forward();"
                 src="data:image/png;base64,[[SPLIT]]"
-                alt="Forward"></div>
+                alt="Forward"><img id="ExpandButton" class="ExpandCollapse" onclick="Expand();"
+                src="data:image/png;base64, [[SPLIT]]"
+                alt="Expand All"><img id="CollapseButton" class="ExpandCollapse" onclick="Collapse();"
+                src="data:image/png;base64, [[SPLIT]]"
+                alt="Collapse All"></div>
         <div id="PageList">
             <ul class="PageListCollapsibleTree">
                 [[SPLIT]]
@@ -398,6 +406,14 @@
             PageDisplay.scrollTop = TargetPageScrollPosition;
             BackNavigation = false;
         }
+    }
+
+    function Expand() {
+        return;
+    }
+
+    function Collapse() {
+        return;
     }
     
     function SearchNotebook() {

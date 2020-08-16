@@ -121,10 +121,14 @@ def ConstructHTMLExportString(Notebook, AssetPaths):
     HTMLExportString += TemplateTextSplit[2]
     HTMLExportString += Base64Converters.GetBase64StringFromFilePath(AssetPaths["ForwardButtonPath"])
     HTMLExportString += TemplateTextSplit[3]
-    HTMLExportString += GeneratePageListItemHTML(Notebook.RootPage, Root=True)
+    HTMLExportString += Base64Converters.GetBase64StringFromFilePath(AssetPaths["ExpandButtonPath"])
     HTMLExportString += TemplateTextSplit[4]
-    HTMLExportString += GeneratePageDictionaryJavaScript(Notebook)
+    HTMLExportString += Base64Converters.GetBase64StringFromFilePath(AssetPaths["CollapseButtonPath"])
     HTMLExportString += TemplateTextSplit[5]
+    HTMLExportString += GeneratePageListItemHTML(Notebook.RootPage, Root=True)
+    HTMLExportString += TemplateTextSplit[6]
+    HTMLExportString += GeneratePageDictionaryJavaScript(Notebook)
+    HTMLExportString += TemplateTextSplit[7]
     return HTMLExportString
 
 

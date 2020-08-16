@@ -883,6 +883,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         AssetPaths["TemplatePath"] = self.GetResourcePath("Assets/HTMLExportTemplate.template")
         AssetPaths["BackButtonPath"] = self.GetResourcePath("Assets/SerpentNotes Back Icon.png")
         AssetPaths["ForwardButtonPath"] = self.GetResourcePath("Assets/SerpentNotes Forward Icon.png")
+        AssetPaths["ExpandButtonPath"] = self.GetResourcePath("Assets/SerpentNotes Expand All Icon.png")
+        AssetPaths["CollapseButtonPath"] = self.GetResourcePath("Assets/SerpentNotes Collapse All Icon.png")
         HTMLText = ConstructHTMLExportString(self.Notebook, AssetPaths)
         self.Save(HTMLText, SaveAs=True, AlternateFileDescription="HTML", AlternateFileExtension=".html", SkipSerialization=True, ExportMode=True)
 

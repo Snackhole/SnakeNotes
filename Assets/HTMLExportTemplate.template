@@ -414,6 +414,7 @@
             var Checkbox = PageListCollapsibleCheckboxes[i];
             Checkbox.checked = true;
         }
+        UpdatePageListDisplay(CurrentPage);
     }
 
     function Collapse() {

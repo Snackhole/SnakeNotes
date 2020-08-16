@@ -134,7 +134,7 @@ def ConstructHTMLExportString(Notebook, AssetPaths):
 
 def GeneratePageListItemHTML(Page, Root=False):
     if len(Page["SubPages"]) > 0:
-        ListItemString = "<li class=\"PageListCollapsibleItem\"><input type=\"checkbox\" id=\"" + str(Page["IndexPath"]) + "checkbox\"" + (" checked=\"checked\"" if Root else "") + "><label for=\"" + str(Page["IndexPath"]) + "checkbox\"></label><span id=\"" + str(Page["IndexPath"]) + "link\" class=\"PageLink\" onclick=\"SelectPage(&quot;" + str(Page["IndexPath"]) + "&quot;);\" ondblclick=\"TogglePageExpansion(&quot;" + str(Page["IndexPath"]) + "&quot;);\">" + Page["Title"] + "</span><ul>"
+        ListItemString = "<li class=\"PageListCollapsibleItem\"><input type=\"checkbox\" id=\"" + str(Page["IndexPath"]) + "checkbox\"" + " class=\"PageListCollapsibleCheckbox\"" + (" checked=\"checked\"" if Root else "") + "><label for=\"" + str(Page["IndexPath"]) + "checkbox\"></label><span id=\"" + str(Page["IndexPath"]) + "link\" class=\"PageLink\" onclick=\"SelectPage(&quot;" + str(Page["IndexPath"]) + "&quot;);\" ondblclick=\"TogglePageExpansion(&quot;" + str(Page["IndexPath"]) + "&quot;);\">" + Page["Title"] + "</span><ul>"
         for SubPage in Page["SubPages"]:
             ListItemString += GeneratePageListItemHTML(SubPage)
         ListItemString += "</ul></li>"

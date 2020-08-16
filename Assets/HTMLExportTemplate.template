@@ -409,11 +409,21 @@
     }
 
     function Expand() {
-        return;
+        var PageListCollapsibleCheckboxes = document.getElementsByClassName("PageListCollapsibleCheckbox");
+        for (var i = 0; i < PageListCollapsibleCheckboxes.length; i++) {
+            var Checkbox = PageListCollapsibleCheckboxes[i];
+            Checkbox.checked = true;
+        }
     }
 
     function Collapse() {
-        return;
+        var PageListCollapsibleCheckboxes = document.getElementsByClassName("PageListCollapsibleCheckbox");
+        for (var i = 0; i < PageListCollapsibleCheckboxes.length; i++) {
+            var Checkbox = PageListCollapsibleCheckboxes[i];
+            Checkbox.checked = false;
+        }
+        SelectPage("[0]");
+        TogglePageExpansion("[0]");
     }
     
     function SearchNotebook() {

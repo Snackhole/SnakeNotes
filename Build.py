@@ -1,6 +1,8 @@
 import os
 import platform
 import shutil
+import subprocess
+
 import zipapp
 
 # Build Variables
@@ -40,11 +42,11 @@ def Build():
 
     #  Windows-Specific Build Variables
     if BuildVariables["OS"] == "Windows":
-        BuildVariables["CommandPrompt"] = "python -m pip install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "\\requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "\\" + BuildVariables["BuildFolder"] + "\""
+        BuildVariables["Command"] = "python -m pip install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "\\requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "\\" + BuildVariables["BuildFolder"] + "\""
 
     # Linux-Specific Build Variables
     if BuildVariables["OS"] == "Linux":
-        BuildVariables["CommandPrompt"] = "pip3 install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "/requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "/" + BuildVariables["BuildFolder"] + "\""
+        BuildVariables["Command"] = "pip3 install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "/requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "/" + BuildVariables["BuildFolder"] + "\""
         BuildVariables["AssetFiles"].append("CreateGNOMEDesktopFile.py")
 
     # Copy Code to Build Folder
@@ -65,16 +67,11 @@ def Build():
     shutil.move(BuildVariables["ExecutableZipName"], BuildVariables["BuildFolder"])
     print("Executable archive moved to build folder.")
 
-    # Prompt to Install Dependencies
-    ProceedPrompt = "\n---\nInstall dependencies to build folder (" + BuildVariables["BuildFolder"] + ") using a command prompt:\n\n    " + BuildVariables["CommandPrompt"] + "\n\nOnce all dependencies are installed, input \"PROCEED\" to continue with build or \"CANCEL\" to cancel and clean up build files:\n---\n"
-    ProceedResponse = input(ProceedPrompt)
-    if ProceedResponse == "PROCEED":
-        pass
-    elif ProceedResponse == "CANCEL":
-        print("Build canceled.")
+    # Install Dependencies
+    DependenciesProcess = subprocess.run(BuildVariables["Command"], shell=True)
+    if DependenciesProcess.returncode != 0:
+        print("Build error while installing dependencies; cleaning up.")
         CleanUp()
-        return
-    else:
         return
 
     # Zip Build

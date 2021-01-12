@@ -38,14 +38,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Set Up Save and Open
         self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
 
-        # Load Favorites
-        FavoritesFile = self.GetResourcePath("Favorites.cfg")
-        if os.path.isfile(FavoritesFile):
-            with open(FavoritesFile, "r") as ConfigFile:
-                self.FavoritesData = self.JSONSerializer.DeserializeDataFromJSONString(ConfigFile.read())
-        else:
-            self.FavoritesData = {}
-
         # Create Notebook
         self.Notebook = Notebook()
 
@@ -53,12 +45,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CreateInterface()
         self.show()
 
-        # Load Display Settings
-        DisplaySettingsFile = self.GetResourcePath("DisplaySettings.cfg")
-        if os.path.isfile(DisplaySettingsFile):
-            with open(DisplaySettingsFile, "r") as ConfigFile:
-                DisplaySettings = json.loads(ConfigFile.read())
-                self.LoadDisplaySettings(DisplaySettings)
+        # Load Configs
+        self.LoadConfigs()
 
     def CreateInterface(self):
         # Create Icons
@@ -517,6 +505,45 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def GetResourcePath(self, RelativeLocation):
         return self.AbsoluteDirectoryPath + "/" + RelativeLocation
 
+    def LoadConfigs(self):
+        # Favorites
+        FavoritesFile = self.GetResourcePath("Favorites.cfg")
+        if os.path.isfile(FavoritesFile):
+            with open(FavoritesFile, "r") as ConfigFile:
+                self.FavoritesData = self.JSONSerializer.DeserializeDataFromJSONString(ConfigFile.read())
+        else:
+            self.FavoritesData = {}
+
+        # Display Settings
+        DisplaySettingsFile = self.GetResourcePath("DisplaySettings.cfg")
+        if os.path.isfile(DisplaySettingsFile):
+            with open(DisplaySettingsFile, "r") as ConfigFile:
+                DisplaySettings = json.loads(ConfigFile.read())
+            if "CurrentZoomLevel" in DisplaySettings:
+                if DisplaySettings["CurrentZoomLevel"] > 0:
+                    for ZoomLevel in range(DisplaySettings["CurrentZoomLevel"]):
+                        self.ZoomIn()
+                elif DisplaySettings["CurrentZoomLevel"] < 0:
+                    for ZoomLevel in range(-DisplaySettings["CurrentZoomLevel"]):
+                        self.ZoomOut()
+            if "HorizontalSplit" in DisplaySettings:
+                self.NotebookAndTextSplitter.setSizes(DisplaySettings["HorizontalSplit"])
+    
+    def SaveConfigs(self):
+        # Favorites
+        with open(self.GetResourcePath("Favorites.cfg"), "w") as ConfigFile:
+                ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
+        
+        # Display Settings
+        DisplaySettings = {}
+        DisplaySettings["CurrentZoomLevel"] = self.CurrentZoomLevel
+        DisplaySettings["HorizontalSplit"] = self.NotebookAndTextSplitter.sizes()
+        with open(self.GetResourcePath("DisplaySettings.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(DisplaySettings, indent=2))
+        
+        # Last Opened Directory
+        self.SaveLastOpenedDirectory()
+
     # Notebook Methods
     def UpdateNotebook(self, Notebook):
         self.Notebook = Notebook
@@ -801,17 +828,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def UpdateWindowTitle(self):
         self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + (" *" if self.UnsavedChanges else ""))
 
-    def LoadDisplaySettings(self, DisplaySettings):
-        if "CurrentZoomLevel" in DisplaySettings:
-            if DisplaySettings["CurrentZoomLevel"] > 0:
-                for ZoomLevel in range(DisplaySettings["CurrentZoomLevel"]):
-                    self.ZoomIn()
-            elif DisplaySettings["CurrentZoomLevel"] < 0:
-                for ZoomLevel in range(-DisplaySettings["CurrentZoomLevel"]):
-                    self.ZoomOut()
-        if "HorizontalSplit" in DisplaySettings:
-            self.NotebookAndTextSplitter.setSizes(DisplaySettings["HorizontalSplit"])
-
     # Save and Open Methods
     def SaveActionTriggered(self, SaveAs=False):
         if self.Save(self.Notebook, SaveAs=SaveAs):
@@ -863,14 +879,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if not Close:
             event.ignore()
         else:
-            with open(self.GetResourcePath("Favorites.cfg"), "w") as ConfigFile:
-                ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
-            DisplaySettings = {}
-            DisplaySettings["CurrentZoomLevel"] = self.CurrentZoomLevel
-            DisplaySettings["HorizontalSplit"] = self.NotebookAndTextSplitter.sizes()
-            with open(self.GetResourcePath("DisplaySettings.cfg"), "w") as ConfigFile:
-                ConfigFile.write(json.dumps(DisplaySettings, indent=2))
-            self.SaveLastOpenedDirectory()
+            self.SaveConfigs()
             event.accept()
 
     def UpdateUnsavedChangesFlag(self, UnsavedChanges):

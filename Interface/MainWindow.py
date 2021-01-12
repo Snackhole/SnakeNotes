@@ -510,7 +510,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         FavoritesFile = self.GetResourcePath("Favorites.cfg")
         if os.path.isfile(FavoritesFile):
             with open(FavoritesFile, "r") as ConfigFile:
-                self.FavoritesData = self.JSONSerializer.DeserializeDataFromJSONString(ConfigFile.read())
+                self.FavoritesData = json.loads(ConfigFile.read())
         else:
             self.FavoritesData = {}
 

@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 
@@ -113,6 +114,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.setTabOrder(self.TextWidgetInst, self.SearchWidgetInst)
         self.setTabOrder(self.SearchWidgetInst, self.NotebookDisplayWidgetInst)
 
+        # Create Keybindings
+        self.CreateKeybindings()
+
     def CreateIcons(self):
         self.WindowIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Icon.png"))
         self.NewPageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes New Page Icon.png"))
@@ -145,23 +149,18 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def CreateActions(self):
         self.NewAction = QAction("New")
-        self.NewAction.setShortcut("Ctrl+Shift+N")
         self.NewAction.triggered.connect(self.NewActionTriggered)
 
         self.OpenAction = QAction("Open")
-        self.OpenAction.setShortcut("Ctrl+O")
         self.OpenAction.triggered.connect(lambda: self.OpenActionTriggered())
 
         self.FavoritesAction = QAction(self.FavoritesIcon, "Favorites")
-        self.FavoritesAction.setShortcut("Ctrl+Shift+O")
         self.FavoritesAction.triggered.connect(self.Favorites)
 
         self.SaveAction = QAction("Save")
-        self.SaveAction.setShortcut("Ctrl+S")
         self.SaveAction.triggered.connect(lambda: self.SaveActionTriggered())
 
         self.SaveAsAction = QAction("Save As")
-        self.SaveAsAction.setShortcut("Ctrl+Shift+S")
         self.SaveAsAction.triggered.connect(lambda: self.SaveActionTriggered(SaveAs=True))
 
         self.ExportHTMLAction = QAction("Export HTML File")
@@ -175,55 +174,44 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleReadModeActionsList.append(self.ImportPageAction)
 
         self.ExitAction = QAction("Exit")
-        self.ExitAction.setShortcut("Ctrl+Q")
         self.ExitAction.triggered.connect(self.close)
 
         self.ToggleReadModeAction = QAction(self.ToggleReadModeIcon, "Toggle Read Mode")
-        self.ToggleReadModeAction.setShortcut("Ctrl+E")
         self.ToggleReadModeAction.triggered.connect(self.ToggleReadMode)
 
         self.BackAction = QAction(self.BackIcon, "Back")
-        self.BackAction.setShortcut("Ctrl+,")
         self.BackAction.triggered.connect(self.Back)
         self.BackAction.setEnabled(False)
 
         self.ForwardAction = QAction(self.ForwardIcon, "Forward")
-        self.ForwardAction.setShortcut("Ctrl+.")
         self.ForwardAction.triggered.connect(self.Forward)
         self.ForwardAction.setEnabled(False)
 
         self.NewPageAction = QAction(self.NewPageIcon, "New Page")
-        self.NewPageAction.setShortcut("Ctrl+N")
         self.NewPageAction.triggered.connect(self.NewPage)
         self.ToggleReadModeActionsList.append(self.NewPageAction)
 
         self.DeletePageAction = QAction(self.DeletePageIcon, "Delete Page")
-        self.DeletePageAction.setShortcut("Ctrl+D")
         self.DeletePageAction.triggered.connect(self.DeletePage)
         self.ToggleReadModeActionsList.append(self.DeletePageAction)
 
         self.MovePageUpAction = QAction(self.MovePageUpIcon, "Move Page Up")
-        self.MovePageUpAction.setShortcut("Ctrl+PgUp")
         self.MovePageUpAction.triggered.connect(lambda: self.MovePage(-1))
         self.ToggleReadModeActionsList.append(self.MovePageUpAction)
 
         self.MovePageDownAction = QAction(self.MovePageDownIcon, "Move Page Down")
-        self.MovePageDownAction.setShortcut("Ctrl+PgDown")
         self.MovePageDownAction.triggered.connect(lambda: self.MovePage(1))
         self.ToggleReadModeActionsList.append(self.MovePageDownAction)
 
         self.PromotePageAction = QAction(self.PromotePageIcon, "Promote Page")
-        self.PromotePageAction.setShortcut("Ctrl+Shift+PgUp")
         self.PromotePageAction.triggered.connect(self.PromotePage)
         self.ToggleReadModeActionsList.append(self.PromotePageAction)
 
         self.DemotePageAction = QAction(self.DemotePageIcon, "Demote Page")
-        self.DemotePageAction.setShortcut("Ctrl+Shift+PgDown")
         self.DemotePageAction.triggered.connect(self.DemotePage)
         self.ToggleReadModeActionsList.append(self.DemotePageAction)
 
         self.RenamePageAction = QAction(self.RenamePageIcon, "Rename Page")
-        self.RenamePageAction.setShortcut("Ctrl+R")
         self.RenamePageAction.triggered.connect(self.RenamePage)
         self.ToggleReadModeActionsList.append(self.RenamePageAction)
 
@@ -250,12 +238,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleReadModeActionsList.append(self.EditFooterAction)
 
         self.ItalicsAction = QAction(self.ItalicsIcon, "Italics")
-        self.ItalicsAction.setShortcut("Ctrl+I")
         self.ItalicsAction.triggered.connect(self.TextWidgetInst.Italics)
         self.ToggleReadModeActionsList.append(self.ItalicsAction)
 
         self.BoldAction = QAction(self.BoldIcon, "Bold")
-        self.BoldAction.setShortcut("Ctrl+B")
         self.BoldAction.triggered.connect(self.TextWidgetInst.Bold)
         self.ToggleReadModeActionsList.append(self.BoldAction)
 
@@ -268,32 +254,26 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleReadModeActionsList.append(self.CodeSpanAction)
 
         self.HeaderOneAction = QAction("Header 1")
-        self.HeaderOneAction.setShortcut("Ctrl+1")
         self.HeaderOneAction.triggered.connect(lambda: self.TextWidgetInst.Header(1))
         self.ToggleReadModeActionsList.append(self.HeaderOneAction)
 
         self.HeaderTwoAction = QAction("Header 2")
-        self.HeaderTwoAction.setShortcut("Ctrl+2")
         self.HeaderTwoAction.triggered.connect(lambda: self.TextWidgetInst.Header(2))
         self.ToggleReadModeActionsList.append(self.HeaderTwoAction)
 
         self.HeaderThreeAction = QAction("Header 3")
-        self.HeaderThreeAction.setShortcut("Ctrl+3")
         self.HeaderThreeAction.triggered.connect(lambda: self.TextWidgetInst.Header(3))
         self.ToggleReadModeActionsList.append(self.HeaderThreeAction)
 
         self.HeaderFourAction = QAction("Header 4")
-        self.HeaderFourAction.setShortcut("Ctrl+4")
         self.HeaderFourAction.triggered.connect(lambda: self.TextWidgetInst.Header(4))
         self.ToggleReadModeActionsList.append(self.HeaderFourAction)
 
         self.HeaderFiveAction = QAction("Header 5")
-        self.HeaderFiveAction.setShortcut("Ctrl+5")
         self.HeaderFiveAction.triggered.connect(lambda: self.TextWidgetInst.Header(5))
         self.ToggleReadModeActionsList.append(self.HeaderFiveAction)
 
         self.HeaderSixAction = QAction("Header 6")
-        self.HeaderSixAction.setShortcut("Ctrl+6")
         self.HeaderSixAction.triggered.connect(lambda: self.TextWidgetInst.Header(6))
         self.ToggleReadModeActionsList.append(self.HeaderSixAction)
 
@@ -322,17 +302,14 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleReadModeActionsList.append(self.FootnoteAction)
 
         self.InsertLinksAction = QAction(self.InsertLinksIcon, "Insert Link(s)")
-        self.InsertLinksAction.setShortcut("Ctrl+L")
         self.InsertLinksAction.triggered.connect(self.TextWidgetInst.InsertLinks)
         self.ToggleReadModeActionsList.append(self.InsertLinksAction)
 
         self.InsertExternalLinkAction = QAction(self.InsertExternalLinkIcon, "Insert External Link")
-        self.InsertExternalLinkAction.setShortcut("Ctrl+Shift+L")
         self.InsertExternalLinkAction.triggered.connect(self.TextWidgetInst.InsertExternalLink)
         self.ToggleReadModeActionsList.append(self.InsertExternalLinkAction)
 
         self.TextToLinkAction = QAction("Convert Exact Title to Link")
-        self.TextToLinkAction.setShortcut("Ctrl+Alt+L")
         self.TextToLinkAction.triggered.connect(self.TextWidgetInst.TextToLink)
         self.ToggleReadModeActionsList.append(self.TextToLinkAction)
 
@@ -345,43 +322,34 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleReadModeActionsList.append(self.InsertImageAction)
 
         self.MoveLineUpAction = QAction("Move Line Up")
-        self.MoveLineUpAction.setShortcut("Ctrl+Up")
         self.MoveLineUpAction.triggered.connect(self.TextWidgetInst.MoveLineUp)
         self.ToggleReadModeActionsList.append(self.MoveLineUpAction)
 
         self.MoveLineDownAction = QAction("Move Line Down")
-        self.MoveLineDownAction.setShortcut("Ctrl+Down")
         self.MoveLineDownAction.triggered.connect(self.TextWidgetInst.MoveLineDown)
         self.ToggleReadModeActionsList.append(self.MoveLineDownAction)
 
         self.DuplicateLinesAction = QAction("Duplicate Lines")
-        self.DuplicateLinesAction.setShortcut("Ctrl+Shift+D")
         self.DuplicateLinesAction.triggered.connect(self.TextWidgetInst.DuplicateLines)
         self.ToggleReadModeActionsList.append(self.DuplicateLinesAction)
 
         self.DeleteLineAction = QAction("Delete Line")
-        self.DeleteLineAction.setShortcut("Ctrl+Shift+K")
         self.DeleteLineAction.triggered.connect(self.TextWidgetInst.DeleteLine)
         self.ToggleReadModeActionsList.append(self.DeleteLineAction)
 
         self.ZoomOutAction = QAction(self.ZoomOutIcon, "Zoom Out")
-        self.ZoomOutAction.setShortcut("Ctrl+-")
         self.ZoomOutAction.triggered.connect(self.ZoomOut)
 
         self.ZoomInAction = QAction(self.ZoomInIcon, "Zoom In")
-        self.ZoomInAction.setShortcut("Ctrl+=")
         self.ZoomInAction.triggered.connect(self.ZoomIn)
 
         self.DefaultZoomAction = QAction("Default Zoom")
-        self.DefaultZoomAction.setShortcut("Ctrl+0")
         self.DefaultZoomAction.triggered.connect(self.DefaultZoom)
 
         self.SearchAction = QAction(self.SearchIcon, "Search")
-        self.SearchAction.setShortcut("Ctrl+F")
         self.SearchAction.triggered.connect(self.SearchWidgetInst.GrabFocus)
 
         self.ToggleSearchAction = QAction(self.ToggleSearchIcon, "Toggle Search")
-        self.ToggleSearchAction.setShortcut("Ctrl+Shift+F")
         self.ToggleSearchAction.triggered.connect(self.SearchWidgetInst.ToggleVisibility)
 
     def CreateMenuBar(self):
@@ -502,6 +470,45 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToolBar.addSeparator()
         self.ToolBar.addAction(self.FavoritesAction)
 
+    def CreateKeybindings(self):
+        self.DefaultKeybindings = {}
+        self.DefaultKeybindings["NewAction"] = "Ctrl+Shift+N"
+        self.DefaultKeybindings["OpenAction"] = "Ctrl+O"
+        self.DefaultKeybindings["FavoritesAction"] = "Ctrl+Shift+O"
+        self.DefaultKeybindings["SaveAction"] = "Ctrl+S"
+        self.DefaultKeybindings["SaveAsAction"] = "Ctrl+Shift+S"
+        self.DefaultKeybindings["ExitAction"] = "Ctrl+Q"
+        self.DefaultKeybindings["ToggleReadModeAction"] = "Ctrl+E"
+        self.DefaultKeybindings["BackAction"] = "Ctrl+,"
+        self.DefaultKeybindings["ForwardAction"] = "Ctrl+."
+        self.DefaultKeybindings["NewPageAction"] = "Ctrl+N"
+        self.DefaultKeybindings["DeletePageAction"] = "Ctrl+D"
+        self.DefaultKeybindings["MovePageUpAction"] = "Ctrl+PgUp"
+        self.DefaultKeybindings["MovePageDownAction"] = "Ctrl+PgDown"
+        self.DefaultKeybindings["PromotePageAction"] = "Ctrl+Shift+PgUp"
+        self.DefaultKeybindings["DemotePageAction"] = "Ctrl+Shift+PgDown"
+        self.DefaultKeybindings["RenamePageAction"] = "Ctrl+R"
+        self.DefaultKeybindings["ItalicsAction"] = "Ctrl+I"
+        self.DefaultKeybindings["BoldAction"] = "Ctrl+B"
+        self.DefaultKeybindings["HeaderOneAction"] = "Ctrl+1"
+        self.DefaultKeybindings["HeaderTwoAction"] = "Ctrl+2"
+        self.DefaultKeybindings["HeaderThreeAction"] = "Ctrl+3"
+        self.DefaultKeybindings["HeaderFourAction"] = "Ctrl+4"
+        self.DefaultKeybindings["HeaderFiveAction"] = "Ctrl+5"
+        self.DefaultKeybindings["HeaderSixAction"] = "Ctrl+6"
+        self.DefaultKeybindings["InsertLinksAction"] = "Ctrl+L"
+        self.DefaultKeybindings["InsertExternalLinkAction"] = "Ctrl+Shift+L"
+        self.DefaultKeybindings["TextToLinkAction"] = "Ctrl+Alt+L"
+        self.DefaultKeybindings["MoveLineUpAction"] = "Ctrl+Up"
+        self.DefaultKeybindings["MoveLineDownAction"] = "Ctrl+Down"
+        self.DefaultKeybindings["DuplicateLinesAction"] = "Ctrl+Shift+D"
+        self.DefaultKeybindings["DeleteLineAction"] = "Ctrl+Shift+K"
+        self.DefaultKeybindings["ZoomOutAction"] = "Ctrl+-"
+        self.DefaultKeybindings["ZoomInAction"] = "Ctrl+="
+        self.DefaultKeybindings["DefaultZoomAction"] = "Ctrl+0"
+        self.DefaultKeybindings["SearchAction"] = "Ctrl+F"
+        self.DefaultKeybindings["ToggleSearchAction"] = "Ctrl+Shift+F"
+
     def GetResourcePath(self, RelativeLocation):
         return self.AbsoluteDirectoryPath + "/" + RelativeLocation
 
@@ -528,11 +535,30 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                         self.ZoomOut()
             if "HorizontalSplit" in DisplaySettings:
                 self.NotebookAndTextSplitter.setSizes(DisplaySettings["HorizontalSplit"])
+        
+        # Keybindings
+        KeybindingsFile = self.GetResourcePath("Keybindings.cfg")
+        if os.path.isfile(KeybindingsFile):
+            with open(KeybindingsFile, "r") as ConfigFile:
+                self.Keybindings = json.loads(ConfigFile.read())
+        else:
+            self.Keybindings = copy.deepcopy(self.DefaultKeybindings)
+        for Action, Keybinding in self.DefaultKeybindings.items():
+            if Action not in self.Keybindings:
+                self.Keybindings[Action] = Keybinding
+        InvalidBindings = []
+        for Action in self.Keybindings.keys():
+            if Action not in self.DefaultKeybindings:
+                InvalidBindings.append(Action)
+        for InvalidBinding in InvalidBindings:
+            del self.Keybindings[InvalidBinding]
+        for Action, Keybinding in self.Keybindings.items():
+            getattr(self, Action).setShortcut(Keybinding)
     
     def SaveConfigs(self):
         # Favorites
         with open(self.GetResourcePath("Favorites.cfg"), "w") as ConfigFile:
-                ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
+            ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
         
         # Display Settings
         DisplaySettings = {}
@@ -540,6 +566,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         DisplaySettings["HorizontalSplit"] = self.NotebookAndTextSplitter.sizes()
         with open(self.GetResourcePath("DisplaySettings.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(DisplaySettings, indent=2))
+        
+        # Keybindings
+        with open(self.GetResourcePath("Keybindings.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.Keybindings, indent=2))
         
         # Last Opened Directory
         self.SaveLastOpenedDirectory()

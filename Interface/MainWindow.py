@@ -352,6 +352,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleSearchAction = QAction(self.ToggleSearchIcon, "Toggle Search")
         self.ToggleSearchAction.triggered.connect(self.SearchWidgetInst.ToggleVisibility)
 
+        self.SearchForLinkingPagesAction = QAction("Search for Linking Pages")
+        self.SearchForLinkingPagesAction.triggered.connect(self.SearchForLinkingPages)
+
     def CreateMenuBar(self):
         self.MenuBar = self.menuBar()
 
@@ -410,6 +413,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.SearchAction)
         self.ViewMenu.addAction(self.ToggleSearchAction)
+        self.ViewMenu.addAction(self.SearchForLinkingPagesAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.ZoomOutAction)
         self.ViewMenu.addAction(self.ZoomInAction)
@@ -807,6 +811,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 elif EditHeaderOrFooterDialogInst.Mode == "Footer":
                     self.Notebook.Footer = EditHeaderOrFooterDialogInst.HeaderOrFooterString
                 self.UpdateUnsavedChangesFlag(True)
+
+    def SearchForLinkingPages(self):
+        self.SearchAction.trigger()
+        self.SearchWidgetInst.SearchTextLineEdit.setText("](" + json.dumps(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath(), indent=None) + ")")
+        self.SearchWidgetInst.SearchButton.click()
 
     # Text Methods
     def TextChanged(self):

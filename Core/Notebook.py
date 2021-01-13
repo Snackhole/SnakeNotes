@@ -8,8 +8,10 @@ from SaveAndLoad.JSONSerializer import SerializableMixin
 class Notebook(SerializableMixin):
     def __init__(self):
         # Variables
-        self.Header = "# {PAGETITLE}"
-        self.Footer = "***\n\nSub Pages:\n\n{SUBPAGELINKS}\n\nSub Page Of:  {SUBPAGEOFLINK}\n\nLinking Pages:\n\n{LINKINGPAGES}"
+        self.DefaultHeader = "# {PAGETITLE}"
+        self.DefaultFooter = "***\n\nSub Pages:\n\n{SUBPAGELINKS}\n\nSub Page Of:  {SUBPAGEOFLINK}\n\nLinking Pages:\n\n{LINKINGPAGES}"
+        self.Header = self.DefaultHeader
+        self.Footer = self.DefaultFooter
         self.RootPage = self.CreatePage("New Notebook")
         self.Images = {}
         self.PageTemplates = {}

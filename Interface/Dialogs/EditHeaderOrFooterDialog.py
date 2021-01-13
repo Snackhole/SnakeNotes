@@ -29,6 +29,8 @@ class EditHeaderOrFooterDialog(QDialog):
         self.SubPagesButton.clicked.connect(self.SubPages)
         self.SubPageOfButton = QPushButton("Sub Page Of Link")
         self.SubPageOfButton.clicked.connect(self.SubPageOf)
+        self.LinkingPagesButton = QPushButton("Linking Pages Links")
+        self.LinkingPagesButton.clicked.connect(self.LinkingPages)
 
         # Buttons
         self.DoneButton = QPushButton("Done")
@@ -41,6 +43,7 @@ class EditHeaderOrFooterDialog(QDialog):
         self.EditLayout.addWidget(self.PageTitleButton, 0, 0)
         self.EditLayout.addWidget(self.SubPagesButton, 0, 1)
         self.EditLayout.addWidget(self.SubPageOfButton, 0, 2)
+        self.EditLayout.addWidget(self.LinkingPagesButton, 0, 3)
         self.ButtonsLayout = QGridLayout()
         self.ButtonsLayout.addWidget(self.DoneButton, 0, 0)
         self.ButtonsLayout.addWidget(self.CancelButton, 0, 1)
@@ -79,6 +82,9 @@ class EditHeaderOrFooterDialog(QDialog):
 
     def SubPageOf(self):
         self.HeaderOrFooterText.insertPlainText("{SUBPAGEOFLINK}")
+    
+    def LinkingPages(self):
+        self.HeaderOrFooterText.insertPlainText("{LINKINGPAGES}")
 
     def Resize(self):
         self.resize(self.Width, self.Height)

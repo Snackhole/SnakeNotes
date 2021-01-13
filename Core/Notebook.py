@@ -9,7 +9,7 @@ class Notebook(SerializableMixin):
     def __init__(self):
         # Variables
         self.Header = "# {PAGETITLE}"
-        self.Footer = "***\n\nSub Pages:\n\n{SUBPAGELINKS}\n\nSub Page Of:  {SUBPAGEOFLINK}"
+        self.Footer = "***\n\nSub Pages:\n\n{SUBPAGELINKS}\n\nSub Page Of:  {SUBPAGEOFLINK}\n\nLinking Pages:\n\n{LINKINGPAGES}"
         self.RootPage = self.CreatePage("New Notebook")
         self.Images = {}
         self.PageTemplates = {}

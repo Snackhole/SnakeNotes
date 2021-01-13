@@ -82,10 +82,12 @@ def ConstructMarkdownStringFromPage(Page, Notebook):
     HeaderString = HeaderString.replace("{PAGETITLE}", Page["Title"])
     HeaderString = HeaderString.replace("{SUBPAGELINKS}", ConstructSubPageLinks(Page))
     HeaderString = HeaderString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, Notebook))
+    HeaderString = HeaderString.replace("{LINKINGPAGES}", ConstructLinkingPagesLinks(Page, Notebook))
     FooterString = "\n\n" + Notebook.Footer
     FooterString = FooterString.replace("{PAGETITLE}", Page["Title"])
     FooterString = FooterString.replace("{SUBPAGELINKS}", ConstructSubPageLinks(Page))
     FooterString = FooterString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, Notebook))
+    FooterString = FooterString.replace("{LINKINGPAGES}", ConstructLinkingPagesLinks(Page, Notebook))
     MarkdownString = HeaderString + Page["Content"] + FooterString
     return MarkdownString
 
@@ -108,6 +110,17 @@ def ConstructSubPageOfLink(Page, Notebook):
         SuperPage = Notebook.GetSuperOfPageFromIndexPath(Page["IndexPath"])
         LinkString = "[" + SuperPage["Title"] + "](" + json.dumps(SuperPage["IndexPath"]) + ")"
     return LinkString
+
+def ConstructLinkingPagesLinks(Page, Notebook):
+    SearchResults = Notebook.GetSearchResults("](" + json.dumps(Page["IndexPath"]) + ")")
+    if len(SearchResults) < 1:
+        LinksString = "No linking pages."
+    else:
+        LinksString = ""
+        for Result in SearchResults:
+            LinksString += "[" + Result[0] + "](" + json.dumps(Result[1]) + ")  \n"
+        LinksString = LinksString.rstrip()
+    return LinksString
 
 
 def ConstructHTMLExportString(Notebook, AssetPaths):

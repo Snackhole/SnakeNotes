@@ -540,7 +540,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                         self.ZoomOut()
             if "HorizontalSplit" in DisplaySettings:
                 self.NotebookAndTextSplitter.setSizes(DisplaySettings["HorizontalSplit"])
-        
+
         # Keybindings
         KeybindingsFile = self.GetResourcePath("Keybindings.cfg")
         if os.path.isfile(KeybindingsFile):
@@ -559,25 +559,28 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             del self.Keybindings[InvalidBinding]
         for Action, Keybinding in self.Keybindings.items():
             getattr(self, Action).setShortcut(Keybinding)
-    
+
     def SaveConfigs(self):
         # Favorites
         with open(self.GetResourcePath("Favorites.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
-        
+
         # Display Settings
         DisplaySettings = {}
         DisplaySettings["CurrentZoomLevel"] = self.CurrentZoomLevel
         DisplaySettings["HorizontalSplit"] = self.NotebookAndTextSplitter.sizes()
         with open(self.GetResourcePath("DisplaySettings.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(DisplaySettings, indent=2))
-        
+
         # Keybindings
         with open(self.GetResourcePath("Keybindings.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.Keybindings, indent=2))
-        
+
         # Last Opened Directory
         self.SaveLastOpenedDirectory()
+
+        # Gzip Mode
+        self.SaveGzipMode()
 
     # Notebook Methods
     def UpdateNotebook(self, Notebook):

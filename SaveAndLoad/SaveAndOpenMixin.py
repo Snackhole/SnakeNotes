@@ -11,9 +11,11 @@ class SaveAndOpenMixin:
         self.UnsavedChanges = False
         self.CurrentOpenFileName = ""
         self.LastOpenedDirectory = None
+        self.GzipMode = False
 
         # Load from Config
         self.LoadLastOpenedDirectory()
+        self.LoadGzipMode()
 
     def Save(self, ObjectToSave, SaveAs=False, AlternateFileDescription=None, AlternateFileExtension=None, SkipSerialization=False, ExportMode=False):
         from Interface.MainWindow import MainWindow
@@ -103,11 +105,13 @@ class SaveAndOpenMixin:
             SavePrompt = self.DisplayMessageBox("There are unsaved changes.  Close anyway?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No))
             if SavePrompt == QMessageBox.Yes:
                 self.SaveLastOpenedDirectory()
+                self.SaveGzipMode()
                 event.accept()
             elif SavePrompt == QMessageBox.No:
                 event.ignore()
         else:
             self.SaveLastOpenedDirectory()
+            self.SaveGzipMode()
             event.accept()
 
     def SetUpSaveAndOpen(self, FileExtension, FileDescription, ObjectClasses):
@@ -125,6 +129,14 @@ class SaveAndOpenMixin:
                 if os.path.isdir(LastOpenedDirectory):
                     self.LastOpenedDirectory = LastOpenedDirectory
 
+    def LoadGzipMode(self):
+        from Interface.MainWindow import MainWindow
+        assert isinstance(self, MainWindow)
+        GzipModeConfig = self.GetResourcePath("GzipMode.cfg")
+        if os.path.isfile(GzipModeConfig):
+            with open(GzipModeConfig, "r") as OpenedConfig:
+                self.GzipMode = self.JSONSerializer.DeserializeDataFromJSONString(OpenedConfig.read())
+
     def SaveLastOpenedDirectory(self):
         from Interface.MainWindow import MainWindow
         assert isinstance(self, MainWindow)
@@ -133,3 +145,10 @@ class SaveAndOpenMixin:
             if os.path.isdir(self.LastOpenedDirectory):
                 with open(FileSavingConfig, "w") as OpenedConfig:
                     OpenedConfig.write(self.LastOpenedDirectory)
+
+    def SaveGzipMode(self):
+        from Interface.MainWindow import MainWindow
+        assert isinstance(self, MainWindow)
+        GzipModeConfig = self.GetResourcePath("GzipMode.cfg")
+        with open(GzipModeConfig, "w") as OpenedConfig:
+            OpenedConfig.write(self.JSONSerializer.SerializeDataToJSONString(self.GzipMode))

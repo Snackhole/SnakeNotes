@@ -86,19 +86,19 @@ class TemplateManagerDialog(QDialog):
             self.Notebook.AddTemplate(AddTemplateDialogInst.TemplateNameString, AddTemplateDialogInst.TemplateString)
             self.UnsavedChanges = True
             self.PopulateTemplateList()
-    
+            self.TemplateList.setCurrentRow(self.GetTemplateIndexFromName(AddTemplateDialogInst.TemplateNameString))
+
     def EditTemplate(self):
         SelectedItems = self.TemplateList.selectedItems()
         if len(SelectedItems) > 0:
             CurrentTemplateName = SelectedItems[0].TemplateName
             CurrentTemplateContent = SelectedItems[0].TemplateContent
-            CurrentRow = self.TemplateList.currentRow()
             EditTemplateDialogInst = AddTemplateDialog(self.Notebook, self.MainWindow, self, EditMode=True, TemplateTitle=CurrentTemplateName, TemplateContent=CurrentTemplateContent)
             if EditTemplateDialogInst.TemplateAdded:
                 self.Notebook.PageTemplates[CurrentTemplateName] = EditTemplateDialogInst.TemplateString
                 self.UnsavedChanges = True
                 self.PopulateTemplateList()
-                self.TemplateList.setCurrentRow(CurrentRow)
+                self.TemplateList.setCurrentRow(self.GetTemplateIndexFromName(CurrentTemplateName))
 
     def RenameTemplate(self):
         SelectedItems = self.TemplateList.selectedItems()
@@ -116,15 +116,27 @@ class TemplateManagerDialog(QDialog):
                     del self.Notebook.PageTemplates[CurrentTemplateName]
                     self.UnsavedChanges = True
                     self.PopulateTemplateList()
+                    self.TemplateList.setCurrentRow(self.GetTemplateIndexFromName(NewName))
 
     def DeleteTemplate(self):
         SelectedItems = self.TemplateList.selectedItems()
         if len(SelectedItems) > 0:
             CurrentTemplateName = SelectedItems[0].TemplateName
+            CurrentTemplateRow = self.TemplateList.currentRow()
             if self.MainWindow.DisplayMessageBox("Are you sure you want to delete the template " + CurrentTemplateName + " from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
                 del self.Notebook.PageTemplates[CurrentTemplateName]
                 self.UnsavedChanges = True
                 self.PopulateTemplateList()
+                if self.TemplateList.count() == 0:
+                    pass
+                elif CurrentTemplateRow == self.TemplateList.count():
+                    self.TemplateList.setCurrentRow(CurrentTemplateRow - 1)
+                else:
+                    self.TemplateList.setCurrentRow(CurrentTemplateRow)
+
+    def GetTemplateIndexFromName(self, TemplateName):
+        TemplateNames = sorted(self.Notebook.PageTemplates.keys(), key=lambda Template: Template.lower())
+        return TemplateNames.index(TemplateName)
 
     def Done(self):
         self.close()

@@ -1,4 +1,6 @@
 import os
+import gzip
+import json
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
@@ -23,15 +25,24 @@ class SaveAndOpenMixin:
         ActionString = "Save " if not ExportMode else "Export "
         ActionDoneString = "saved" if not ExportMode else "exported"
         Caption = ActionString + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
-        Extension = self.FileExtension if AlternateFileExtension is None else AlternateFileExtension
+        ExtensionWithoutGzip = self.FileExtension if AlternateFileExtension is None else AlternateFileExtension
+        GzipExtension = ".gz"
+        Extension = ExtensionWithoutGzip + ("" if not self.GzipMode else GzipExtension)
         Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + Extension + ")"
         SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs else QFileDialog.getSaveFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
         if SaveFileName != "":
             if not SaveFileName.endswith(Extension):
-                SaveFileName += Extension
+                if SaveFileName.endswith(ExtensionWithoutGzip):
+                    SaveFileName += GzipExtension
+                else:
+                    SaveFileName += Extension
             SaveString = self.JSONSerializer.SerializeDataToJSONString(ObjectToSave) if not SkipSerialization else ObjectToSave
-            with open(SaveFileName, "w") as SaveFile:
-                SaveFile.write(SaveString)
+            if self.GzipMode:
+                with gzip.open(SaveFileName, "wt") as SaveFile:
+                    SaveFile.write(SaveString)
+            else:
+                with open(SaveFileName, "w") as SaveFile:
+                    SaveFile.write(SaveString)
             SaveFileNameShort = os.path.basename(SaveFileName)
             self.LastOpenedDirectory = os.path.dirname(SaveFileName)
             self.FlashStatusBar("File " + ActionDoneString + " as:  " + SaveFileNameShort)
@@ -135,7 +146,7 @@ class SaveAndOpenMixin:
         GzipModeConfig = self.GetResourcePath("GzipMode.cfg")
         if os.path.isfile(GzipModeConfig):
             with open(GzipModeConfig, "r") as OpenedConfig:
-                self.GzipMode = self.JSONSerializer.DeserializeDataFromJSONString(OpenedConfig.read())
+                self.GzipMode = json.loads(OpenedConfig.read())
 
     def SaveLastOpenedDirectory(self):
         from Interface.MainWindow import MainWindow
@@ -151,4 +162,4 @@ class SaveAndOpenMixin:
         assert isinstance(self, MainWindow)
         GzipModeConfig = self.GetResourcePath("GzipMode.cfg")
         with open(GzipModeConfig, "w") as OpenedConfig:
-            OpenedConfig.write(self.JSONSerializer.SerializeDataToJSONString(self.GzipMode))
+            OpenedConfig.write(json.dumps(self.GzipMode))

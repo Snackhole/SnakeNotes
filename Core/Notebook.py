@@ -157,7 +157,7 @@ class Notebook(SerializableMixin):
         return self.PageTemplates[TemplateName]
 
     def GetTemplateNames(self):
-        return sorted(self.PageTemplates.keys())
+        return sorted(self.PageTemplates.keys(), key=lambda TemplateName: TemplateName.lower())
 
     # Search Methods
     def BuildSearchIndex(self):

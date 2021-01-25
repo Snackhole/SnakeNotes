@@ -75,7 +75,7 @@ class TemplateManagerDialog(QDialog):
     def PopulateTemplateList(self):
         self.TemplateList.clear()
         self.TemplateDisplay.clear()
-        for TemplateName, TemplateContent in sorted(self.Notebook.PageTemplates.items()):
+        for TemplateName, TemplateContent in sorted(self.Notebook.PageTemplates.items(), key=lambda Template: Template[0].lower()):
             self.TemplateList.addItem(TemplateListItem(TemplateName, TemplateContent))
         self.TemplateList.setCurrentRow(0)
         self.TemplateList.setFocus()

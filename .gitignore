@@ -11,6 +11,7 @@ venv/
 Versions/
 DisplaySettings.cfg
 Favorites.cfg
+GzipFavorites.cfg
 Keybindings.cfg
 LastOpenedDirectory.cfg
 GzipMode.cfg

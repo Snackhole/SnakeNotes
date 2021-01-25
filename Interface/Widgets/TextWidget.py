@@ -324,6 +324,8 @@ class TextWidget(QTextEdit):
                     else:
                         TopResultIndexPath = SearchResults[0][1]
                         self.SelectionSpanWrap("[", "](" + json.dumps(TopResultIndexPath, indent=None) + ")")
+                else:
+                    self.MainWindow.DisplayMessageBox("No pages with this title found.")
 
     def InsertTable(self):
         if not self.ReadMode and self.hasFocus():

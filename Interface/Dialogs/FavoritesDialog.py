@@ -1,6 +1,6 @@
 import os
 
-from PyQt5.QtWidgets import QDialog, QListWidget, QPushButton, QGridLayout, QListWidgetItem, QMessageBox
+from PyQt5.QtWidgets import QDialog, QInputDialog, QListWidget, QPushButton, QGridLayout, QListWidgetItem, QMessageBox
 
 
 class FavoritesDialog(QDialog):
@@ -67,13 +67,21 @@ class FavoritesDialog(QDialog):
         if CurrentOpenFileName == "":
             self.MainWindow.DisplayMessageBox("Save or open a notebook first.")
             return
-        CurrentOpenFileNameShort = os.path.splitext(os.path.basename(CurrentOpenFileName))[0]
-        if CurrentOpenFileNameShort in self.FavoritesData:
-            if self.MainWindow.DisplayMessageBox("There is already a notebook called " + CurrentOpenFileNameShort + " in your favorites.\n\nOverwrite?", Icon=QMessageBox.Question,
-                                                 Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.No:
+        CurrentModeExtension = ".ntbk" if not self.MainWindow.GzipMode else ".ntbk.gz"
+        if not CurrentOpenFileName.endswith(CurrentModeExtension):
+            self.MainWindow.DisplayMessageBox("The current file must be saved as a " + CurrentModeExtension + " file before it can be added to your favorites for the current mode.")
+            return
+        CurrentOpenFileNameShort = os.path.basename(CurrentOpenFileName)[:-len(CurrentModeExtension)]
+        FavoriteName, OK = QInputDialog.getText(self, "Name Favorite", "Enter a name:", text=CurrentOpenFileNameShort)
+        if OK:
+            if FavoriteName == "":
+                self.MainWindow.DisplayMessageBox("Favorite names cannot be blank.")
                 return
-        self.FavoritesData[CurrentOpenFileNameShort] = CurrentOpenFileName
-        self.PopulateFavoritesList()
+            if FavoriteName in self.FavoritesData:
+                if self.MainWindow.DisplayMessageBox("There is already a notebook called " + FavoriteName + " in your favorites.\n\nOverwrite?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.No:
+                    return
+            self.FavoritesData[FavoriteName] = CurrentOpenFileName
+            self.PopulateFavoritesList()
 
     def DeleteFavorite(self):
         SelectedItems = self.FavoritesList.selectedItems()

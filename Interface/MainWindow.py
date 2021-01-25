@@ -174,6 +174,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ImportPageAction.triggered.connect(self.ImportPage)
         self.ToggleReadModeActionsList.append(self.ImportPageAction)
 
+        self.GzipModeAction = QAction("Gzip Mode (Smaller Files)")
+        self.GzipModeAction.setCheckable(True)
+        self.GzipModeAction.setChecked(self.GzipMode)
+        self.GzipModeAction.triggered.connect(self.ToggleGzipMode)
+
         self.ExitAction = QAction("Exit")
         self.ExitAction.triggered.connect(self.close)
 
@@ -371,6 +376,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.FileMenu.addSeparator()
         self.FileMenu.addAction(self.ExportPageAction)
         self.FileMenu.addAction(self.ImportPageAction)
+        self.FileMenu.addSeparator()
+        self.FileMenu.addAction(self.GzipModeAction)
         self.FileMenu.addSeparator()
         self.FileMenu.addAction(self.ExitAction)
 
@@ -916,6 +923,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SearchWidgetInst.ClearSearch()
         self.ClearBackAndForward()
         self.UpdateUnsavedChangesFlag(False)
+
+    def ToggleGzipMode(self):
+        self.GzipMode = not self.GzipMode
 
     def closeEvent(self, event):
         Close = True

@@ -71,11 +71,15 @@ class SaveAndOpenMixin:
             elif SavePrompt == QMessageBox.Cancel:
                 return None
         Caption = ActionString + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
-        Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + (self.FileExtension if AlternateFileExtension is None else AlternateFileExtension) + ")"
+        Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + (self.FileExtension if AlternateFileExtension is None else AlternateFileExtension) + ("" if not self.GzipMode else ".gz") + ")"
         OpenFileName = FilePath if FilePath is not None else QFileDialog.getOpenFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
         if OpenFileName != "":
-            with open(OpenFileName, "r") as LoadFile:
-                JSONString = LoadFile.read()
+            if self.GzipMode:
+                with gzip.open(OpenFileName, "rt") as LoadFile:
+                    JSONString = LoadFile.read()
+            else:
+                with open(OpenFileName, "r") as LoadFile:
+                    JSONString = LoadFile.read()
             OpenFileNameShort = os.path.basename(OpenFileName)
             try:
                 Data = self.JSONSerializer.DeserializeDataFromJSONString(JSONString)

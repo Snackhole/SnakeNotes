@@ -35,6 +35,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.BackMaximum = 50
         self.ForwardList = []
         self.BackNavigation = False
+        self.AutoScrollQueue = None
 
         # Set Up Save and Open
         self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
@@ -597,7 +598,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if not self.BackNavigation and self.TextWidgetInst.ReadMode:
             PreviousPageIndexPath = self.TextWidgetInst.CurrentPage["IndexPath"]
             PreviousPageScrollPosition = self.TextWidgetInst.verticalScrollBar().value()
-            PreviousPageData = (PreviousPageIndexPath, PreviousPageScrollPosition)
+            PreviousPageScrollMaximum = self.TextWidgetInst.verticalScrollBar().maximum()
+            PreviousPageData = (PreviousPageIndexPath, PreviousPageScrollPosition, PreviousPageScrollMaximum)
             if self.BackList != []:
                 if self.BackList[-1][0] != PreviousPageIndexPath:
                     self.BackList.append(PreviousPageData)
@@ -620,13 +622,17 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.BackNavigation = True
             TargetPageIndexPath = self.BackList[-1][0]
             TargetPageScrollPosition = self.BackList[-1][1]
+            TargetPageScrollMaximum = self.BackList[-1][2]
+            self.AutoScrollQueue = {}
+            self.AutoScrollQueue["TargetScrollPosition"] = TargetPageScrollPosition
+            self.AutoScrollQueue["ScrollBarMaximum"] = TargetPageScrollMaximum
             del self.BackList[-1]
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
             CurrentPageScrollPosition = self.TextWidgetInst.verticalScrollBar().value()
-            CurrentPageData = (CurrentPageIndexPath, CurrentPageScrollPosition)
+            CurrentPageScrollMaximum = self.TextWidgetInst.verticalScrollBar().maximum()
+            CurrentPageData = (CurrentPageIndexPath, CurrentPageScrollPosition, CurrentPageScrollMaximum)
             self.ForwardList.append(CurrentPageData)
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
-            self.TextWidgetInst.verticalScrollBar().setValue(TargetPageScrollPosition)
             self.BackNavigation = False
 
     def Forward(self):
@@ -634,13 +640,17 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.BackNavigation = True
             TargetPageIndexPath = self.ForwardList[-1][0]
             TargetPageScrollPosition = self.ForwardList[-1][1]
+            TargetPageScrollMaximum = self.ForwardList[-1][2]
+            self.AutoScrollQueue = {}
+            self.AutoScrollQueue["TargetScrollPosition"] = TargetPageScrollPosition
+            self.AutoScrollQueue["ScrollBarMaximum"] = TargetPageScrollMaximum
             del self.ForwardList[-1]
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
             CurrentPageScrollPosition = self.TextWidgetInst.verticalScrollBar().value()
-            CurrentPageData = (CurrentPageIndexPath, CurrentPageScrollPosition)
+            CurrentPageScrollMaximum = self.TextWidgetInst.verticalScrollBar().maximum()
+            CurrentPageData = (CurrentPageIndexPath, CurrentPageScrollPosition, CurrentPageScrollMaximum)
             self.BackList.append(CurrentPageData)
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
-            self.TextWidgetInst.verticalScrollBar().setValue(TargetPageScrollPosition)
             self.BackNavigation = False
 
     def NewPage(self):

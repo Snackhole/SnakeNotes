@@ -39,6 +39,9 @@ class TextWidget(QTextEdit):
         # Set Style Sheet
         self.setStyleSheet("selection-background-color: rgb(0, 120, 215); selection-color: white")
 
+        # Set Up Auto Scrolling Method
+        self.verticalScrollBar().rangeChanged.connect(self.AutoScroll)
+
     def UpdateText(self):
         self.DisplayChanging = True
         if self.ReadMode:
@@ -58,6 +61,12 @@ class TextWidget(QTextEdit):
         self.ReadMode = ReadMode
         self.setReadOnly(self.ReadMode)
         self.UpdateText()
+    
+    def AutoScroll(self):
+        if self.MainWindow.AutoScrollQueue is not None:
+            if self.verticalScrollBar().maximum() == self.MainWindow.AutoScrollQueue["ScrollBarMaximum"]:
+                self.verticalScrollBar().setValue(self.MainWindow.AutoScrollQueue["TargetScrollPosition"])
+                self.MainWindow.AutoScrollQueue = None
 
     # Internal Text and Cursor Methods
     def SelectionSpanWrap(self, WrapPrefix, WrapSuffix):

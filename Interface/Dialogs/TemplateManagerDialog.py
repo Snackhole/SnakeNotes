@@ -26,6 +26,8 @@ class TemplateManagerDialog(QDialog):
         # Buttons
         self.AddTemplateButton = QPushButton("Add")
         self.AddTemplateButton.clicked.connect(self.AddTemplate)
+        self.EditTemplateButton = QPushButton("Edit")
+        self.EditTemplateButton.clicked.connect(self.EditTemplate)
         self.RenameTemplateButton = QPushButton("Rename")
         self.RenameTemplateButton.clicked.connect(self.RenameTemplate)
         self.DeleteTemplateButton = QPushButton("Delete")
@@ -36,9 +38,10 @@ class TemplateManagerDialog(QDialog):
         # Create, Populate, and Set Layout
         self.ButtonLayout = QGridLayout()
         self.ButtonLayout.addWidget(self.AddTemplateButton, 0, 0)
-        self.ButtonLayout.addWidget(self.RenameTemplateButton, 0, 1)
-        self.ButtonLayout.addWidget(self.DeleteTemplateButton, 0, 2)
-        self.ButtonLayout.addWidget(self.DoneButton, 0, 3)
+        self.ButtonLayout.addWidget(self.EditTemplateButton, 0, 1)
+        self.ButtonLayout.addWidget(self.RenameTemplateButton, 0, 2)
+        self.ButtonLayout.addWidget(self.DeleteTemplateButton, 0, 3)
+        self.ButtonLayout.addWidget(self.DoneButton, 0, 4)
 
         self.Splitter = QSplitter()
         self.Splitter.addWidget(self.TemplateList)
@@ -83,6 +86,19 @@ class TemplateManagerDialog(QDialog):
             self.Notebook.AddTemplate(AddTemplateDialogInst.TemplateNameString, AddTemplateDialogInst.TemplateString)
             self.UnsavedChanges = True
             self.PopulateTemplateList()
+    
+    def EditTemplate(self):
+        SelectedItems = self.TemplateList.selectedItems()
+        if len(SelectedItems) > 0:
+            CurrentTemplateName = SelectedItems[0].TemplateName
+            CurrentTemplateContent = SelectedItems[0].TemplateContent
+            CurrentRow = self.TemplateList.currentRow()
+            EditTemplateDialogInst = AddTemplateDialog(self.Notebook, self.MainWindow, self, EditMode=True, TemplateTitle=CurrentTemplateName, TemplateContent=CurrentTemplateContent)
+            if EditTemplateDialogInst.TemplateAdded:
+                self.Notebook.PageTemplates[CurrentTemplateName] = EditTemplateDialogInst.TemplateString
+                self.UnsavedChanges = True
+                self.PopulateTemplateList()
+                self.TemplateList.setCurrentRow(CurrentRow)
 
     def RenameTemplate(self):
         SelectedItems = self.TemplateList.selectedItems()
@@ -105,8 +121,7 @@ class TemplateManagerDialog(QDialog):
         SelectedItems = self.TemplateList.selectedItems()
         if len(SelectedItems) > 0:
             CurrentTemplateName = SelectedItems[0].TemplateName
-            if self.MainWindow.DisplayMessageBox("Are you sure you want to delete the template " + CurrentTemplateName + " from the notebook?  This cannot be undone.", Icon=QMessageBox.Question,
-                                                 Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+            if self.MainWindow.DisplayMessageBox("Are you sure you want to delete the template " + CurrentTemplateName + " from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
                 del self.Notebook.PageTemplates[CurrentTemplateName]
                 self.UnsavedChanges = True
                 self.PopulateTemplateList()
@@ -131,12 +146,15 @@ class TemplateListItem(QListWidgetItem):
 
 
 class AddTemplateDialog(QDialog):
-    def __init__(self, Notebook, MainWindow, Parent):
+    def __init__(self, Notebook, MainWindow, Parent, EditMode=False, TemplateTitle="", TemplateContent=""):
         super().__init__(parent=Parent)
 
         # Store Parameters
         self.Notebook = Notebook
         self.MainWindow = MainWindow
+        self.EditMode = EditMode
+        self.TemplateTitle = TemplateTitle
+        self.TemplateContent = TemplateContent
 
         # Variables
         self.TemplateAdded = False
@@ -149,9 +167,13 @@ class AddTemplateDialog(QDialog):
 
         # Template Title
         self.TemplateName = QLineEdit()
+        self.TemplateName.setText(self.TemplateTitle)
+        if self.EditMode:
+            self.TemplateName.setEnabled(False)
 
         # Template Text
         self.TemplateText = QTextEdit()
+        self.TemplateText.setPlainText(self.TemplateContent)
         self.TemplateText.setTabChangesFocus(True)
         self.TemplateText.setStyleSheet("selection-background-color: rgb(0, 120, 215); selection-color: white")
 
@@ -174,7 +196,7 @@ class AddTemplateDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.MainWindow.ScriptName)
+        self.setWindowTitle("Add Template" if not self.EditMode else "Edit Template")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog
@@ -185,9 +207,8 @@ class AddTemplateDialog(QDialog):
         if TemplateNameString == "":
             self.MainWindow.DisplayMessageBox("Template names cannot be blank.", Parent=self)
             return
-        if TemplateNameString in self.Notebook.PageTemplates:
-            if self.MainWindow.DisplayMessageBox("A template by this name already exists in the notebook.\n\nOverwrite existing template?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No),
-                                                 Parent=self) == QMessageBox.No:
+        if TemplateNameString in self.Notebook.PageTemplates and not self.EditMode:
+            if self.MainWindow.DisplayMessageBox("A template by this name already exists in the notebook.\n\nOverwrite existing template?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.No:
                 return
         self.TemplateAdded = True
         self.TemplateNameString = TemplateNameString

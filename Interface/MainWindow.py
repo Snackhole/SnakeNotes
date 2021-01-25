@@ -532,6 +532,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.FavoritesData = json.loads(ConfigFile.read())
         else:
             self.FavoritesData = {}
+        GzipFavoritesFile = self.GetResourcePath("GzipFavorites.cfg")
+        if os.path.isfile(GzipFavoritesFile):
+            with open(GzipFavoritesFile, "r") as ConfigFile:
+                self.GzipFavoritesData = json.loads(ConfigFile.read())
+        else:
+            self.GzipFavoritesData = {}
 
         # Display Settings
         DisplaySettingsFile = self.GetResourcePath("DisplaySettings.cfg")
@@ -571,6 +577,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Favorites
         with open(self.GetResourcePath("Favorites.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
+        with open(self.GetResourcePath("GzipFavorites.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.GzipFavoritesData, indent=2))
 
         # Display Settings
         DisplaySettings = {}
@@ -909,7 +917,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.UpdateWindowTitle()
 
     def Favorites(self):
-        FavoritesDialogInst = FavoritesDialog(self.FavoritesData, self)
+        FavoritesDialogInst = FavoritesDialog(self.FavoritesData if not self.GzipMode else self.GzipFavoritesData, self)
         if FavoritesDialogInst.OpenFilePath is not None:
             self.OpenActionTriggered(FavoritesDialogInst.OpenFilePath)
 

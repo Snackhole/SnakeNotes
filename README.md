@@ -29,6 +29,13 @@ If SerpentNotes does not run at first, you probably need to resolve some depende
 ## Keybindings
 Note that, after the first startup, there will be a `Keybindings.cfg` file in the installation directory.  This file can be used to alter the keybindings for various actions in the app.  This is not intended as a feature for regular users, but rather as a workaround in case of conflicts with the user's operating system, so it is not documented thoroughly and there is no user interface provided.  If you want to alter your keybindings, you'll need to know how to format the shortcut string properly in the config file, which you can work out by looking at the existing shortcut strings.  If you format the shortcut improperly, the app will still run but the action will have no keybinding assigned.
 
+## Gzip Mode
+SerpentNotes saves `.ntbk` files as plain-text JSON by default, but is also capable of using Python's built-in `gzip` module to save and load compressed `.ntbk.gz` files.  There is a toggle to enable or disable this mode in the File menu.  When enabled, the save and open dialogs will look for `.ntbk.gz` files instead of `.ntbk`, and the favorites dialog will use a separate set of favorites (stored in `GzipFavorites.cfg` instead of `Favorites.cfg`).  The gzip mode is mostly useful if you have a notebook with lots of images.  To store images as plain text in JSON, SerpentNotes converts them to base64, which creates significant storage space overhead, though the gzip compression can offset this quite a lot, and even overcome it entirely.  (For example, a 22MB `.ntbk` file might be saved as a `.ntbk.gz` file of around 14MB.)
+
+To save an existing `.ntbk` file as a `.ntbk.gz` file, just open it, turn on gzip mode, and save it.  To save a `.ntbk.gz` file as a `.ntbk` file, just do the reverse, turning gzip mode off.  Gzipped notebooks can also be uncompressed with any archive program that handles `.gz` files, and the resulting file will be a perfectly functional `.ntbk` file.
+
+It can take noticeably longer to save and open larger notebooks in gzip mode, due to the compression.
+
 ## Updates
 Updating SerpentNotes is as simple as deleting all files wherever you installed it *except* .cfg files, and then extracting the contents of the latest release to the same folder.  Any shortcuts in place should resolve without issue to the updated version.
 

@@ -102,8 +102,7 @@ class ImageManagerDialog(QDialog):
         if ImageFilePath != "":
             ImageFileName = os.path.basename(ImageFilePath)
             if self.Notebook.HasImage(ImageFileName):
-                if self.MainWindow.DisplayMessageBox("A file named \"" + ImageFileName + "\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No),
-                                                     Parent=self) == QMessageBox.Yes:
+                if self.MainWindow.DisplayMessageBox("A file named \"" + ImageFileName + "\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
                     AttachNewFile = True
             else:
                 AttachNewFile = True
@@ -144,8 +143,7 @@ class ImageManagerDialog(QDialog):
         SelectedItems = self.ImageList.selectedItems()
         if len(SelectedItems) > 0:
             CurrentFileName = SelectedItems[0].FileName
-            if self.MainWindow.DisplayMessageBox("Are you sure you want to delete " + CurrentFileName + " from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No),
-                                                 Parent=self) == QMessageBox.Yes:
+            if self.MainWindow.DisplayMessageBox("Are you sure you want to delete " + CurrentFileName + " from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
                 del self.Notebook.Images[CurrentFileName]
                 self.UnsavedChanges = True
                 self.PopulateImageList()

@@ -29,7 +29,8 @@ class SaveAndOpenMixin:
         GzipExtension = ".gz"
         Extension = ExtensionWithoutGzip + ("" if not self.GzipMode else GzipExtension)
         Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + Extension + ")"
-        SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs else QFileDialog.getSaveFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
+        ModeAndExtensionMatch = (self.CurrentOpenFileName.endswith(".ntbk") and not self.GzipMode) or (self.CurrentOpenFileName.endswith(".ntbk.gz") and self.GzipMode)
+        SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs and ModeAndExtensionMatch else QFileDialog.getSaveFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
         if SaveFileName != "":
             if not SaveFileName.endswith(Extension):
                 if SaveFileName.endswith(ExtensionWithoutGzip):

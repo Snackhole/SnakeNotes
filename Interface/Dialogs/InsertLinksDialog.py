@@ -36,6 +36,9 @@ class InsertLinksDialog(QDialog):
         self.SearchLineEdit.textChanged.connect(self.PopulateNotebookDisplay)
         self.SearchLineEdit.setFocus()
 
+        # Match Case Check Box
+        self.MatchCaseCheckBox = QCheckBox("Match Case")
+
         # Notebook Display
         self.NotebookDisplay = QTreeWidget()
         self.NotebookDisplay.setHeaderHidden(True)
@@ -64,7 +67,10 @@ class InsertLinksDialog(QDialog):
 
         # Create, Populate, and Set Layout
         self.Layout = QGridLayout()
-        self.Layout.addWidget(self.SearchLineEdit, 0, 0, 1, 3)
+        self.SearchLayout = QGridLayout()
+        self.SearchLayout.addWidget(self.SearchLineEdit, 0, 0)
+        self.SearchLayout.addWidget(self.MatchCaseCheckBox, 0, 1)
+        self.Layout.addLayout(self.SearchLayout, 0, 0, 1, 3)
         self.NotebookDisplayLayout = QGridLayout()
         self.NotebookDisplayLayout.addWidget(self.NotebookDisplay, 0, 0)
         self.NotebookDisplayLayout.addWidget(self.PreviewTextEdit, 0, 1)
@@ -114,7 +120,8 @@ class InsertLinksDialog(QDialog):
         if SearchTerm == "":
             self.FillNotebookWidgetItem(self.NotebookDisplay.invisibleRootItem(), self.Notebook.RootPage, IsRootPage=True)
         else:
-            SearchResults = self.Notebook.GetSearchResults(SearchTerm)
+            MatchCase = self.MatchCaseCheckBox.isChecked()
+            SearchResults = self.Notebook.GetSearchResults(SearchTerm, MatchCase=MatchCase)
             self.FillNotebookWidgetItemFromSearchResults(SearchResults)
 
     def FillNotebookWidgetItem(self, CurrentTreeItem, CurrentPage, IsRootPage=False):

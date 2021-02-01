@@ -1,4 +1,7 @@
-from PyQt5.QtWidgets import QDialog, QLineEdit, QTreeWidget, QHeaderView, QTreeWidgetItem, QGridLayout, QPushButton, QCheckBox, QLabel, QComboBox
+import mistune
+from PyQt5.QtWidgets import QDialog, QLineEdit, QTextEdit, QTreeWidget, QHeaderView, QTreeWidgetItem, QGridLayout, QPushButton, QCheckBox, QLabel, QComboBox
+
+from Core import MarkdownRenderers
 
 
 class InsertLinksDialog(QDialog):
@@ -7,6 +10,10 @@ class InsertLinksDialog(QDialog):
         self.Notebook = Notebook
         self.MainWindow = MainWindow
         self.Parent = Parent
+
+        # Create Markdown Parser
+        self.Renderer = MarkdownRenderers.Renderer(self.Notebook)
+        self.MarkdownParser = mistune.Markdown(renderer=self.Renderer)
 
         # QDialog Init
         super().__init__(parent=self.Parent)
@@ -34,6 +41,11 @@ class InsertLinksDialog(QDialog):
         self.NotebookDisplay.setHeaderHidden(True)
         self.NotebookDisplay.header().setStretchLastSection(False)
         self.NotebookDisplay.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.NotebookDisplay.itemSelectionChanged.connect(self.UpdatePreview)
+
+        # Preview Text Edit
+        self.PreviewTextEdit = QTextEdit()
+        self.PreviewTextEdit.setReadOnly(True)
 
         # Insert Sub Page Links Check Box
         self.InsertSubPageLinksCheckBox = QCheckBox("Insert Sub Page Links")
@@ -53,7 +65,11 @@ class InsertLinksDialog(QDialog):
         # Create, Populate, and Set Layout
         self.Layout = QGridLayout()
         self.Layout.addWidget(self.SearchLineEdit, 0, 0, 1, 3)
-        self.Layout.addWidget(self.NotebookDisplay, 1, 0, 1, 3)
+        self.NotebookDisplayLayout = QGridLayout()
+        self.NotebookDisplayLayout.addWidget(self.NotebookDisplay, 0, 0)
+        self.NotebookDisplayLayout.addWidget(self.PreviewTextEdit, 0, 1)
+        self.NotebookDisplayLayout.setColumnStretch(1, 1)
+        self.Layout.addLayout(self.NotebookDisplayLayout, 1, 0, 1, 3)
         self.Layout.addWidget(self.InsertSubPageLinksCheckBox, 2, 0)
         self.Layout.addWidget(self.SubPageLinksSeparatorLabel, 2, 1)
         self.Layout.addWidget(self.SubPageLinksSeparatorComboBox, 2, 2)
@@ -115,7 +131,7 @@ class InsertLinksDialog(QDialog):
         if IsRootPage:
             ChildTreeItem.setExpanded(True)
             self.NotebookDisplay.setCurrentIndex(self.NotebookDisplay.model().index(0, 0))
-    
+
     def FillNotebookWidgetItemFromSearchResults(self, SearchResults):
         for Result in SearchResults:
             CurrentPage = self.Notebook.GetPageFromIndexPath(Result[1])
@@ -125,6 +141,17 @@ class InsertLinksDialog(QDialog):
             ChildTreeItem = NotebookDisplayItem(Result[0], Result[1], SubPageIndexPaths)
             self.NotebookDisplay.invisibleRootItem().addChild(ChildTreeItem)
         self.NotebookDisplay.setCurrentIndex(self.NotebookDisplay.model().index(0, 0))
+
+    def UpdatePreview(self):
+        self.PreviewTextEdit.clear()
+        SelectedItems = self.NotebookDisplay.selectedItems()
+        if len(SelectedItems) < 1:
+            return
+        SelectedItem = SelectedItems[0]
+        CurrentPage = self.Notebook.GetPageFromIndexPath(SelectedItem.IndexPath)
+        DisplayText = MarkdownRenderers.ConstructMarkdownStringFromPage(CurrentPage, self.Notebook)
+        HTMLText = self.MarkdownParser(DisplayText)
+        self.PreviewTextEdit.setHtml(HTMLText)
 
     def Resize(self):
         self.resize(self.Width, self.Height)

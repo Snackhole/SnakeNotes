@@ -38,6 +38,7 @@ class InsertLinksDialog(QDialog):
 
         # Match Case Check Box
         self.MatchCaseCheckBox = QCheckBox("Match Case")
+        self.MatchCaseCheckBox.stateChanged.connect(self.PopulateNotebookDisplay)
 
         # Notebook Display
         self.NotebookDisplay = QTreeWidget()

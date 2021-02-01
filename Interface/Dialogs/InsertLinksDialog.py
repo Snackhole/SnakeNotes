@@ -87,7 +87,7 @@ class InsertLinksDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.MainWindow.ScriptName)
+        self.setWindowTitle("Insert Link(s)")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize

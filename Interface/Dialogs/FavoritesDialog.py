@@ -41,7 +41,7 @@ class FavoritesDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.MainWindow.ScriptName + " Favorites")
+        self.setWindowTitle("Favorites")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize

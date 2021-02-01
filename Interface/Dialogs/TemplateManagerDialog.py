@@ -54,7 +54,7 @@ class TemplateManagerDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.MainWindow.ScriptName + " Template Manager")
+        self.setWindowTitle("Template Manager")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize

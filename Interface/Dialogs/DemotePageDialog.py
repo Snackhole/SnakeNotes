@@ -36,7 +36,7 @@ class DemotePageDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.MainWindow.ScriptName)
+        self.setWindowTitle("Demote Page")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog

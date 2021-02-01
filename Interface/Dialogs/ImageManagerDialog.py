@@ -83,7 +83,7 @@ class ImageManagerDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.MainWindow.ScriptName + " Image Manager")
+        self.setWindowTitle("Image Manager")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize

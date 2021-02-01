@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QTreeWidget, QHeaderView, QTreeWidgetItem, QGridLayout, QPushButton, QCheckBox, QLabel, QComboBox
+from PyQt5.QtWidgets import QDialog, QLineEdit, QTreeWidget, QHeaderView, QTreeWidgetItem, QGridLayout, QPushButton, QCheckBox, QLabel, QComboBox
 
 
 class InsertLinksDialog(QDialog):
@@ -23,6 +23,12 @@ class InsertLinksDialog(QDialog):
         self.Width = max(self.Parent.width() - 100, 100)
         self.Height = max(self.Parent.height() - 100, 100)
 
+        # Search Line Edit
+        self.SearchLineEdit = QLineEdit()
+        self.SearchLineEdit.setPlaceholderText("Search")
+        self.SearchLineEdit.textChanged.connect(self.PopulateNotebookDisplay)
+        self.SearchLineEdit.setFocus()
+
         # Notebook Display
         self.NotebookDisplay = QTreeWidget()
         self.NotebookDisplay.setHeaderHidden(True)
@@ -46,14 +52,15 @@ class InsertLinksDialog(QDialog):
 
         # Create, Populate, and Set Layout
         self.Layout = QGridLayout()
-        self.Layout.addWidget(self.NotebookDisplay, 0, 0, 1, 3)
-        self.Layout.addWidget(self.InsertSubPageLinksCheckBox, 1, 0)
-        self.Layout.addWidget(self.SubPageLinksSeparatorLabel, 1, 1)
-        self.Layout.addWidget(self.SubPageLinksSeparatorComboBox, 1, 2)
+        self.Layout.addWidget(self.SearchLineEdit, 0, 0, 1, 3)
+        self.Layout.addWidget(self.NotebookDisplay, 1, 0, 1, 3)
+        self.Layout.addWidget(self.InsertSubPageLinksCheckBox, 2, 0)
+        self.Layout.addWidget(self.SubPageLinksSeparatorLabel, 2, 1)
+        self.Layout.addWidget(self.SubPageLinksSeparatorComboBox, 2, 2)
         self.ButtonsLayout = QGridLayout()
         self.ButtonsLayout.addWidget(self.InsertButton, 0, 0)
         self.ButtonsLayout.addWidget(self.CancelButton, 0, 1)
-        self.Layout.addLayout(self.ButtonsLayout, 2, 0, 1, 3)
+        self.Layout.addLayout(self.ButtonsLayout, 3, 0, 1, 3)
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
@@ -86,9 +93,13 @@ class InsertLinksDialog(QDialog):
         self.close()
 
     def PopulateNotebookDisplay(self):
+        SearchTerm = self.SearchLineEdit.text()
         self.NotebookDisplay.clear()
-        self.FillNotebookWidgetItem(self.NotebookDisplay.invisibleRootItem(), self.Notebook.RootPage, IsRootPage=True)
-        self.NotebookDisplay.setFocus()
+        if SearchTerm == "":
+            self.FillNotebookWidgetItem(self.NotebookDisplay.invisibleRootItem(), self.Notebook.RootPage, IsRootPage=True)
+        else:
+            SearchResults = self.Notebook.GetSearchResults(SearchTerm)
+            self.FillNotebookWidgetItemFromSearchResults(SearchResults)
 
     def FillNotebookWidgetItem(self, CurrentTreeItem, CurrentPage, IsRootPage=False):
         SubPageIndexPaths = []
@@ -104,6 +115,16 @@ class InsertLinksDialog(QDialog):
         if IsRootPage:
             ChildTreeItem.setExpanded(True)
             self.NotebookDisplay.setCurrentIndex(self.NotebookDisplay.model().index(0, 0))
+    
+    def FillNotebookWidgetItemFromSearchResults(self, SearchResults):
+        for Result in SearchResults:
+            CurrentPage = self.Notebook.GetPageFromIndexPath(Result[1])
+            SubPageIndexPaths = []
+            for SubPage in CurrentPage["SubPages"]:
+                SubPageIndexPaths.append((SubPage["Title"], SubPage["IndexPath"]))
+            ChildTreeItem = NotebookDisplayItem(Result[0], Result[1], SubPageIndexPaths)
+            self.NotebookDisplay.invisibleRootItem().addChild(ChildTreeItem)
+        self.NotebookDisplay.setCurrentIndex(self.NotebookDisplay.model().index(0, 0))
 
     def Resize(self):
         self.resize(self.Width, self.Height)

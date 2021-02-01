@@ -134,6 +134,7 @@ class ImageManagerDialog(QDialog):
             self.Notebook.AddImage(ImageFilePath)
             self.UnsavedChanges = True
             self.PopulateImageList()
+            self.ImageList.setCurrentRow(self.GetImageIndexFromName(os.path.basename(ImageFilePath)))
 
     def RenameImage(self):
         SelectedItems = self.ImageList.selectedItems()
@@ -154,6 +155,7 @@ class ImageManagerDialog(QDialog):
                     self.MainWindow.SearchWidgetInst.ReplaceAllInNotebook(SearchText="](" + CurrentFileName + CurrentFileExtension + ")", ReplaceText="](" + NewName + CurrentFileExtension + ")", MatchCase=True)
                     self.UnsavedChanges = True
                     self.PopulateImageList()
+                    self.ImageList.setCurrentRow(self.GetImageIndexFromName(NewName + CurrentFileExtension))
 
     def ExportImage(self):
         SelectedItems = self.ImageList.selectedItems()
@@ -168,10 +170,21 @@ class ImageManagerDialog(QDialog):
         SelectedItems = self.ImageList.selectedItems()
         if len(SelectedItems) > 0:
             CurrentFileName = SelectedItems[0].FileName
+            CurrentImageRow = self.ImageList.currentRow()
             if self.MainWindow.DisplayMessageBox("Are you sure you want to delete " + CurrentFileName + " from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
                 del self.Notebook.Images[CurrentFileName]
                 self.UnsavedChanges = True
                 self.PopulateImageList()
+                if self.ImageList.count() == 0:
+                    pass
+                elif CurrentImageRow == self.ImageList.count():
+                    self.ImageList.setCurrentRow(CurrentImageRow - 1)
+                else:
+                    self.ImageList.setCurrentRow(CurrentImageRow)
+    
+    def GetImageIndexFromName(self, ImageName):
+        ImageNames = sorted(self.Notebook.Images.keys(), key=lambda Image: Image.lower())
+        return ImageNames.index(ImageName)
 
     def Done(self):
         self.close()

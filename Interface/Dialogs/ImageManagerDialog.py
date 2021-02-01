@@ -115,7 +115,7 @@ class ImageManagerDialog(QDialog):
     def PopulateImageList(self):
         self.ImageList.clear()
         self.ImageDisplay.clear()
-        for FileName, Base64String in sorted(self.Notebook.Images.items()):
+        for FileName, Base64String in sorted(self.Notebook.Images.items(), key=lambda Image: Image[0].lower()):
             self.ImageList.addItem(ImageListItem(FileName, Base64String))
         self.ImageList.setCurrentRow(0)
         self.ImageList.setFocus()

@@ -1,7 +1,8 @@
 import os
+from PyQt5 import QtCore
 
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QDialog, QGridLayout, QListWidget, QPushButton, QListWidgetItem, QLabel, QFileDialog, QMessageBox, QScrollArea, QSplitter, QInputDialog
+from PyQt5.QtWidgets import QDialog, QFrame, QGridLayout, QListWidget, QPushButton, QListWidgetItem, QLabel, QFileDialog, QMessageBox, QScrollArea, QSplitter, QInputDialog
 
 from Core import Base64Converters
 
@@ -29,6 +30,16 @@ class ImageManagerDialog(QDialog):
         self.ImageList = QListWidget()
         self.ImageList.itemSelectionChanged.connect(self.ItemSelected)
 
+        # Linking Pages Frame
+        self.LinkingPagesFrame = QFrame()
+
+        # Linking Pages Label
+        self.LinkingPagesLabel = QLabel("Linking Pages")
+        self.LinkingPagesLabel.setAlignment(QtCore.Qt.AlignHCenter)
+
+        # Linking Pages List
+        self.LinkingPagesList = QListWidget()
+
         # Image Display
         self.ImageDisplay = QLabel()
 
@@ -45,20 +56,26 @@ class ImageManagerDialog(QDialog):
         self.DoneButton.clicked.connect(self.Done)
 
         # Create, Populate, and Set Layout
+        self.ImageDisplayScrollArea = QScrollArea()
+        self.ImageDisplayScrollArea.setWidget(self.ImageDisplay)
+
+        self.LinkingPagesLayout = QGridLayout()
+        self.LinkingPagesLayout.addWidget(self.LinkingPagesLabel, 0, 0)
+        self.LinkingPagesLayout.addWidget(self.LinkingPagesList, 1, 0)
+        self.LinkingPagesFrame.setLayout(self.LinkingPagesLayout)
+
+        self.Splitter = QSplitter()
+        self.Splitter.addWidget(self.ImageList)
+        self.Splitter.addWidget(self.ImageDisplayScrollArea)
+        self.Splitter.addWidget(self.LinkingPagesFrame)
+        self.Splitter.setStretchFactor(1, 1)
+
         self.ButtonLayout = QGridLayout()
         self.ButtonLayout.addWidget(self.AddImageButton, 0, 0)
         self.ButtonLayout.addWidget(self.RenameImageButton, 0, 1)
         self.ButtonLayout.addWidget(self.ExportImageButton, 0, 2)
         self.ButtonLayout.addWidget(self.DeleteImageButton, 0, 3)
         self.ButtonLayout.addWidget(self.DoneButton, 0, 4)
-
-        self.ImageDisplayScrollArea = QScrollArea()
-        self.ImageDisplayScrollArea.setWidget(self.ImageDisplay)
-
-        self.Splitter = QSplitter()
-        self.Splitter.addWidget(self.ImageList)
-        self.Splitter.addWidget(self.ImageDisplayScrollArea)
-        self.Splitter.setStretchFactor(1, 1)
 
         self.Layout = QGridLayout()
         self.Layout.addWidget(self.Splitter, 0, 0)
@@ -87,6 +104,13 @@ class ImageManagerDialog(QDialog):
             ImagePixmap.loadFromData(CurrentFileBinary)
             self.ImageDisplay.setPixmap(ImagePixmap)
             self.ImageDisplay.resize(self.ImageDisplay.pixmap().size())
+            CurrentFileName = SelectedItems[0].FileName
+            SearchTerm = "](" + CurrentFileName + ")"
+            SearchResults = self.Notebook.GetSearchResults(SearchTerm, MatchCase=True)
+            self.LinkingPagesList.clear()
+            for Result in SearchResults:
+                LinkingPagesListItem = QListWidgetItem(Result[0])
+                self.LinkingPagesList.addItem(LinkingPagesListItem)
 
     def PopulateImageList(self):
         self.ImageList.clear()

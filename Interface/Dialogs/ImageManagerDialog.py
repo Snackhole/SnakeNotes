@@ -56,29 +56,25 @@ class ImageManagerDialog(QDialog):
         self.DoneButton.clicked.connect(self.Done)
 
         # Create, Populate, and Set Layout
+        self.Layout = QGridLayout()
+        self.Splitter = QSplitter()
+        self.Splitter.addWidget(self.ImageList)
         self.ImageDisplayScrollArea = QScrollArea()
         self.ImageDisplayScrollArea.setWidget(self.ImageDisplay)
-
+        self.Splitter.addWidget(self.ImageDisplayScrollArea)
         self.LinkingPagesLayout = QGridLayout()
         self.LinkingPagesLayout.addWidget(self.LinkingPagesLabel, 0, 0)
         self.LinkingPagesLayout.addWidget(self.LinkingPagesList, 1, 0)
         self.LinkingPagesFrame.setLayout(self.LinkingPagesLayout)
-
-        self.Splitter = QSplitter()
-        self.Splitter.addWidget(self.ImageList)
-        self.Splitter.addWidget(self.ImageDisplayScrollArea)
         self.Splitter.addWidget(self.LinkingPagesFrame)
         self.Splitter.setStretchFactor(1, 1)
-
+        self.Layout.addWidget(self.Splitter, 0, 0)
         self.ButtonLayout = QGridLayout()
         self.ButtonLayout.addWidget(self.AddImageButton, 0, 0)
         self.ButtonLayout.addWidget(self.RenameImageButton, 0, 1)
         self.ButtonLayout.addWidget(self.ExportImageButton, 0, 2)
         self.ButtonLayout.addWidget(self.DeleteImageButton, 0, 3)
         self.ButtonLayout.addWidget(self.DoneButton, 0, 4)
-
-        self.Layout = QGridLayout()
-        self.Layout.addWidget(self.Splitter, 0, 0)
         self.Layout.addLayout(self.ButtonLayout, 1, 0)
         self.setLayout(self.Layout)
 
@@ -181,7 +177,7 @@ class ImageManagerDialog(QDialog):
                     self.ImageList.setCurrentRow(CurrentImageRow - 1)
                 else:
                     self.ImageList.setCurrentRow(CurrentImageRow)
-    
+
     def GetImageIndexFromName(self, ImageName):
         ImageNames = sorted(self.Notebook.Images.keys(), key=lambda Image: Image.lower())
         return ImageNames.index(ImageName)

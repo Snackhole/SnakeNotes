@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QTextEdit, QInputDialog, QMessageBox
 from Core import MarkdownRenderers
 from Interface.Dialogs.InsertLinksDialog import InsertLinksDialog
 from Interface.Dialogs.InsertTableDialog import InsertTableDialog, TableDimensionsDialog
+from Interface.Dialogs.InsertImageDialog import InsertImageDialog
 
 
 class TextWidget(QTextEdit):
@@ -61,7 +62,7 @@ class TextWidget(QTextEdit):
         self.ReadMode = ReadMode
         self.setReadOnly(self.ReadMode)
         self.UpdateText()
-    
+
     def AutoScroll(self):
         if self.MainWindow.AutoScrollQueue is not None:
             if self.verticalScrollBar().maximum() == self.MainWindow.AutoScrollQueue["ScrollBarMaximum"]:
@@ -340,13 +341,12 @@ class TextWidget(QTextEdit):
 
     def InsertImage(self):
         if not self.ReadMode and self.hasFocus():
-            AttachedImages = self.Notebook.GetImageNames()
-            if len(AttachedImages) < 1:
+            if len(self.Notebook.Images) < 1:
                 self.MainWindow.DisplayMessageBox("No images are attached to the notebook.\n\nUse the Image Manager in the Notebook menu to add images to the notebook.")
             else:
-                ImageFileName, OK = QInputDialog.getItem(self, "Select Image", "Image file:", AttachedImages, editable=False)
-                if OK:
-                    self.insertPlainText("![](" + ImageFileName + ")")
+                InsertImageDialogInst = InsertImageDialog(self.Notebook, self.MainWindow)
+                if InsertImageDialogInst.InsertAccepted:
+                    self.insertPlainText("![](" + InsertImageDialogInst.ImageFileName + ")")
                     self.MakeCursorVisible()
                 else:
                     self.MainWindow.FlashStatusBar("No image inserted.")

@@ -1,4 +1,5 @@
 import mistune
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialog, QLineEdit, QTextEdit, QTreeWidget, QHeaderView, QTreeWidgetItem, QGridLayout, QPushButton, QCheckBox, QLabel, QComboBox
 
 from Core import MarkdownRenderers
@@ -31,7 +32,7 @@ class InsertLinksDialog(QDialog):
         self.Height = max(self.Parent.height() - 100, 100)
 
         # Search Line Edit
-        self.SearchLineEdit = QLineEdit()
+        self.SearchLineEdit = SearchLineEdit(self)
         self.SearchLineEdit.setPlaceholderText("Search")
         self.SearchLineEdit.textChanged.connect(self.PopulateNotebookDisplay)
         self.SearchLineEdit.setFocus()
@@ -41,7 +42,7 @@ class InsertLinksDialog(QDialog):
         self.MatchCaseCheckBox.stateChanged.connect(self.PopulateNotebookDisplay)
 
         # Notebook Display
-        self.NotebookDisplay = QTreeWidget()
+        self.NotebookDisplay = NotebookDisplay(self)
         self.NotebookDisplay.setHeaderHidden(True)
         self.NotebookDisplay.header().setStretchLastSection(False)
         self.NotebookDisplay.header().setSectionResizeMode(QHeaderView.ResizeToContents)
@@ -171,3 +172,36 @@ class NotebookDisplayItem(QTreeWidgetItem):
         self.setText(0, Title)
         self.IndexPath = IndexPath
         self.SubPageIndexPaths = SubPageIndexPaths
+
+
+class SearchLineEdit(QLineEdit):
+    def __init__(self, Dialog):
+        # QLineEdit Init
+        super().__init__()
+
+        # Store Parameters
+        self.Dialog = Dialog
+
+    def keyPressEvent(self, QKeyEvent):
+        KeyPressed = QKeyEvent.key()
+        if KeyPressed == QtCore.Qt.Key_Down:
+            self.Dialog.NotebookDisplay.setFocus()
+        else:
+            super().keyPressEvent(QKeyEvent)
+
+
+class NotebookDisplay(QTreeWidget):
+    def __init__(self, Dialog):
+        # QTreeWidget Init
+        super().__init__()
+
+        # Store Parameters
+        self.Dialog = Dialog
+
+    def keyPressEvent(self, QKeyEvent):
+        KeyPressed = QKeyEvent.key()
+        ItemBefore = self.currentItem()
+        super().keyPressEvent(QKeyEvent)
+        ItemAfter = self.currentItem()
+        if ItemBefore == ItemAfter and KeyPressed == QtCore.Qt.Key_Up:
+            self.Dialog.SearchLineEdit.setFocus()

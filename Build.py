@@ -7,7 +7,7 @@ import zipapp
 
 # Build Variables
 BuildVariables = {}
-BuildVariables["Version"] = "37"
+BuildVariables["Version"] = "38"
 BuildVariables["AppName"] = "SerpentNotes"
 BuildVariables["VersionedAppName"] = BuildVariables["AppName"] + " " + BuildVariables["Version"]
 

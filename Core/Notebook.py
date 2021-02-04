@@ -142,7 +142,7 @@ class Notebook(SerializableMixin):
         return self.Images[FileName]
 
     def GetImageNames(self):
-        return sorted(self.Images.keys())
+        return sorted(self.Images.keys(), key=lambda ImageName: ImageName.lower())
 
     # Template Methods
     def HasTemplate(self, TemplateName):

@@ -14,14 +14,15 @@ class SaveAndOpenMixin:
         self.CurrentOpenFileName = ""
         self.LastOpenedDirectory = None
         self.GzipMode = False
+        from Interface.MainWindow import MainWindow
+        self.MainWindowClass = MainWindow
 
         # Load from Config
         self.LoadLastOpenedDirectory()
         self.LoadGzipMode()
 
     def Save(self, ObjectToSave, SaveAs=False, AlternateFileDescription=None, AlternateFileExtension=None, SkipSerialization=False, ExportMode=False):
-        from Interface.MainWindow import MainWindow
-        assert isinstance(self, MainWindow)
+        assert isinstance(self, self.MainWindowClass)
         GzipMode = self.GzipMode if not ExportMode else False
         ActionString = "Save " if not ExportMode else "Export "
         ActionDoneString = "saved" if not ExportMode else "exported"
@@ -57,8 +58,7 @@ class SaveAndOpenMixin:
             return False
 
     def Open(self, ObjectToSave, FilePath=None, RespectUnsavedChanges=True, AlternateFileDescription=None, AlternateFileExtension=None, ImportMode=False):
-        from Interface.MainWindow import MainWindow
-        assert isinstance(self, MainWindow)
+        assert isinstance(self, self.MainWindowClass)
         GzipMode = self.GzipMode if not ImportMode else False
         ActionString = "Open " if not ImportMode else "Import "
         ActionInProgressString = "opening" if not ImportMode else "importing"
@@ -100,8 +100,7 @@ class SaveAndOpenMixin:
             return None
 
     def New(self, ObjectToSave, RespectUnsavedChanges=True):
-        from Interface.MainWindow import MainWindow
-        assert isinstance(self, MainWindow)
+        assert isinstance(self, self.MainWindowClass)
         if self.UnsavedChanges and RespectUnsavedChanges:
             SavePrompt = self.DisplayMessageBox("Save unsaved work before starting a new file?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
             if SavePrompt == QMessageBox.Yes:
@@ -117,8 +116,7 @@ class SaveAndOpenMixin:
         return True
 
     def closeEvent(self, event):
-        from Interface.MainWindow import MainWindow
-        assert isinstance(self, MainWindow)
+        assert isinstance(self, self.MainWindowClass)
         if self.UnsavedChanges:
             SavePrompt = self.DisplayMessageBox("There are unsaved changes.  Close anyway?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No))
             if SavePrompt == QMessageBox.Yes:
@@ -138,8 +136,7 @@ class SaveAndOpenMixin:
         self.JSONSerializer = JSONSerializer(ObjectClasses)
 
     def LoadLastOpenedDirectory(self):
-        from Interface.MainWindow import MainWindow
-        assert isinstance(self, MainWindow)
+        assert isinstance(self, self.MainWindowClass)
         FileSavingConfig = self.GetResourcePath("LastOpenedDirectory.cfg")
         if os.path.isfile(FileSavingConfig):
             with open(FileSavingConfig, "r") as OpenedConfig:
@@ -148,16 +145,14 @@ class SaveAndOpenMixin:
                     self.LastOpenedDirectory = LastOpenedDirectory
 
     def LoadGzipMode(self):
-        from Interface.MainWindow import MainWindow
-        assert isinstance(self, MainWindow)
+        assert isinstance(self, self.MainWindowClass)
         GzipModeConfig = self.GetResourcePath("GzipMode.cfg")
         if os.path.isfile(GzipModeConfig):
             with open(GzipModeConfig, "r") as OpenedConfig:
                 self.GzipMode = json.loads(OpenedConfig.read())
 
     def SaveLastOpenedDirectory(self):
-        from Interface.MainWindow import MainWindow
-        assert isinstance(self, MainWindow)
+        assert isinstance(self, self.MainWindowClass)
         FileSavingConfig = self.GetResourcePath("LastOpenedDirectory.cfg")
         if type(self.LastOpenedDirectory) == str:
             if os.path.isdir(self.LastOpenedDirectory):
@@ -165,8 +160,7 @@ class SaveAndOpenMixin:
                     OpenedConfig.write(self.LastOpenedDirectory)
 
     def SaveGzipMode(self):
-        from Interface.MainWindow import MainWindow
-        assert isinstance(self, MainWindow)
+        assert isinstance(self, self.MainWindowClass)
         GzipModeConfig = self.GetResourcePath("GzipMode.cfg")
         with open(GzipModeConfig, "w") as OpenedConfig:
             OpenedConfig.write(json.dumps(self.GzipMode))

@@ -511,6 +511,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultKeybindings["InsertLinksAction"] = "Ctrl+L"
         self.DefaultKeybindings["InsertExternalLinkAction"] = "Ctrl+Shift+L"
         self.DefaultKeybindings["TextToLinkAction"] = "Ctrl+Alt+L"
+        self.DefaultKeybindings["InsertImageAction"] = "Ctrl+Shift+I"
         self.DefaultKeybindings["MoveLineUpAction"] = "Ctrl+Up"
         self.DefaultKeybindings["MoveLineDownAction"] = "Ctrl+Down"
         self.DefaultKeybindings["DuplicateLinesAction"] = "Ctrl+Shift+D"

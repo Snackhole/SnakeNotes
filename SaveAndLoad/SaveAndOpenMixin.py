@@ -1,6 +1,7 @@
 import os
 import gzip
 import json
+from datetime import datetime
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
@@ -13,6 +14,7 @@ class SaveAndOpenMixin:
         self.UnsavedChanges = False
         self.CurrentOpenFileName = ""
         self.LastOpenedDirectory = None
+        self.FileLastModified = None
         self.GzipMode = False
         from Interface.MainWindow import MainWindow
         self.MainWindowClass = MainWindow
@@ -33,6 +35,11 @@ class SaveAndOpenMixin:
         Extension = ExtensionWithoutGzip + ("" if not GzipMode else GzipExtension)
         Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + Extension + ")"
         SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs and ModeAndExtensionMatch else QFileDialog.getSaveFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
+        if SaveFileName == self.CurrentOpenFileName and os.path.isfile(SaveFileName) and self.FileLastModified is not None:
+            SaveFileModified = datetime.fromtimestamp(os.path.getmtime(SaveFileName))
+            if SaveFileModified != self.FileLastModified:
+                if self.DisplayMessageBox("Warning!  The current open file has been modified since it was last saved or opened by this instance of SerpentNotes.  Saving could cause data loss!\n\nProceed?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.No:
+                    return False
         if SaveFileName != "":
             if not SaveFileName.endswith(Extension):
                 if SaveFileName.endswith(ExtensionWithoutGzip):
@@ -52,6 +59,7 @@ class SaveAndOpenMixin:
             if not ExportMode:
                 self.CurrentOpenFileName = SaveFileName
                 self.UnsavedChanges = False
+                self.FileLastModified = datetime.fromtimestamp(os.path.getmtime(SaveFileName))
             return True
         else:
             self.FlashStatusBar("No file " + ActionDoneString + ".")
@@ -94,6 +102,7 @@ class SaveAndOpenMixin:
             if not ImportMode:
                 self.CurrentOpenFileName = OpenFileName
                 self.UnsavedChanges = False
+                self.FileLastModified = datetime.fromtimestamp(os.path.getmtime(OpenFileName))
             return Data
         else:
             self.FlashStatusBar("No file " + ActionDoneString + ".")
@@ -113,6 +122,7 @@ class SaveAndOpenMixin:
         self.CurrentOpenFileName = ""
         self.FlashStatusBar("New file opened.")
         self.UnsavedChanges = False
+        self.FileLastModified = None
         return True
 
     def closeEvent(self, event):

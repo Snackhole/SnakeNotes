@@ -183,6 +183,8 @@ class ImageManagerDialog(QDialog):
             CurrentFileExtension = os.path.splitext(CurrentFileName)[1]
             ExportImagePath = QFileDialog.getSaveFileName(parent=self, caption="Export Image File", filter=self.ExportFilters[CurrentFileExtension])[0]
             if ExportImagePath != "":
+                if not ExportImagePath.endswith(CurrentFileExtension):
+                    ExportImagePath += CurrentFileExtension
                 Base64Converters.WriteFileFromBase64String(SelectedItems[0].Base64String, ExportImagePath)
 
     def DeleteImage(self):

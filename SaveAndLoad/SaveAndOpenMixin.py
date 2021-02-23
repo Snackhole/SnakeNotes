@@ -22,14 +22,15 @@ class SaveAndOpenMixin:
     def Save(self, ObjectToSave, SaveAs=False, AlternateFileDescription=None, AlternateFileExtension=None, SkipSerialization=False, ExportMode=False):
         from Interface.MainWindow import MainWindow
         assert isinstance(self, MainWindow)
+        GzipMode = self.GzipMode if not ExportMode else False
         ActionString = "Save " if not ExportMode else "Export "
         ActionDoneString = "saved" if not ExportMode else "exported"
         Caption = ActionString + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
         ExtensionWithoutGzip = self.FileExtension if AlternateFileExtension is None else AlternateFileExtension
         GzipExtension = ".gz"
-        Extension = ExtensionWithoutGzip + ("" if not self.GzipMode else GzipExtension)
+        Extension = ExtensionWithoutGzip + ("" if not GzipMode else GzipExtension)
         Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + Extension + ")"
-        ModeAndExtensionMatch = (self.CurrentOpenFileName.endswith(".ntbk") and not self.GzipMode) or (self.CurrentOpenFileName.endswith(".ntbk.gz") and self.GzipMode)
+        ModeAndExtensionMatch = (self.CurrentOpenFileName.endswith(".ntbk") and not GzipMode) or (self.CurrentOpenFileName.endswith(".ntbk.gz") and GzipMode)
         SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs and ModeAndExtensionMatch else QFileDialog.getSaveFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
         if SaveFileName != "":
             if not SaveFileName.endswith(Extension):
@@ -38,7 +39,7 @@ class SaveAndOpenMixin:
                 else:
                     SaveFileName += Extension
             SaveString = self.JSONSerializer.SerializeDataToJSONString(ObjectToSave) if not SkipSerialization else ObjectToSave
-            if self.GzipMode:
+            if GzipMode:
                 with gzip.open(SaveFileName, "wt") as SaveFile:
                     SaveFile.write(SaveString)
             else:
@@ -58,6 +59,7 @@ class SaveAndOpenMixin:
     def Open(self, ObjectToSave, FilePath=None, RespectUnsavedChanges=True, AlternateFileDescription=None, AlternateFileExtension=None, ImportMode=False):
         from Interface.MainWindow import MainWindow
         assert isinstance(self, MainWindow)
+        GzipMode = self.GzipMode if not ImportMode else False
         ActionString = "Open " if not ImportMode else "Import "
         ActionInProgressString = "opening" if not ImportMode else "importing"
         ActionDoneString = "opened" if not ImportMode else "imported"
@@ -72,10 +74,10 @@ class SaveAndOpenMixin:
             elif SavePrompt == QMessageBox.Cancel:
                 return None
         Caption = ActionString + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
-        Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + (self.FileExtension if AlternateFileExtension is None else AlternateFileExtension) + ("" if not self.GzipMode else ".gz") + ")"
+        Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + (self.FileExtension if AlternateFileExtension is None else AlternateFileExtension) + ("" if not GzipMode else ".gz") + ")"
         OpenFileName = FilePath if FilePath is not None else QFileDialog.getOpenFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
         if OpenFileName != "":
-            if self.GzipMode:
+            if GzipMode:
                 with gzip.open(OpenFileName, "rt") as LoadFile:
                     JSONString = LoadFile.read()
             else:

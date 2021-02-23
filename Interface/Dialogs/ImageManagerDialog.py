@@ -2,7 +2,7 @@ import os
 from PyQt5 import QtCore
 
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QDialog, QFrame, QGridLayout, QListWidget, QPushButton, QListWidgetItem, QLabel, QFileDialog, QMessageBox, QScrollArea, QSplitter, QInputDialog
+from PyQt5.QtWidgets import QCheckBox, QDialog, QFrame, QGridLayout, QLineEdit, QListWidget, QPushButton, QListWidgetItem, QLabel, QFileDialog, QMessageBox, QScrollArea, QSplitter, QInputDialog
 
 from Core import Base64Converters
 
@@ -26,8 +26,18 @@ class ImageManagerDialog(QDialog):
         self.Width = max(self.MainWindow.width() - 100, 100)
         self.Height = max(self.MainWindow.height() - 100, 100)
 
+        # Search Line Edit
+        self.SearchLineEdit = SearchLineEdit(self)
+        self.SearchLineEdit.setPlaceholderText("Search")
+        self.SearchLineEdit.textChanged.connect(self.PopulateImageList)
+        self.SearchLineEdit.setFocus()
+
+        # Match Case Check Box
+        self.MatchCaseCheckBox = QCheckBox("Match Case")
+        self.MatchCaseCheckBox.stateChanged.connect(self.PopulateImageList)
+
         # Image List
-        self.ImageList = QListWidget()
+        self.ImageList = ImageList(self)
         self.ImageList.itemSelectionChanged.connect(self.ItemSelected)
 
         # Linking Pages Frame
@@ -57,6 +67,10 @@ class ImageManagerDialog(QDialog):
 
         # Create, Populate, and Set Layout
         self.Layout = QGridLayout()
+        self.SearchLayout = QGridLayout()
+        self.SearchLayout.addWidget(self.SearchLineEdit, 0, 0)
+        self.SearchLayout.addWidget(self.MatchCaseCheckBox, 0, 1)
+        self.Layout.addLayout(self.SearchLayout, 0, 0)
         self.Splitter = QSplitter()
         self.Splitter.addWidget(self.ImageList)
         self.ImageDisplayScrollArea = QScrollArea()
@@ -68,14 +82,14 @@ class ImageManagerDialog(QDialog):
         self.LinkingPagesFrame.setLayout(self.LinkingPagesLayout)
         self.Splitter.addWidget(self.LinkingPagesFrame)
         self.Splitter.setStretchFactor(1, 1)
-        self.Layout.addWidget(self.Splitter, 0, 0)
+        self.Layout.addWidget(self.Splitter, 1, 0)
         self.ButtonLayout = QGridLayout()
         self.ButtonLayout.addWidget(self.AddImageButton, 0, 0)
         self.ButtonLayout.addWidget(self.RenameImageButton, 0, 1)
         self.ButtonLayout.addWidget(self.ExportImageButton, 0, 2)
         self.ButtonLayout.addWidget(self.DeleteImageButton, 0, 3)
         self.ButtonLayout.addWidget(self.DoneButton, 0, 4)
-        self.Layout.addLayout(self.ButtonLayout, 1, 0)
+        self.Layout.addLayout(self.ButtonLayout, 2, 0)
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
@@ -109,13 +123,19 @@ class ImageManagerDialog(QDialog):
                 self.LinkingPagesList.addItem(LinkingPagesListItem)
 
     def PopulateImageList(self):
+        SearchTerm = self.SearchLineEdit.text()
+        MatchCase = self.MatchCaseCheckBox.isChecked()
+        if not MatchCase:
+            SearchTerm = SearchTerm.lower()
         self.ImageList.clear()
         self.ImageDisplay.clear()
         self.LinkingPagesList.clear()
-        for FileName, Base64String in sorted(self.Notebook.Images.items(), key=lambda Image: Image[0].lower()):
+        Images = sorted(self.Notebook.Images.items(), key=lambda Image: Image[0].lower())
+        if SearchTerm != "":
+            Images = [Image for Image in Images if SearchTerm in (Image[0].lower() if not MatchCase else Image[0])]
+        for FileName, Base64String in Images:
             self.ImageList.addItem(ImageListItem(FileName, Base64String))
         self.ImageList.setCurrentRow(0)
-        self.ImageList.setFocus()
 
     def AddImage(self):
         AttachNewFile = False
@@ -130,6 +150,7 @@ class ImageManagerDialog(QDialog):
         if AttachNewFile:
             self.Notebook.AddImage(ImageFilePath)
             self.UnsavedChanges = True
+            self.SearchLineEdit.clear()
             self.PopulateImageList()
             self.ImageList.setCurrentRow(self.GetImageIndexFromName(os.path.basename(ImageFilePath)))
 
@@ -151,6 +172,7 @@ class ImageManagerDialog(QDialog):
                     del self.Notebook.Images[CurrentFileName + CurrentFileExtension]
                     self.MainWindow.SearchWidgetInst.ReplaceAllInNotebook(SearchText="](" + CurrentFileName + CurrentFileExtension + ")", ReplaceText="](" + NewName + CurrentFileExtension + ")", MatchCase=True)
                     self.UnsavedChanges = True
+                    self.SearchLineEdit.clear()
                     self.PopulateImageList()
                     self.ImageList.setCurrentRow(self.GetImageIndexFromName(NewName + CurrentFileExtension))
 
@@ -198,3 +220,36 @@ class ImageListItem(QListWidgetItem):
         self.Base64String = Base64String
 
         self.setText(self.FileName)
+
+
+class SearchLineEdit(QLineEdit):
+    def __init__(self, Dialog):
+        # QLineEdit Init
+        super().__init__()
+
+        # Store Parameters
+        self.Dialog = Dialog
+
+    def keyPressEvent(self, QKeyEvent):
+        KeyPressed = QKeyEvent.key()
+        if KeyPressed == QtCore.Qt.Key_Down:
+            self.Dialog.ImageList.setFocus()
+        else:
+            super().keyPressEvent(QKeyEvent)
+
+
+class ImageList(QListWidget):
+    def __init__(self, Dialog):
+        # QListWidget Init
+        super().__init__()
+
+        # Store Parameters
+        self.Dialog = Dialog
+
+    def keyPressEvent(self, QKeyEvent):
+        KeyPressed = QKeyEvent.key()
+        Row = self.currentRow()
+        if KeyPressed == QtCore.Qt.Key_Up and Row == 0:
+            self.Dialog.SearchLineEdit.setFocus()
+        else:
+            super().keyPressEvent(QKeyEvent)

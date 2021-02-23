@@ -120,10 +120,12 @@ class InsertLinksDialog(QDialog):
         SearchTerm = self.SearchLineEdit.text()
         self.NotebookDisplay.clear()
         if SearchTerm == "":
+            self.NotebookDisplay.setRootIsDecorated(True)
             self.FillNotebookWidgetItem(self.NotebookDisplay.invisibleRootItem(), self.Notebook.RootPage, IsRootPage=True)
         else:
             MatchCase = self.MatchCaseCheckBox.isChecked()
             SearchResults = self.Notebook.GetSearchResults(SearchTerm, MatchCase=MatchCase)
+            self.NotebookDisplay.setRootIsDecorated(False)
             self.FillNotebookWidgetItemFromSearchResults(SearchResults)
 
     def FillNotebookWidgetItem(self, CurrentTreeItem, CurrentPage, IsRootPage=False):

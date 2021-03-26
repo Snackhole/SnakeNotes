@@ -14,6 +14,7 @@ from Interface.Dialogs.FavoritesDialog import FavoritesDialog
 from Interface.Dialogs.ImageManagerDialog import ImageManagerDialog
 from Interface.Dialogs.NewPageDialog import NewPageDialog
 from Interface.Dialogs.TemplateManagerDialog import TemplateManagerDialog
+from Interface.Dialogs.AddToPageAndSubpagesDialog import AddToPageAndSubpagesDialog
 from Interface.Widgets.NotebookDisplayWidget import NotebookDisplayWidget
 from Interface.Widgets.SearchWidget import SearchWidget
 from Interface.Widgets.TextWidget import TextWidget
@@ -333,12 +334,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.InsertImageAction.triggered.connect(self.TextWidgetInst.InsertImage)
         self.ToggleReadModeActionsList.append(self.InsertImageAction)
 
-        self.PrependAction = QAction("Prepend to Page and Subpages")
-        self.PrependAction.triggered.connect(lambda: self.AddToPageAndSubpages(Prepend=True))
+        self.PrependAction = QAction("Prepend Text to Page and Subpages")
+        self.PrependAction.triggered.connect(lambda: self.AddTextToPageAndSubpages(Prepend=True))
         self.ToggleReadModeActionsList.append(self.PrependAction)
 
-        self.AppendAction = QAction("Append to Page and Subpages")
-        self.AppendAction.triggered.connect(self.AddToPageAndSubpages)
+        self.AppendAction = QAction("Append Text to Page and Subpages")
+        self.AppendAction.triggered.connect(self.AddTextToPageAndSubpages)
         self.ToggleReadModeActionsList.append(self.AppendAction)
 
         self.MoveLineUpAction = QAction("Move Line Up")
@@ -917,18 +918,22 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def ToggleInlineFootnoteStyle(self):
         self.InlineFootnoteStyle = not self.InlineFootnoteStyle
 
-    def AddToPageAndSubpages(self, Prepend=False):
+    def AddTextToPageAndSubpages(self, Prepend=False):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
             CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
-            self.Notebook.AddToPageAndSubpages("blah", CurrentPage=CurrentPage, Prepend=Prepend)
-            self.NotebookDisplayWidgetInst.FillFromRootPage()
-            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
-            self.SearchWidgetInst.RefreshSearch()
-            self.UpdateUnsavedChangesFlag(True)
-            self.TextWidgetInst.setFocus()
-            if not Prepend:
-                self.TextWidgetInst.moveCursor(QTextCursor.End)
+            Mode = "Prepend" if Prepend else "Append"
+            AddToPageAndSubpagesDialogInst = AddToPageAndSubpagesDialog(Mode, self.Notebook, self)
+            Text = AddToPageAndSubpagesDialogInst.TextToAdd
+            if Text is not None:
+                self.Notebook.AddTextToPageAndSubpages(Text, CurrentPage=CurrentPage, Prepend=Prepend)
+                self.NotebookDisplayWidgetInst.FillFromRootPage()
+                self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
+                self.SearchWidgetInst.RefreshSearch()
+                self.UpdateUnsavedChangesFlag(True)
+                self.TextWidgetInst.setFocus()
+                if not Prepend:
+                    self.TextWidgetInst.moveCursor(QTextCursor.End)
 
     # Interface Methods
     def DisplayMessageBox(self, Message, Icon=QMessageBox.Information, Buttons=QMessageBox.Ok, Parent=None):

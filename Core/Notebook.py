@@ -126,7 +126,7 @@ class Notebook(SerializableMixin):
             return False
         return True
 
-    def AddToPageAndSubpages(self, Text, CurrentPage=None, Prepend=False):
+    def AddTextToPageAndSubpages(self, Text, CurrentPage=None, Prepend=False):
         if CurrentPage is None:
             CurrentPage = self.RootPage
         if Prepend:
@@ -135,7 +135,7 @@ class Notebook(SerializableMixin):
             NewContent = CurrentPage["Content"] + Text
         CurrentPage["Content"] = NewContent
         for Page in CurrentPage["SubPages"]:
-            self.AddToPageAndSubpages(Text, Page, Prepend=Prepend)
+            self.AddTextToPageAndSubpages(Text, Page, Prepend=Prepend)
 
     # Image Methods
     def HasImage(self, FileName):

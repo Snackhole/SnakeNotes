@@ -307,6 +307,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.FootnoteAction.triggered.connect(self.TextWidgetInst.Footnote)
         self.ToggleReadModeActionsList.append(self.FootnoteAction)
 
+        self.InlineFootnoteStyleAction = QAction("Inline Footnote Style")
+        self.InlineFootnoteStyleAction.setCheckable(True)
+        self.InlineFootnoteStyleAction.setChecked(True)
+        self.InlineFootnoteStyleAction.triggered.connect(self.ToggleInlineFootnoteStyle)
+        self.ToggleReadModeActionsList.append(self.InlineFootnoteStyleAction)
+
         self.InsertLinksAction = QAction(self.InsertLinksIcon, "Insert Link(s)")
         self.InsertLinksAction.triggered.connect(self.TextWidgetInst.InsertLinks)
         self.ToggleReadModeActionsList.append(self.InsertLinksAction)
@@ -403,6 +409,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.HorizontalRuleAction)
         self.EditMenu.addAction(self.FootnoteAction)
+        self.EditMenu.addAction(self.InlineFootnoteStyleAction)
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.InsertLinksAction)
         self.EditMenu.addAction(self.InsertExternalLinkAction)
@@ -575,6 +582,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             del self.Keybindings[InvalidBinding]
         for Action, Keybinding in self.Keybindings.items():
             getattr(self, Action).setShortcut(Keybinding)
+        
+        # Inline Footnote Style
+        InlineFootnoteStyleFile = self.GetResourcePath("InlineFootnoteStyle.cfg")
+        if os.path.isfile(InlineFootnoteStyleFile):
+            with open(InlineFootnoteStyleFile, "r") as ConfigFile:
+                self.InlineFootnoteStyle = json.loads(ConfigFile.read())
+        else:
+            self.InlineFootnoteStyle = True
+        self.InlineFootnoteStyleAction.setChecked(self.InlineFootnoteStyle)
 
     def SaveConfigs(self):
         # Favorites
@@ -593,6 +609,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Keybindings
         with open(self.GetResourcePath("Keybindings.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.Keybindings, indent=2))
+        
+        # Inline Footnote Style
+        with open(self.GetResourcePath("InlineFootnoteStyle.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.InlineFootnoteStyle))
 
         # Last Opened Directory
         self.SaveLastOpenedDirectory()
@@ -882,6 +902,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         elif self.CurrentZoomLevel < 0:
             self.TextWidgetInst.zoomIn(-self.CurrentZoomLevel)
             self.CurrentZoomLevel = 0
+    
+    def ToggleInlineFootnoteStyle(self):
+        self.InlineFootnoteStyle = not self.InlineFootnoteStyle
 
     # Interface Methods
     def DisplayMessageBox(self, Message, Icon=QMessageBox.Information, Buttons=QMessageBox.Ok, Parent=None):

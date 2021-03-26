@@ -3,7 +3,7 @@ import json
 import os
 
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QTextCursor
 from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QAction, QSplitter, QApplication
 
 from Core.MarkdownRenderers import ConstructHTMLExportString
@@ -333,6 +333,14 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.InsertImageAction.triggered.connect(self.TextWidgetInst.InsertImage)
         self.ToggleReadModeActionsList.append(self.InsertImageAction)
 
+        self.PrependAction = QAction("Prepend to Page and Subpages")
+        self.PrependAction.triggered.connect(lambda: self.AddToPageAndSubpages(Prepend=True))
+        self.ToggleReadModeActionsList.append(self.PrependAction)
+
+        self.AppendAction = QAction("Append to Page and Subpages")
+        self.AppendAction.triggered.connect(self.AddToPageAndSubpages)
+        self.ToggleReadModeActionsList.append(self.AppendAction)
+
         self.MoveLineUpAction = QAction("Move Line Up")
         self.MoveLineUpAction.triggered.connect(self.TextWidgetInst.MoveLineUp)
         self.ToggleReadModeActionsList.append(self.MoveLineUpAction)
@@ -416,6 +424,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.TextToLinkAction)
         self.EditMenu.addAction(self.InsertTableAction)
         self.EditMenu.addAction(self.InsertImageAction)
+        self.EditMenu.addSeparator()
+        self.EditMenu.addAction(self.PrependAction)
+        self.EditMenu.addAction(self.AppendAction)
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.MoveLineUpAction)
         self.EditMenu.addAction(self.MoveLineDownAction)
@@ -582,7 +593,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             del self.Keybindings[InvalidBinding]
         for Action, Keybinding in self.Keybindings.items():
             getattr(self, Action).setShortcut(Keybinding)
-        
+
         # Inline Footnote Style
         InlineFootnoteStyleFile = self.GetResourcePath("InlineFootnoteStyle.cfg")
         if os.path.isfile(InlineFootnoteStyleFile):
@@ -609,7 +620,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Keybindings
         with open(self.GetResourcePath("Keybindings.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.Keybindings, indent=2))
-        
+
         # Inline Footnote Style
         with open(self.GetResourcePath("InlineFootnoteStyle.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.InlineFootnoteStyle))
@@ -902,9 +913,22 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         elif self.CurrentZoomLevel < 0:
             self.TextWidgetInst.zoomIn(-self.CurrentZoomLevel)
             self.CurrentZoomLevel = 0
-    
+
     def ToggleInlineFootnoteStyle(self):
         self.InlineFootnoteStyle = not self.InlineFootnoteStyle
+
+    def AddToPageAndSubpages(self, Prepend=False):
+        if not self.TextWidgetInst.ReadMode:
+            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+            self.Notebook.AddToPageAndSubpages("blah", CurrentPage=CurrentPage, Prepend=Prepend)
+            self.NotebookDisplayWidgetInst.FillFromRootPage()
+            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
+            self.SearchWidgetInst.RefreshSearch()
+            self.UpdateUnsavedChangesFlag(True)
+            self.TextWidgetInst.setFocus()
+            if not Prepend:
+                self.TextWidgetInst.moveCursor(QTextCursor.End)
 
     # Interface Methods
     def DisplayMessageBox(self, Message, Icon=QMessageBox.Information, Buttons=QMessageBox.Ok, Parent=None):

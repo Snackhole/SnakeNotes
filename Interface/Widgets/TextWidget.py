@@ -283,9 +283,12 @@ class TextWidget(QTextEdit):
                     Cursor = self.textCursor()
                     Cursor.beginEditBlock()
                     self.insertPlainText(FootnoteSymbol)
-                    Cursor.movePosition(QTextCursor.End)
+                    if self.MainWindow.InlineFootnoteStyle:
+                        Cursor.movePosition(QTextCursor.EndOfBlock)
+                    else:
+                        Cursor.movePosition(QTextCursor.End)
                     Cursor.insertText(("\u2029" * 2) + FootnoteSymbol + ": ")
-                    self.moveCursor(QTextCursor.End)
+                    self.moveCursor(Cursor.position() if self.MainWindow.InlineFootnoteStyle else QTextCursor.End)
                     self.MakeCursorVisible()
                     Cursor.endEditBlock()
 

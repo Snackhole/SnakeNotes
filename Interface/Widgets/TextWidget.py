@@ -51,7 +51,6 @@ class TextWidget(QTextEdit):
         if self.ReadMode:
             DisplayText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.CurrentPage, self.Notebook)
             HTMLText = self.MarkdownParser(DisplayText)
-            self.setCurrentCharFormat(self.DefaultCharacterFormat)
             self.setHtml(HTMLText)
         else:
             self.setCurrentCharFormat(self.DefaultCharacterFormat)
@@ -66,7 +65,9 @@ class TextWidget(QTextEdit):
         Text = self.toPlainText()
         Cursor = self.textCursor()
 
-        self.setCurrentCharFormat(self.DefaultCharacterFormat)
+        Cursor.select(Cursor.Document)
+        Cursor.setCharFormat(self.DefaultCharacterFormat)
+        Cursor.clearSelection()
 
         for HighlightTarget in self.HighlightTargets.values():
             TargetIterator = re.finditer(HighlightTarget["RegEx"], Text)

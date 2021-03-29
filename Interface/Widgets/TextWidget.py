@@ -1,10 +1,11 @@
 import json
+import re
 import webbrowser
 
 import mistune
 from PyQt5 import QtCore
 from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QTextCursor, QTextCharFormat
+from PyQt5.QtGui import QColor, QTextCursor, QTextCharFormat
 from PyQt5.QtWidgets import QTextEdit, QInputDialog, QMessageBox
 
 from Core import MarkdownRenderers
@@ -26,6 +27,8 @@ class TextWidget(QTextEdit):
         self.DisplayChanging = False
         self.ReadMode = True
         self.DefaultCharacterFormat = QTextCharFormat()
+        self.HighlightTargets = {}
+        self.HighlightTargets["Footnotes"] = {"RegEx": "\[\^.+\]", "Color": "darkGreen"}
 
         # Create Markdown Parser
         self.Renderer = MarkdownRenderers.Renderer(self.Notebook)
@@ -48,10 +51,32 @@ class TextWidget(QTextEdit):
         if self.ReadMode:
             DisplayText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.CurrentPage, self.Notebook)
             HTMLText = self.MarkdownParser(DisplayText)
+            self.setCurrentCharFormat(self.DefaultCharacterFormat)
             self.setHtml(HTMLText)
         else:
             self.setCurrentCharFormat(self.DefaultCharacterFormat)
             self.setPlainText(self.CurrentPage["Content"])
+            if self.MainWindow.HighlightFormatting:
+                self.HighlightFormatting()
+        self.DisplayChanging = False
+
+    def HighlightFormatting(self):
+        self.DisplayChanging = True
+
+        Text = self.toPlainText()
+        Cursor = self.textCursor()
+
+        self.setCurrentCharFormat(self.DefaultCharacterFormat)
+
+        for HighlightTarget in self.HighlightTargets.values():
+            TargetIterator = re.finditer(HighlightTarget["RegEx"], Text)
+            HighlightFormat = QTextCharFormat()
+            HighlightFormat.setBackground(QColor(HighlightTarget["Color"]))
+            for Target in TargetIterator:
+                Cursor.setPosition(Target.start(), QTextCursor.MoveAnchor)
+                Cursor.setPosition(Target.end(), QTextCursor.KeepAnchor)
+                Cursor.setCharFormat(HighlightFormat)
+
         self.DisplayChanging = False
 
     def SetCurrentPage(self, Page):

@@ -37,6 +37,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ForwardList = []
         self.BackNavigation = False
         self.AutoScrollQueue = None
+        self.HighlightFormatting = True
 
         # Set Up Save and Open
         self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
@@ -891,6 +892,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.TextWidgetInst.CurrentPage["Content"] = CurrentText
             self.Notebook.SearchIndexUpToDate = False
             self.UpdateUnsavedChangesFlag(True)
+        if self.HighlightFormatting:
+            self.TextWidgetInst.HighlightFormatting()
 
     def ToggleReadMode(self):
         self.TextWidgetInst.setFocus() if self.TextWidgetInst.ReadMode else self.NotebookDisplayWidgetInst.setFocus()

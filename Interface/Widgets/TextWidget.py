@@ -29,6 +29,19 @@ class TextWidget(QTextEdit):
         self.DefaultCharacterFormat = QTextCharFormat()
         self.HighlightTargets = {}
         self.HighlightTargets["Footnotes"] = {"RegEx": "\[\^.+\]", "Color": "darkGreen"}
+        self.HighlightTargets["InternalLinks"] = {"RegEx": "\[.+\]\([^\[].+[^\[]\)", "Color": "darkCyan"}
+        self.HighlightTargets["ExternalLinks"] = {"RegEx": "\[.+\]\(\[.+\]\)", "Color": "darkBlue"}
+        self.HighlightTargets["Images"] = {"RegEx": "!\[.*\]\(.+\)", "Color": "darkRed"}
+        # Italics
+        # Bold
+        # Strikethrough
+        # Code Span
+        # Header One
+        # Header Two
+        # Header Three
+        # Header Four
+        # Header Five
+        # Header Six
 
         # Create Markdown Parser
         self.Renderer = MarkdownRenderers.Renderer(self.Notebook)

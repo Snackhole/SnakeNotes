@@ -204,12 +204,12 @@ class TextWidget(QTextEdit):
                 self.setTextCursor(Cursor)
                 self.VerticallyCenterCursor()
 
-    def GetLineData(self):
+    def GetLineData(self, CursorToCopy=None):
         Text = self.toPlainText()
         Lines = Text.splitlines()
         if Text.endswith("\n"):
             Lines.append("")
-        Cursor = self.textCursor()
+        Cursor = self.textCursor() if CursorToCopy is None else QTextCursor(CursorToCopy)
         AbsolutePosition = Cursor.position()
         BlockPosition = Cursor.positionInBlock()
         LineIndex = 0
@@ -317,12 +317,25 @@ class TextWidget(QTextEdit):
                     self.insertPlainText(FootnoteSymbol)
                     if self.MainWindow.InlineFootnoteStyle:
                         Cursor.movePosition(QTextCursor.EndOfBlock)
+                        NextLineBlank = self.NextLineBlank(Cursor)
+                        while not NextLineBlank and not NextLineBlank is None:
+                            Cursor.movePosition(QTextCursor.NextCharacter)
+                            Cursor.movePosition(QTextCursor.EndOfBlock)
+                            NextLineBlank = self.NextLineBlank(Cursor)
                     else:
                         Cursor.movePosition(QTextCursor.End)
                     Cursor.insertText(("\u2029" * 2) + FootnoteSymbol + ": ")
                     self.moveCursor(Cursor.position() if self.MainWindow.InlineFootnoteStyle else QTextCursor.End)
                     self.MakeCursorVisible()
                     Cursor.endEditBlock()
+
+    def NextLineBlank(self, Cursor):
+        LineData = self.GetLineData(CursorToCopy=Cursor)
+        CurrentLineIndex = LineData[1]
+        if CurrentLineIndex == len(LineData[0]) - 1:
+            return None
+        NextLine = LineData[0][CurrentLineIndex + 1]
+        return NextLine == ""
 
     def InsertLinks(self):
         if not self.ReadMode and self.hasFocus():

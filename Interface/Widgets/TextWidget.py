@@ -28,20 +28,10 @@ class TextWidget(QTextEdit):
         self.ReadMode = True
         self.DefaultCharacterFormat = QTextCharFormat()
         self.HighlightTargets = {}
-        self.HighlightTargets["Footnotes"] = {"RegEx": "\[\^.+\]", "Color": "darkGreen"}
-        self.HighlightTargets["InternalLinks"] = {"RegEx": "\[.+\]\([^\[].+[^\[]\)", "Color": "darkCyan"}
-        self.HighlightTargets["ExternalLinks"] = {"RegEx": "\[.+\]\(\[.+\]\)", "Color": "darkBlue"}
-        self.HighlightTargets["Images"] = {"RegEx": "!\[.*\]\(.+\)", "Color": "darkRed"}
-        # Italics
-        # Bold
-        # Strikethrough
-        # Code Span
-        # Header One
-        # Header Two
-        # Header Three
-        # Header Four
-        # Header Five
-        # Header Six
+        self.HighlightTargets["ExternalLinks"] = {"RegEx": "!{0}\[.+\]\([^\[\]]+\)", "BackgroundColor": "darkBlue"}
+        self.HighlightTargets["InternalLinks"] = {"RegEx": "!{0}\[.+\]\(\[{1}.+\]{1}\)", "BackgroundColor": "darkCyan"}
+        self.HighlightTargets["Images"] = {"RegEx": "!\[.*\]\(.+\)", "BackgroundColor": "darkRed"}
+        self.HighlightTargets["Footnotes"] = {"RegEx": "\[\^[^\]]+\]", "BackgroundColor": "darkGreen"}
 
         # Create Markdown Parser
         self.Renderer = MarkdownRenderers.Renderer(self.Notebook)
@@ -85,7 +75,9 @@ class TextWidget(QTextEdit):
         for HighlightTarget in self.HighlightTargets.values():
             TargetIterator = re.finditer(HighlightTarget["RegEx"], Text)
             HighlightFormat = QTextCharFormat()
-            HighlightFormat.setBackground(QColor(HighlightTarget["Color"]))
+            if "BackgroundColor" in HighlightTarget:
+                HighlightFormat.setBackground(QColor(HighlightTarget["BackgroundColor"]))
+                HighlightFormat.setForeground(QColor("white"))
             for Target in TargetIterator:
                 Cursor.setPosition(Target.start(), QTextCursor.MoveAnchor)
                 Cursor.setPosition(Target.end(), QTextCursor.KeepAnchor)

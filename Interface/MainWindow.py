@@ -37,7 +37,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ForwardList = []
         self.BackNavigation = False
         self.AutoScrollQueue = None
-        self.HighlightFormatting = True
+        self.HighlightFormatting = False
 
         # Set Up Save and Open
         self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
@@ -231,7 +231,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         self.HighlightFormattingAction = QAction("Highlight Formatting")
         self.HighlightFormattingAction.setCheckable(True)
-        self.HighlightFormattingAction.setChecked(True)
+        self.HighlightFormattingAction.setChecked(False)
         self.HighlightFormattingAction.triggered.connect(self.ToggleHighlightFormatting)
         self.ToggleReadModeActionsList.append(self.HighlightFormattingAction)
 
@@ -619,7 +619,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             with open(HighlightFormattingFile, "r") as ConfigFile:
                 self.HighlightFormatting = json.loads(ConfigFile.read())
         else:
-            self.HighlightFormatting = True
+            self.HighlightFormatting = False
         self.HighlightFormattingAction.setChecked(self.HighlightFormatting)
 
     def SaveConfigs(self):

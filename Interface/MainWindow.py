@@ -557,13 +557,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def LoadConfigs(self):
         # Favorites
-        FavoritesFile = self.GetResourcePath("Favorites.cfg")
+        FavoritesFile = self.GetResourcePath("Configs/Favorites.cfg")
         if os.path.isfile(FavoritesFile):
             with open(FavoritesFile, "r") as ConfigFile:
                 self.FavoritesData = json.loads(ConfigFile.read())
         else:
             self.FavoritesData = {}
-        GzipFavoritesFile = self.GetResourcePath("GzipFavorites.cfg")
+        GzipFavoritesFile = self.GetResourcePath("Configs/GzipFavorites.cfg")
         if os.path.isfile(GzipFavoritesFile):
             with open(GzipFavoritesFile, "r") as ConfigFile:
                 self.GzipFavoritesData = json.loads(ConfigFile.read())
@@ -571,7 +571,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.GzipFavoritesData = {}
 
         # Display Settings
-        DisplaySettingsFile = self.GetResourcePath("DisplaySettings.cfg")
+        DisplaySettingsFile = self.GetResourcePath("Configs/DisplaySettings.cfg")
         if os.path.isfile(DisplaySettingsFile):
             with open(DisplaySettingsFile, "r") as ConfigFile:
                 DisplaySettings = json.loads(ConfigFile.read())
@@ -586,7 +586,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.NotebookAndTextSplitter.setSizes(DisplaySettings["HorizontalSplit"])
 
         # Keybindings
-        KeybindingsFile = self.GetResourcePath("Keybindings.cfg")
+        KeybindingsFile = self.GetResourcePath("Configs/Keybindings.cfg")
         if os.path.isfile(KeybindingsFile):
             with open(KeybindingsFile, "r") as ConfigFile:
                 self.Keybindings = json.loads(ConfigFile.read())
@@ -605,7 +605,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             getattr(self, Action).setShortcut(Keybinding)
 
         # Inline Footnote Style
-        InlineFootnoteStyleFile = self.GetResourcePath("InlineFootnoteStyle.cfg")
+        InlineFootnoteStyleFile = self.GetResourcePath("Configs/InlineFootnoteStyle.cfg")
         if os.path.isfile(InlineFootnoteStyleFile):
             with open(InlineFootnoteStyleFile, "r") as ConfigFile:
                 self.InlineFootnoteStyle = json.loads(ConfigFile.read())
@@ -614,7 +614,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.InlineFootnoteStyleAction.setChecked(self.InlineFootnoteStyle)
 
         # Highlight Formatting
-        HighlightFormattingFile = self.GetResourcePath("HighlightFormatting.cfg")
+        HighlightFormattingFile = self.GetResourcePath("Configs/HighlightFormatting.cfg")
         if os.path.isfile(HighlightFormattingFile):
             with open(HighlightFormattingFile, "r") as ConfigFile:
                 self.HighlightFormatting = json.loads(ConfigFile.read())
@@ -624,28 +624,28 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def SaveConfigs(self):
         # Favorites
-        with open(self.GetResourcePath("Favorites.cfg"), "w") as ConfigFile:
+        with open(self.GetResourcePath("Configs/Favorites.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.FavoritesData, indent=2))
-        with open(self.GetResourcePath("GzipFavorites.cfg"), "w") as ConfigFile:
+        with open(self.GetResourcePath("Configs/GzipFavorites.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.GzipFavoritesData, indent=2))
 
         # Display Settings
         DisplaySettings = {}
         DisplaySettings["CurrentZoomLevel"] = self.CurrentZoomLevel
         DisplaySettings["HorizontalSplit"] = self.NotebookAndTextSplitter.sizes()
-        with open(self.GetResourcePath("DisplaySettings.cfg"), "w") as ConfigFile:
+        with open(self.GetResourcePath("Configs/DisplaySettings.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(DisplaySettings, indent=2))
 
         # Keybindings
-        with open(self.GetResourcePath("Keybindings.cfg"), "w") as ConfigFile:
+        with open(self.GetResourcePath("Configs/Keybindings.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.Keybindings, indent=2))
 
         # Inline Footnote Style
-        with open(self.GetResourcePath("InlineFootnoteStyle.cfg"), "w") as ConfigFile:
+        with open(self.GetResourcePath("Configs/InlineFootnoteStyle.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.InlineFootnoteStyle))
 
         # Highlight Formatting
-        with open(self.GetResourcePath("HighlightFormatting.cfg"), "w") as ConfigFile:
+        with open(self.GetResourcePath("Configs/HighlightFormatting.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.HighlightFormatting))
 
         # Last Opened Directory

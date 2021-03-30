@@ -947,7 +947,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if not self.HighlightFormatting:
             self.TextWidgetInst.ClearCharFormats()
         else:
-            self.DisplayMessageBox("Format highlighting shows internal links, external links, images, and footnotes in edit mode with color highlights.  It is intended as a visual guide for finding these elements in the text as you edit, but is not powerful enough to reliably validate markdown syntax.")
+            self.DisplayMessageBox("Format highlighting shows internal links, external links, images, and footnotes in edit mode with color highlights.  It is intended as a loose visual guide for finding these elements in the text as you edit, but is not powerful enough to reliably validate markdown syntax, and may behave oddly with certain syntax combinations.")
             self.TextWidgetInst.HighlightFormatting()
 
     def AddTextToPageAndSubpages(self, Prepend=False):

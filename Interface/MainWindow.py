@@ -229,6 +229,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CollapseAllAction = QAction(self.CollapseAllIcon, "Collapse All")
         self.CollapseAllAction.triggered.connect(self.NotebookDisplayWidgetInst.collapseAll)
 
+        self.HighlightFormattingAction = QAction("Highlight Formatting")
+        self.HighlightFormattingAction.setCheckable(True)
+        self.HighlightFormattingAction.setChecked(True)
+        self.HighlightFormattingAction.triggered.connect(self.ToggleHighlightFormatting)
+        self.ToggleReadModeActionsList.append(self.HighlightFormattingAction)
+
         self.ImageManagerAction = QAction("Image Manager")
         self.ImageManagerAction.triggered.connect(self.ImageManager)
         self.ToggleReadModeActionsList.append(self.ImageManagerAction)
@@ -449,6 +455,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.ExpandAllAction)
         self.ViewMenu.addAction(self.CollapseAllAction)
+        self.ViewMenu.addSeparator()
+        self.ViewMenu.addAction(self.HighlightFormattingAction)
 
         self.NotebookMenu = self.MenuBar.addMenu("Notebook")
         self.NotebookMenu.addAction(self.NewPageAction)
@@ -605,6 +613,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.InlineFootnoteStyle = True
         self.InlineFootnoteStyleAction.setChecked(self.InlineFootnoteStyle)
 
+        # Highlight Formatting
+        HighlightFormattingFile = self.GetResourcePath("HighlightFormatting.cfg")
+        if os.path.isfile(HighlightFormattingFile):
+            with open(HighlightFormattingFile, "r") as ConfigFile:
+                self.HighlightFormatting = json.loads(ConfigFile.read())
+        else:
+            self.HighlightFormatting = True
+        self.HighlightFormattingAction.setChecked(self.HighlightFormatting)
+
     def SaveConfigs(self):
         # Favorites
         with open(self.GetResourcePath("Favorites.cfg"), "w") as ConfigFile:
@@ -626,6 +643,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Inline Footnote Style
         with open(self.GetResourcePath("InlineFootnoteStyle.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.InlineFootnoteStyle))
+
+        # Highlight Formatting
+        with open(self.GetResourcePath("HighlightFormatting.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.HighlightFormatting))
 
         # Last Opened Directory
         self.SaveLastOpenedDirectory()
@@ -920,6 +941,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def ToggleInlineFootnoteStyle(self):
         self.InlineFootnoteStyle = not self.InlineFootnoteStyle
+
+    def ToggleHighlightFormatting(self):
+        self.HighlightFormatting = not self.HighlightFormatting
+        if not self.HighlightFormatting:
+            self.TextWidgetInst.ClearCharFormats()
+        else:
+            self.TextWidgetInst.HighlightFormatting()
 
     def AddTextToPageAndSubpages(self, Prepend=False):
         if not self.TextWidgetInst.ReadMode:

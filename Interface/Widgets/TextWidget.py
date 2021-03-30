@@ -62,16 +62,17 @@ class TextWidget(QTextEdit):
                 self.HighlightFormatting()
         self.DisplayChanging = False
 
-    def HighlightFormatting(self):
-        self.DisplayChanging = True
-
-        Text = self.toPlainText()
+    def ClearCharFormats(self):
         Cursor = self.textCursor()
-
         Cursor.select(Cursor.Document)
         Cursor.setCharFormat(self.DefaultCharacterFormat)
         Cursor.clearSelection()
 
+    def HighlightFormatting(self):
+        self.DisplayChanging = True
+        Text = self.toPlainText()
+        self.ClearCharFormats()
+        Cursor = self.textCursor()
         for HighlightTarget in self.HighlightTargets.values():
             TargetIterator = re.finditer(HighlightTarget["RegEx"], Text)
             HighlightFormat = QTextCharFormat()

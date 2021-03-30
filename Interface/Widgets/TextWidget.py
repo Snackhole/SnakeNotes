@@ -28,10 +28,10 @@ class TextWidget(QTextEdit):
         self.ReadMode = True
         self.DefaultCharacterFormat = QTextCharFormat()
         self.HighlightTargets = {}
-        self.HighlightTargets["ExternalLinks"] = {"RegEx": "!{0}\[[^^].*?\]\([^\[\]]+?\)", "BackgroundColor": "darkBlue"}
-        self.HighlightTargets["InternalLinks"] = {"RegEx": "!{0}\[[^^].*?\]\(\[{1}.+?\]{1}\)", "BackgroundColor": "darkCyan"}
-        self.HighlightTargets["Images"] = {"RegEx": "!\[.*?\]\(.+?\)", "BackgroundColor": "darkRed"}
-        self.HighlightTargets["Footnotes"] = {"RegEx": "\[\^[^\]]+?\]", "BackgroundColor": "darkGreen"}
+        self.HighlightTargets["ExternalLinks"] = {"RegEx": r"!{0}\[[^^\n].*?\]\([^\[\]\n]+?\)", "BackgroundColor": "darkBlue"}
+        self.HighlightTargets["InternalLinks"] = {"RegEx": r"!{0}\[[^^\n].*?\]\(\[{1}.+?\]{1}\)", "BackgroundColor": "darkCyan"}
+        self.HighlightTargets["Images"] = {"RegEx": r"!\[.*?\]\(.+?\)", "BackgroundColor": "darkRed"}
+        self.HighlightTargets["Footnotes"] = {"RegEx": r"\[\^[^\]\n]+?\]", "BackgroundColor": "darkGreen"}
 
         # Create Markdown Parser
         self.Renderer = MarkdownRenderers.Renderer(self.Notebook)

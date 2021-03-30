@@ -7,13 +7,5 @@ venv/
 # VS Code
 .vscode/
 
-# SerpentNotes Runtime Files and Compiled Versions
-Versions/
-DisplaySettings.cfg
-Favorites.cfg
-GzipFavorites.cfg
-Keybindings.cfg
-LastOpenedDirectory.cfg
-GzipMode.cfg
-InlineFootnoteStyle.cfg
-HighlightFormatting.cfg
+# SerpentNotes Runtime Files
+Configs/

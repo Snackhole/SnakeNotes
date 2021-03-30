@@ -85,10 +85,10 @@ class EditHeaderOrFooterDialog(QDialog):
 
     def SubPageOf(self):
         self.HeaderOrFooterText.insertPlainText("{SUBPAGEOFLINK}")
-    
+
     def LinkingPages(self):
         self.HeaderOrFooterText.insertPlainText("{LINKINGPAGES}")
-    
+
     def Default(self):
         self.HeaderOrFooterText.setPlainText(self.Notebook.DefaultHeader if self.Mode == "Header" else (self.Notebook.DefaultFooter if self.Mode == "Footer" else ""))
 

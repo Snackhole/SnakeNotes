@@ -5,6 +5,7 @@ import mistune
 
 from Core import Base64Converters
 
+
 class Renderer(mistune.Renderer):
     def __init__(self, Notebook):
         super().__init__()
@@ -110,6 +111,7 @@ def ConstructSubPageOfLink(Page, Notebook):
         SuperPage = Notebook.GetSuperOfPageFromIndexPath(Page["IndexPath"])
         LinkString = "[" + SuperPage["Title"] + "](" + json.dumps(SuperPage["IndexPath"]) + ")"
     return LinkString
+
 
 def ConstructLinkingPagesLinks(Page, Notebook):
     SearchResults = Notebook.GetSearchResults("](" + json.dumps(Page["IndexPath"]) + ")")

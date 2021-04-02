@@ -625,7 +625,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def SaveConfigs(self):
         if not os.path.isdir(self.GetResourcePath("Configs")):
             os.mkdir(self.GetResourcePath("Configs"))
-        
+
         # Favorites
         with open(self.GetResourcePath("Configs/Favorites.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.FavoritesData, indent=2))

@@ -58,12 +58,6 @@ class TextWidget(QTextEdit):
             self.setPlainText(self.CurrentPage["Content"])
         self.DisplayChanging = False
 
-    def ClearCharFormats(self):
-        Cursor = self.textCursor()
-        Cursor.select(Cursor.Document)
-        Cursor.setCharFormat(self.DefaultCharacterFormat)
-        Cursor.clearSelection()
-
     def SetCurrentPage(self, Page):
         self.CurrentPage = Page
         self.UpdateText()

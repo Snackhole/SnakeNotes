@@ -74,6 +74,11 @@ class SearchWidget(QFrame):
         Results = self.Notebook.GetSearchResults(SearchText, MatchCase=MatchCase)
         for Result in Results["ResultsList"]:
             self.ResultsList.addItem(SearchResult(Result[0], Result[1]))
+        if len(Results["ResultsList"]) > 0:
+            ResultsStatsString = str(Results["TotalHits"]) + " hit" + ("" if Results["TotalHits"] == 1 else "s") + " in " + str(Results["TotalPages"]) + " page" + ("" if Results["TotalPages"] == 1 else "s") + "."
+        else:
+            ResultsStatsString = "No search results."
+        self.MainWindow.SearchResultsStatsLabel.setText(ResultsStatsString)
         self.ResultsList.setCurrentIndex(self.ResultsList.model().index(0))
         if not self.RefreshingSearchResults:
             self.ResultsList.setFocus()
@@ -161,6 +166,7 @@ class SearchWidget(QFrame):
         self.SearchTextLineEdit.clear()
         self.ReplaceTextLineEdit.clear()
         self.MatchCaseCheckBox.setChecked(False)
+        self.MainWindow.SearchResultsStatsLabel.setText("No search results.")
         self.ResultsList.clear()
 
     def NewSearch(self):
@@ -177,6 +183,8 @@ class SearchWidget(QFrame):
         VisibleState = self.isVisible()
         self.setVisible(not VisibleState)
         self.setEnabled(not VisibleState)
+        self.MainWindow.SearchResultsStatsLabel.setVisible(not VisibleState)
+        self.MainWindow.SearchResultsStatsLabel.setEnabled(not VisibleState)
 
     def GrabFocus(self):
         if not self.isVisible():

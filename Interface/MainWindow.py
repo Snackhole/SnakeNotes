@@ -4,7 +4,7 @@ import os
 
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QIcon, QTextCursor
-from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox, QAction, QSplitter, QApplication
+from PyQt5.QtWidgets import QLabel, QMainWindow, QInputDialog, QMessageBox, QAction, QSplitter, QApplication
 
 from Core.MarkdownRenderers import ConstructHTMLExportString
 from Core.Notebook import Notebook
@@ -102,6 +102,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         # Create Status Bar
         self.StatusBar = self.statusBar()
+        self.SearchResultsStatsLabel = QLabel("No search results.")
+        self.SearchResultsStatsLabel.setVisible(False)
+        self.SearchResultsStatsLabel.setEnabled(False)
+        self.StatusBar.addPermanentWidget(self.SearchResultsStatsLabel)
 
         # Window Setup
         self.WindowSetup()

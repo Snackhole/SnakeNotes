@@ -5,7 +5,7 @@ import webbrowser
 import mistune
 from PyQt5 import QtCore
 from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QColor, QTextCursor, QTextCharFormat
+from PyQt5.QtGui import QColor, QSyntaxHighlighter, QTextCursor, QTextCharFormat
 from PyQt5.QtWidgets import QTextEdit, QInputDialog, QMessageBox
 
 from Core import MarkdownRenderers
@@ -27,11 +27,7 @@ class TextWidget(QTextEdit):
         self.DisplayChanging = False
         self.ReadMode = True
         self.DefaultCharacterFormat = QTextCharFormat()
-        self.HighlightTargets = {}
-        self.HighlightTargets["ExternalLinks"] = {"RegEx": r"!{0}\[[^^\n].*?\]\([^\[\]\n]+?\)", "BackgroundColor": "darkBlue"}
-        self.HighlightTargets["InternalLinks"] = {"RegEx": r"!{0}\[[^^\n].*?\]\(\[{1}.+?\]{1}\)", "BackgroundColor": "darkCyan"}
-        self.HighlightTargets["Images"] = {"RegEx": r"!\[.*?\]\(.+?\)", "BackgroundColor": "darkRed"}
-        self.HighlightTargets["Footnotes"] = {"RegEx": r"\[\^[^\]\n]+?\]", "BackgroundColor": "darkGreen"}
+        self.SyntaxHighlighter = SyntaxHighlighter(self)
 
         # Create Markdown Parser
         self.Renderer = MarkdownRenderers.Renderer(self.Notebook)
@@ -58,8 +54,6 @@ class TextWidget(QTextEdit):
         else:
             self.setCurrentCharFormat(self.DefaultCharacterFormat)
             self.setPlainText(self.CurrentPage["Content"])
-            if self.MainWindow.HighlightFormatting:
-                self.HighlightFormatting()
         self.DisplayChanging = False
 
     def ClearCharFormats(self):
@@ -67,24 +61,6 @@ class TextWidget(QTextEdit):
         Cursor.select(Cursor.Document)
         Cursor.setCharFormat(self.DefaultCharacterFormat)
         Cursor.clearSelection()
-
-    def HighlightFormatting(self):
-        self.DisplayChanging = True
-        Text = self.toPlainText()
-        self.ClearCharFormats()
-        Cursor = self.textCursor()
-        for HighlightTarget in self.HighlightTargets.values():
-            TargetIterator = re.finditer(HighlightTarget["RegEx"], Text)
-            HighlightFormat = QTextCharFormat()
-            if "BackgroundColor" in HighlightTarget:
-                HighlightFormat.setBackground(QColor(HighlightTarget["BackgroundColor"]))
-                HighlightFormat.setForeground(QColor("white"))
-            for Target in TargetIterator:
-                Cursor.setPosition(Target.start(), QTextCursor.MoveAnchor)
-                Cursor.setPosition(Target.end(), QTextCursor.KeepAnchor)
-                Cursor.setCharFormat(HighlightFormat)
-
-        self.DisplayChanging = False
 
     def SetCurrentPage(self, Page):
         self.CurrentPage = Page
@@ -436,3 +412,29 @@ class TextWidget(QTextEdit):
                 Cursor = self.textCursor()
                 Cursor.setPosition(NewPosition)
                 self.setTextCursor(Cursor)
+
+
+class SyntaxHighlighter(QSyntaxHighlighter):
+    def __init__(self, TextWidget):
+        super().__init__(TextWidget)
+
+        # Store Parameters
+        self.TextWidget = TextWidget
+
+        # Variables
+        self.HighlightTargets = {}
+        self.HighlightTargets["ExternalLinks"] = {"RegEx": r"!{0}\[[^^\n].*?\]\([^\[\]\n]+?\)", "BackgroundColor": "darkBlue"}
+        self.HighlightTargets["InternalLinks"] = {"RegEx": r"!{0}\[[^^\n].*?\]\(\[{1}.+?\]{1}\)", "BackgroundColor": "darkCyan"}
+        self.HighlightTargets["Images"] = {"RegEx": r"!\[.*?\]\(.+?\)", "BackgroundColor": "darkRed"}
+        self.HighlightTargets["Footnotes"] = {"RegEx": r"\[\^[^\]\n]+?\]", "BackgroundColor": "darkGreen"}
+
+    def highlightBlock(self, Text) -> None:
+        if self.TextWidget.MainWindow.HighlightFormatting and not self.TextWidget.ReadMode:
+            for HighlightTarget in self.HighlightTargets.values():
+                TargetIterator = re.finditer(HighlightTarget["RegEx"], Text)
+                HighlightFormat = QTextCharFormat()
+                if "BackgroundColor" in HighlightTarget:
+                    HighlightFormat.setBackground(QColor(HighlightTarget["BackgroundColor"]))
+                    HighlightFormat.setForeground(QColor("white"))
+                for Target in TargetIterator:
+                    self.setFormat(Target.start(), Target.end() - Target.start(), HighlightFormat)

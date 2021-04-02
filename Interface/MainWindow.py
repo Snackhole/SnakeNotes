@@ -920,8 +920,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.TextWidgetInst.CurrentPage["Content"] = CurrentText
             self.Notebook.SearchIndexUpToDate = False
             self.UpdateUnsavedChangesFlag(True)
-        if self.HighlightFormatting:
-            self.TextWidgetInst.HighlightFormatting()
 
     def ToggleReadMode(self):
         self.TextWidgetInst.setFocus() if self.TextWidgetInst.ReadMode else self.NotebookDisplayWidgetInst.setFocus()
@@ -951,11 +949,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def ToggleHighlightFormatting(self):
         self.HighlightFormatting = not self.HighlightFormatting
-        if not self.HighlightFormatting:
-            self.TextWidgetInst.ClearCharFormats()
-        else:
-            self.DisplayMessageBox("Format highlighting shows internal links, external links, images, and footnotes in edit mode with color highlights.  It is intended as a loose visual guide for finding these elements in the text as you edit, but is not powerful enough to reliably validate markdown syntax, and may behave oddly with certain syntax combinations.  Also, undo and redo will not function while it is active.")
-            self.TextWidgetInst.HighlightFormatting()
+        self.TextWidgetInst.SyntaxHighlighter.rehighlight()
 
     def AddTextToPageAndSubpages(self, Prepend=False):
         if not self.TextWidgetInst.ReadMode:

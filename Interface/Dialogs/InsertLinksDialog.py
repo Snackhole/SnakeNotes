@@ -144,7 +144,7 @@ class InsertLinksDialog(QDialog):
             self.NotebookDisplay.setCurrentIndex(self.NotebookDisplay.model().index(0, 0))
 
     def FillNotebookWidgetItemFromSearchResults(self, SearchResults):
-        for Result in SearchResults:
+        for Result in SearchResults["ResultsList"]:
             CurrentPage = self.Notebook.GetPageFromIndexPath(Result[1])
             SubPageIndexPaths = []
             for SubPage in CurrentPage["SubPages"]:

@@ -115,11 +115,11 @@ def ConstructSubPageOfLink(Page, Notebook):
 
 def ConstructLinkingPagesLinks(Page, Notebook):
     SearchResults = Notebook.GetSearchResults("](" + json.dumps(Page["IndexPath"]) + ")")
-    if len(SearchResults) < 1:
+    if len(SearchResults["ResultsList"]) < 1:
         LinksString = "No linking pages."
     else:
         LinksString = ""
-        for Result in SearchResults:
+        for Result in SearchResults["ResultsList"]:
             LinksString += "[" + Result[0] + "](" + json.dumps(Result[1]) + ")  \n"
         LinksString = LinksString.rstrip()
     return LinksString

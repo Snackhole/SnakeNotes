@@ -186,14 +186,19 @@ class Notebook(SerializableMixin):
             SearchTermString = SearchTermString.casefold()
         if not self.SearchIndexUpToDate:
             self.BuildSearchIndex()
-        Results = []
+        ResultsList = []
+        TotalHits = 0
+        TotalPages = 0
         for PageData in self.SearchIndex:
             ExactTitle = (PageData[0].casefold() if not MatchCase else PageData[0]) == SearchTermString
             TitleHits = (PageData[0].casefold() if not MatchCase else PageData[0]).count(SearchTermString)
             ContentHits = (PageData[1].casefold() if not MatchCase else PageData[1]).count(SearchTermString)
             if (ExactTitleOnly and ExactTitle) or (not ExactTitleOnly and (TitleHits > 0 or ContentHits > 0)):
-                Results.append((PageData[0], PageData[2], ExactTitle, TitleHits, ContentHits))
-        Results = sorted(Results, key=lambda Result: (Result[2], Result[3], Result[4]), reverse=True)
+                ResultsList.append((PageData[0], PageData[2], ExactTitle, TitleHits, ContentHits))
+                TotalHits += TitleHits + ContentHits
+                TotalPages += 1
+        ResultsList = sorted(ResultsList, key=lambda Result: (Result[2], Result[3], Result[4]), reverse=True)
+        Results = {"ResultsList": ResultsList, "TotalHits": TotalHits, "TotalPages": TotalPages}
         return Results
 
     # Serialization Methods

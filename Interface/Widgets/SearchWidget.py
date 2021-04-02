@@ -24,11 +24,6 @@ class SearchWidget(QFrame):
         # Match Case Check Box
         self.MatchCaseCheckBox = QCheckBox("Match Case")
 
-        # Results List
-        self.ResultsList = QListWidget()
-        self.ResultsList.itemSelectionChanged.connect(self.SearchResultSelected)
-        self.ResultsList.itemActivated.connect(self.SearchResultActivated)
-
         # Replace Text Line Edit
         self.ReplaceTextLineEdit = SearchLineEdit(self)
         self.ReplaceTextLineEdit.setPlaceholderText("Replace With")
@@ -49,6 +44,11 @@ class SearchWidget(QFrame):
         self.ReplaceAllInNotebookButton.clicked.connect(lambda: self.ReplaceAllInNotebook())
         self.MainWindow.ToggleReadModeActionsList.append(self.ReplaceAllInNotebookButton)
 
+        # Results List
+        self.ResultsList = QListWidget()
+        self.ResultsList.itemSelectionChanged.connect(self.SearchResultSelected)
+        self.ResultsList.itemActivated.connect(self.SearchResultActivated)
+
         # Layout
         self.Layout = QGridLayout()
         self.Layout.addWidget(self.SearchTextLineEdit, 0, 0, 1, 3)
@@ -59,7 +59,7 @@ class SearchWidget(QFrame):
         self.Layout.addWidget(self.ReplaceButton, 3, 0)
         self.Layout.addWidget(self.ReplaceAllInPageButton, 3, 1)
         self.Layout.addWidget(self.ReplaceAllInNotebookButton, 3, 2)
-        self.Layout.addWidget(self.ResultsList, 0, 4, 4, 1)
+        self.Layout.addWidget(self.ResultsList, 0, 3, 4, 1)
         self.setLayout(self.Layout)
 
         # Start Invisible
@@ -72,7 +72,7 @@ class SearchWidget(QFrame):
         if SearchText == "":
             return
         Results = self.Notebook.GetSearchResults(SearchText, MatchCase=MatchCase)
-        for Result in Results:
+        for Result in Results["ResultsList"]:
             self.ResultsList.addItem(SearchResult(Result[0], Result[1]))
         self.ResultsList.setCurrentIndex(self.ResultsList.model().index(0))
         if not self.RefreshingSearchResults:

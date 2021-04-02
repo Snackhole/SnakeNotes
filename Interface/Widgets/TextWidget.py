@@ -366,12 +366,12 @@ class TextWidget(QTextEdit):
             SearchText = Cursor.selectedText()
             if SearchText != "" and "\u2029" not in SearchText:
                 SearchResults = self.Notebook.GetSearchResults(SearchText, ExactTitleOnly=True)
-                SearchResultsLength = len(SearchResults)
+                SearchResultsLength = len(SearchResults["ResultsList"])
                 if SearchResultsLength > 0:
                     if SearchResultsLength > 1:
                         self.MainWindow.DisplayMessageBox("Multiple pages found.  Use the full link dialog to insert a link.", Icon=QMessageBox.Warning)
                     else:
-                        TopResultIndexPath = SearchResults[0][1]
+                        TopResultIndexPath = SearchResults["ResultsList"][0][1]
                         self.SelectionSpanWrap("[", "](" + json.dumps(TopResultIndexPath, indent=None) + ")")
                 else:
                     self.MainWindow.DisplayMessageBox("No pages with this title found.")

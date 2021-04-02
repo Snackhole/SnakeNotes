@@ -118,7 +118,7 @@ class ImageManagerDialog(QDialog):
             SearchTerm = "](" + CurrentFileName + ")"
             SearchResults = self.Notebook.GetSearchResults(SearchTerm, MatchCase=True)
             self.LinkingPagesList.clear()
-            for Result in SearchResults:
+            for Result in SearchResults["ResultsList"]:
                 LinkingPagesListItem = QListWidgetItem(Result[0])
                 self.LinkingPagesList.addItem(LinkingPagesListItem)
 

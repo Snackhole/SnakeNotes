@@ -27,11 +27,13 @@ class TextWidget(QTextEdit):
         self.DisplayChanging = False
         self.ReadMode = True
         self.DefaultCharacterFormat = QTextCharFormat()
-        self.SyntaxHighlighter = SyntaxHighlighter(self)
 
         # Create Markdown Parser
         self.Renderer = MarkdownRenderers.Renderer(self.Notebook)
         self.MarkdownParser = mistune.Markdown(renderer=self.Renderer)
+
+        # Create Syntax Highlighter
+        self.SyntaxHighlighter = SyntaxHighlighter(self)
 
         # Tab Behavior
         self.setTabChangesFocus(True)

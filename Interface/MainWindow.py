@@ -37,7 +37,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ForwardList = []
         self.BackNavigation = False
         self.AutoScrollQueue = None
-        self.HighlightFormatting = False
+        self.HighlightSyntax = False
 
         # Set Up Save and Open
         self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
@@ -233,11 +233,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CollapseAllAction = QAction(self.CollapseAllIcon, "Collapse All")
         self.CollapseAllAction.triggered.connect(self.NotebookDisplayWidgetInst.collapseAll)
 
-        self.HighlightFormattingAction = QAction("Highlight Formatting")
-        self.HighlightFormattingAction.setCheckable(True)
-        self.HighlightFormattingAction.setChecked(False)
-        self.HighlightFormattingAction.triggered.connect(self.ToggleHighlightFormatting)
-        self.ToggleReadModeActionsList.append(self.HighlightFormattingAction)
+        self.HighlightSyntaxAction = QAction("Highlight Syntax")
+        self.HighlightSyntaxAction.setCheckable(True)
+        self.HighlightSyntaxAction.setChecked(False)
+        self.HighlightSyntaxAction.triggered.connect(self.ToggleHighlightSyntax)
+        self.ToggleReadModeActionsList.append(self.HighlightSyntaxAction)
 
         self.ImageManagerAction = QAction("Image Manager")
         self.ImageManagerAction.triggered.connect(self.ImageManager)
@@ -460,7 +460,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.ExpandAllAction)
         self.ViewMenu.addAction(self.CollapseAllAction)
         self.ViewMenu.addSeparator()
-        self.ViewMenu.addAction(self.HighlightFormattingAction)
+        self.ViewMenu.addAction(self.HighlightSyntaxAction)
 
         self.NotebookMenu = self.MenuBar.addMenu("Notebook")
         self.NotebookMenu.addAction(self.NewPageAction)
@@ -617,14 +617,14 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.InlineFootnoteStyle = True
         self.InlineFootnoteStyleAction.setChecked(self.InlineFootnoteStyle)
 
-        # Highlight Formatting
-        HighlightFormattingFile = self.GetResourcePath("Configs/HighlightFormatting.cfg")
-        if os.path.isfile(HighlightFormattingFile):
-            with open(HighlightFormattingFile, "r") as ConfigFile:
-                self.HighlightFormatting = json.loads(ConfigFile.read())
+        # Highlight Syntax
+        HighlightSyntaxFile = self.GetResourcePath("Configs/HighlightSyntax.cfg")
+        if os.path.isfile(HighlightSyntaxFile):
+            with open(HighlightSyntaxFile, "r") as ConfigFile:
+                self.HighlightSyntax = json.loads(ConfigFile.read())
         else:
-            self.HighlightFormatting = False
-        self.HighlightFormattingAction.setChecked(self.HighlightFormatting)
+            self.HighlightSyntax = False
+        self.HighlightSyntaxAction.setChecked(self.HighlightSyntax)
 
     def SaveConfigs(self):
         if not os.path.isdir(self.GetResourcePath("Configs")):
@@ -651,9 +651,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         with open(self.GetResourcePath("Configs/InlineFootnoteStyle.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.InlineFootnoteStyle))
 
-        # Highlight Formatting
-        with open(self.GetResourcePath("Configs/HighlightFormatting.cfg"), "w") as ConfigFile:
-            ConfigFile.write(json.dumps(self.HighlightFormatting))
+        # Highlight Syntax
+        with open(self.GetResourcePath("Configs/HighlightSyntax.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.HighlightSyntax))
 
         # Last Opened Directory
         self.SaveLastOpenedDirectory()
@@ -947,8 +947,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def ToggleInlineFootnoteStyle(self):
         self.InlineFootnoteStyle = not self.InlineFootnoteStyle
 
-    def ToggleHighlightFormatting(self):
-        self.HighlightFormatting = not self.HighlightFormatting
+    def ToggleHighlightSyntax(self):
+        self.HighlightSyntax = not self.HighlightSyntax
         self.TextWidgetInst.SyntaxHighlighter.rehighlight()
 
     def AddTextToPageAndSubpages(self, Prepend=False):

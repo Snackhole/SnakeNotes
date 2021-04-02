@@ -429,7 +429,7 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.HighlightTargets["Footnotes"] = {"RegEx": r"\[\^[^\]\n]+?\]", "BackgroundColor": "darkGreen"}
 
     def highlightBlock(self, Text) -> None:
-        if self.TextWidget.MainWindow.HighlightFormatting and not self.TextWidget.ReadMode:
+        if self.TextWidget.MainWindow.HighlightSyntax and not self.TextWidget.ReadMode:
             for HighlightTarget in self.HighlightTargets.values():
                 TargetIterator = re.finditer(HighlightTarget["RegEx"], Text)
                 HighlightFormat = QTextCharFormat()

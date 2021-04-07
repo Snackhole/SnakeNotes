@@ -421,10 +421,10 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.HighlightTargets = []
 
         # External Links
-        self.HighlightTargets.append({"RegEx": r"(?<!!)\[[^^\n].*?\]\([^\[\]\n]+?\)", "BackgroundColor": "darkBlue"})
+        self.HighlightTargets.append({"RegEx": r"(?<!!)\[[^^].*?\]\([^\[\]]+?\)", "BackgroundColor": "darkBlue"})
 
         # Internal Links
-        self.HighlightTargets.append({"RegEx": r"(?<!!)\[[^^\n].*?\]\(\[{1}.+?\]{1}\)", "BackgroundColor": "darkCyan"})
+        self.HighlightTargets.append({"RegEx": r"(?<!!)\[[^^].*?\]\(\[{1}.+?\]{1}\)", "BackgroundColor": "darkCyan"})
 
         # Images
         self.HighlightTargets.append({"RegEx": r"!\[.*?\]\(.+?\)", "BackgroundColor": "darkRed"})

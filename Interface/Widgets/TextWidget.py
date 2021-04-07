@@ -432,7 +432,7 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         # Footnotes
         self.HighlightTargets.append({"RegEx": r"\[\^[^\]]+\]", "BackgroundColor": "darkGreen"})
 
-    def highlightBlock(self, Text) -> None:
+    def highlightBlock(self, Text):
         if self.TextWidget.MainWindow.HighlightSyntax and not self.TextWidget.ReadMode:
             for HighlightTarget in self.HighlightTargets:
                 TargetIterator = re.finditer(HighlightTarget["RegEx"], Text)

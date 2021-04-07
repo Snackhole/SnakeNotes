@@ -417,16 +417,24 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         # Store Parameters
         self.TextWidget = TextWidget
 
-        # Variables
-        self.HighlightTargets = {}
-        self.HighlightTargets["ExternalLinks"] = {"RegEx": r"!{0}\[[^^\n].*?\]\([^\[\]\n]+?\)", "BackgroundColor": "darkBlue"}
-        self.HighlightTargets["InternalLinks"] = {"RegEx": r"!{0}\[[^^\n].*?\]\(\[{1}.+?\]{1}\)", "BackgroundColor": "darkCyan"}
-        self.HighlightTargets["Images"] = {"RegEx": r"!\[.*?\]\(.+?\)", "BackgroundColor": "darkRed"}
-        self.HighlightTargets["Footnotes"] = {"RegEx": r"\[\^[^\]\n]+?\]", "BackgroundColor": "darkGreen"}
+        # Highlight Targets
+        self.HighlightTargets = []
+
+        # External Links
+        self.HighlightTargets.append({"RegEx": r"!{0}\[[^^\n].*?\]\([^\[\]\n]+?\)", "BackgroundColor": "darkBlue"})
+
+        # Internal Links
+        self.HighlightTargets.append({"RegEx": r"!{0}\[[^^\n].*?\]\(\[{1}.+?\]{1}\)", "BackgroundColor": "darkCyan"})
+
+        # Images
+        self.HighlightTargets.append({"RegEx": r"!\[.*?\]\(.+?\)", "BackgroundColor": "darkRed"})
+
+        # Footnotes
+        self.HighlightTargets.append({"RegEx": r"\[\^[^\]\n]+?\]", "BackgroundColor": "darkGreen"})
 
     def highlightBlock(self, Text) -> None:
         if self.TextWidget.MainWindow.HighlightSyntax and not self.TextWidget.ReadMode:
-            for HighlightTarget in self.HighlightTargets.values():
+            for HighlightTarget in self.HighlightTargets:
                 TargetIterator = re.finditer(HighlightTarget["RegEx"], Text)
                 HighlightFormat = QTextCharFormat()
                 if "BackgroundColor" in HighlightTarget:

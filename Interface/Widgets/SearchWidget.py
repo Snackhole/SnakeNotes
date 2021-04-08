@@ -20,9 +20,15 @@ class SearchWidget(QFrame):
         self.SearchTextLineEdit = SearchLineEdit(self)
         self.SearchTextLineEdit.setPlaceholderText("Search (Ctrl+F)")
         self.SearchTextLineEdit.returnPressed.connect(self.Search)
+        self.SearchTextLineEdit.textChanged.connect(self.RehighlightTextWidget)
+
+        # Highlight Check Box
+        self.HighlightCheckBox = QCheckBox("Highlight")
+        self.HighlightCheckBox.stateChanged.connect(self.RehighlightTextWidget)
 
         # Match Case Check Box
         self.MatchCaseCheckBox = QCheckBox("Match Case")
+        self.MatchCaseCheckBox.stateChanged.connect(self.RehighlightTextWidget)
 
         # Replace Text Line Edit
         self.ReplaceTextLineEdit = SearchLineEdit(self)
@@ -30,9 +36,9 @@ class SearchWidget(QFrame):
         self.MainWindow.ToggleReadModeActionsList.append(self.ReplaceTextLineEdit)
 
         # Buttons
-        self.SearchButton = QPushButton("Search Notebook")
+        self.SearchButton = QPushButton("Search\nNotebook")
         self.SearchButton.clicked.connect(self.Search)
-        self.FindInPageButton = QPushButton("Find In Page")
+        self.FindInPageButton = QPushButton("Find\nIn Page")
         self.FindInPageButton.clicked.connect(self.FindInPage)
         self.ReplaceButton = QPushButton("Replace\nCurrent Hit")
         self.ReplaceButton.clicked.connect(self.Replace)
@@ -52,14 +58,15 @@ class SearchWidget(QFrame):
         # Layout
         self.Layout = QGridLayout()
         self.Layout.addWidget(self.SearchTextLineEdit, 0, 0, 1, 3)
-        self.Layout.addWidget(self.SearchButton, 1, 0)
-        self.Layout.addWidget(self.FindInPageButton, 1, 1)
-        self.Layout.addWidget(self.MatchCaseCheckBox, 1, 2)
-        self.Layout.addWidget(self.ReplaceTextLineEdit, 2, 0, 1, 3)
-        self.Layout.addWidget(self.ReplaceButton, 3, 0)
-        self.Layout.addWidget(self.ReplaceAllInPageButton, 3, 1)
-        self.Layout.addWidget(self.ReplaceAllInNotebookButton, 3, 2)
-        self.Layout.addWidget(self.ResultsList, 0, 3, 4, 1)
+        self.Layout.addWidget(self.SearchButton, 1, 0, 2, 1)
+        self.Layout.addWidget(self.FindInPageButton, 1, 1, 2, 1)
+        self.Layout.addWidget(self.HighlightCheckBox, 1, 2)
+        self.Layout.addWidget(self.MatchCaseCheckBox, 2, 2)
+        self.Layout.addWidget(self.ReplaceTextLineEdit, 3, 0, 1, 3)
+        self.Layout.addWidget(self.ReplaceButton, 4, 0)
+        self.Layout.addWidget(self.ReplaceAllInPageButton, 4, 1)
+        self.Layout.addWidget(self.ReplaceAllInNotebookButton, 4, 2)
+        self.Layout.addWidget(self.ResultsList, 0, 3, 5, 1)
         self.setLayout(self.Layout)
 
         # Start Invisible
@@ -82,6 +89,7 @@ class SearchWidget(QFrame):
         self.ResultsList.setCurrentIndex(self.ResultsList.model().index(0))
         if not self.RefreshingSearchResults:
             self.ResultsList.setFocus()
+        self.RehighlightTextWidget()
 
     def SearchResultSelected(self):
         SelectedItems = self.ResultsList.selectedItems()
@@ -105,6 +113,9 @@ class SearchWidget(QFrame):
             if not self.MainWindow.TextWidgetInst.find(SearchText):
                 self.MainWindow.TextWidgetInst.moveCursor(QTextCursor.Start)
                 self.MainWindow.TextWidgetInst.find(SearchText)
+
+    def RehighlightTextWidget(self):
+        self.MainWindow.TextWidgetInst.SyntaxHighlighter.rehighlight()
 
     def Replace(self):
         if not self.MainWindow.TextWidgetInst.ReadMode:
@@ -168,6 +179,7 @@ class SearchWidget(QFrame):
         self.MatchCaseCheckBox.setChecked(False)
         self.MainWindow.SearchResultsStatsLabel.setText("No search results.")
         self.ResultsList.clear()
+        self.RehighlightTextWidget()
 
     def NewSearch(self):
         self.SearchTextLineEdit.setFocus()

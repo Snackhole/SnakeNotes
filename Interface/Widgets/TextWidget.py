@@ -443,3 +443,16 @@ class SyntaxHighlighter(QSyntaxHighlighter):
                     HighlightFormat.setForeground(QColor("white"))
                 for Target in TargetIterator:
                     self.setFormat(Target.start(), Target.end() - Target.start(), HighlightFormat)
+        if self.TextWidget.MainWindow.SearchWidgetInst.HighlightCheckBox.isChecked():
+            SearchText = self.TextWidget.MainWindow.SearchWidgetInst.SearchTextLineEdit.text()
+            if SearchText != "":
+                SearchFormat = QTextCharFormat()
+                SearchFormat.setBackground(QColor("darkMagenta"))
+                SearchFormat.setForeground(QColor("white"))
+                MatchCase = self.TextWidget.MainWindow.SearchWidgetInst.MatchCaseCheckBox.isChecked()
+                if MatchCase:
+                    TargetIterator = re.finditer(SearchText, Text)
+                else:
+                    TargetIterator = re.finditer(SearchText, Text, re.IGNORECASE)
+                for Target in TargetIterator:
+                    self.setFormat(Target.start(), Target.end() - Target.start(), SearchFormat)

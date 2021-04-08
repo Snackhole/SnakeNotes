@@ -299,6 +299,7 @@ class TextWidget(QTextEdit):
                     Cursor.insertText(("\u2029" * 2) + FootnoteSymbol + ": ")
                     self.setTextCursor(Cursor)
                     self.MakeCursorVisible()
+                    QTimer.singleShot(0, self.VerticallyCenterCursor)
                     Cursor.endEditBlock()
 
     def NextLineBlank(self, Cursor):

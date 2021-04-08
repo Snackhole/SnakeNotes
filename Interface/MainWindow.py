@@ -626,6 +626,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.HighlightSyntax = False
         self.HighlightSyntaxAction.setChecked(self.HighlightSyntax)
 
+        # Search Highlight
+        SearchHighlightFile = self.GetResourcePath("Configs/SearchHighlight.cfg")
+        if os.path.isfile(SearchHighlightFile):
+            with open(SearchHighlightFile, "r") as ConfigFile:
+                self.SearchWidgetInst.HighlightCheckBox.setChecked(json.loads(ConfigFile.read()))
+
     def SaveConfigs(self):
         if not os.path.isdir(self.GetResourcePath("Configs")):
             os.mkdir(self.GetResourcePath("Configs"))
@@ -654,6 +660,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Highlight Syntax
         with open(self.GetResourcePath("Configs/HighlightSyntax.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.HighlightSyntax))
+
+        # Search Highlight
+        with open(self.GetResourcePath("Configs/SearchHighlight.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.SearchWidgetInst.HighlightCheckBox.isChecked()))
 
         # Last Opened Directory
         self.SaveLastOpenedDirectory()

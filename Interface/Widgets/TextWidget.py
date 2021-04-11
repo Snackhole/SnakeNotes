@@ -451,8 +451,8 @@ class SyntaxHighlighter(QSyntaxHighlighter):
                 SearchFormat.setForeground(QColor("white"))
                 MatchCase = self.TextWidget.MainWindow.SearchWidgetInst.MatchCaseCheckBox.isChecked()
                 if MatchCase:
-                    TargetIterator = re.finditer(SearchText, Text)
+                    TargetIterator = re.finditer(re.escape(SearchText), Text)
                 else:
-                    TargetIterator = re.finditer(SearchText, Text, re.IGNORECASE)
+                    TargetIterator = re.finditer(re.escape(SearchText), Text, re.IGNORECASE)
                 for Target in TargetIterator:
                     self.setFormat(Target.start(), Target.end() - Target.start(), SearchFormat)

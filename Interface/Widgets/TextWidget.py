@@ -455,10 +455,10 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.HighlightTargets = []
 
         # Link-Type
-        self.HighlightTargets.append({"RegEx": r"(!?)\[(.*?)\]\((.+?)( \".+?\")?\)", "FormatCallable": self.GetLinksFormat})
+        self.HighlightTargets.append({"RegEx": r"(!?)\[([^\[\]\n]*?)\]\((.+?)( \".+?\")?\)", "FormatCallable": self.GetLinksFormat})
 
         # Footnotes
-        self.HighlightTargets.append({"RegEx": r"\[\^[^\]]+\]", "FormatCallable": self.GetFootnotesFormat})
+        self.HighlightTargets.append({"RegEx": r"\[\^[^\]]+?\]", "FormatCallable": self.GetFootnotesFormat})
 
     def GetLinksFormat(self, Match):
         if Match.group(1) == "!":

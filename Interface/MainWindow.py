@@ -959,6 +959,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def ToggleHighlightSyntax(self):
         self.HighlightSyntax = not self.HighlightSyntax
+        if self.HighlightSyntax:
+            self.DisplayMessageBox("Syntax highlighting is intended only as a rough guide, and may not capture all valid Markdown syntax perfectly.", Icon=QMessageBox.Warning)
         self.TextWidgetInst.SyntaxHighlighter.rehighlight()
 
     def AddTextToPageAndSubpages(self, Prepend=False):

@@ -7,5 +7,6 @@ venv/
 # VS Code
 .vscode/
 
-# SerpentNotes Runtime Files
+# SerpentNotes Build and Runtime Files
 Configs/
+BUILD - */

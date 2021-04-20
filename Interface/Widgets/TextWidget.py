@@ -418,41 +418,76 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         # Store Parameters
         self.TextWidget = TextWidget
 
+        # Create Formats
+        self.CreateFormats()
+
+        # Create Highlight Targets
+        self.CreateHighlightTargets()
+
+    def CreateFormats(self):
+        # External Links
+        self.ExternalLinksFormat = QTextCharFormat()
+        self.ExternalLinksFormat.setBackground(QColor("darkBlue"))
+        self.ExternalLinksFormat.setForeground(QColor("white"))
+
+        # Internal Links
+        self.InternalLinksFormat = QTextCharFormat()
+        self.InternalLinksFormat.setBackground(QColor("darkCyan"))
+        self.InternalLinksFormat.setForeground(QColor("white"))
+
+        # Images
+        self.ImagesFormat = QTextCharFormat()
+        self.ImagesFormat.setBackground(QColor("darkRed"))
+        self.ImagesFormat.setForeground(QColor("white"))
+
+        # Footnotes
+        self.FootnotesFormat = QTextCharFormat()
+        self.FootnotesFormat.setBackground(QColor("darkGreen"))
+        self.FootnotesFormat.setForeground(QColor("white"))
+
+        # Search Highlight
+        self.SearchHighlightFormat = QTextCharFormat()
+        self.SearchHighlightFormat.setBackground(QColor("darkMagenta"))
+        self.SearchHighlightFormat.setForeground(QColor("white"))
+
+    def CreateHighlightTargets(self):
         # Highlight Targets
         self.HighlightTargets = []
 
-        # External Links
-        self.HighlightTargets.append({"RegEx": r"(?<!!)\[[^^].*?\]\([^\[\]]+?\)", "BackgroundColor": "darkBlue"})
-
-        # Internal Links
-        self.HighlightTargets.append({"RegEx": r"(?<!!)\[[^^].*?\]\(\[{1}.+?\]{1}\)", "BackgroundColor": "darkCyan"})
-
-        # Images
-        self.HighlightTargets.append({"RegEx": r"!\[.*?\]\(.+?\)", "BackgroundColor": "darkRed"})
+        # Link-Type
+        self.HighlightTargets.append({"RegEx": r"(!?)\[(.*?)\]\((.+?)( \".+?\")?\)", "FormatCallable": self.GetLinksFormat})
 
         # Footnotes
-        self.HighlightTargets.append({"RegEx": r"\[\^[^\]]+\]", "BackgroundColor": "darkGreen"})
+        self.HighlightTargets.append({"RegEx": r"\[\^[^\]]+\]", "FormatCallable": self.GetFootnotesFormat})
+
+    def GetLinksFormat(self, Match):
+        if Match.group(1) == "!":
+            return self.ImagesFormat
+        elif Match.group(2) != "" and Match.group(3).startswith("[") and Match.group(3).endswith("]"):
+            return self.InternalLinksFormat
+        elif Match.group(2) != "" and not (Match.group(3).startswith("[") and Match.group(3).endswith("]")):
+            return self.ExternalLinksFormat
+        else:
+            return None
+
+    def GetFootnotesFormat(self, Match):
+        return self.FootnotesFormat
 
     def highlightBlock(self, Text):
         if self.TextWidget.MainWindow.HighlightSyntax and not self.TextWidget.ReadMode:
             for HighlightTarget in self.HighlightTargets:
                 TargetIterator = re.finditer(HighlightTarget["RegEx"], Text)
-                HighlightFormat = QTextCharFormat()
-                if "BackgroundColor" in HighlightTarget:
-                    HighlightFormat.setBackground(QColor(HighlightTarget["BackgroundColor"]))
-                    HighlightFormat.setForeground(QColor("white"))
                 for Target in TargetIterator:
-                    self.setFormat(Target.start(), Target.end() - Target.start(), HighlightFormat)
+                    Format = HighlightTarget["FormatCallable"](Target)
+                    if Format is not None:
+                        self.setFormat(Target.start(), Target.end() - Target.start(), Format)
         if self.TextWidget.MainWindow.SearchWidgetInst.HighlightCheckBox.isChecked():
             SearchText = self.TextWidget.MainWindow.SearchWidgetInst.SearchTextLineEdit.text()
             if SearchText != "":
-                SearchFormat = QTextCharFormat()
-                SearchFormat.setBackground(QColor("darkMagenta"))
-                SearchFormat.setForeground(QColor("white"))
                 MatchCase = self.TextWidget.MainWindow.SearchWidgetInst.MatchCaseCheckBox.isChecked()
                 if MatchCase:
                     TargetIterator = re.finditer(re.escape(SearchText), Text)
                 else:
                     TargetIterator = re.finditer(re.escape(SearchText), Text, re.IGNORECASE)
                 for Target in TargetIterator:
-                    self.setFormat(Target.start(), Target.end() - Target.start(), SearchFormat)
+                    self.setFormat(Target.start(), Target.end() - Target.start(), self.SearchHighlightFormat)

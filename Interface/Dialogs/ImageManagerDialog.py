@@ -2,7 +2,7 @@ import os
 from PyQt5 import QtCore
 
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QCheckBox, QDialog, QFrame, QGridLayout, QLineEdit, QListWidget, QPushButton, QListWidgetItem, QLabel, QFileDialog, QMessageBox, QScrollArea, QSplitter, QInputDialog
+from PyQt5.QtWidgets import QCheckBox, QDialog, QFrame, QGridLayout, QLineEdit, QListWidget, QPushButton, QListWidgetItem, QLabel, QFileDialog, QMessageBox, QScrollArea, QSizePolicy, QSplitter, QInputDialog
 
 from Core import Base64Converters
 
@@ -54,16 +54,24 @@ class ImageManagerDialog(QDialog):
         self.ImageDisplay = QLabel()
 
         # Buttons
-        self.AddImageButton = QPushButton("Add")
+        self.AddImageButton = QPushButton("Add Image")
         self.AddImageButton.clicked.connect(self.AddImage)
-        self.RenameImageButton = QPushButton("Rename")
+        self.AddMultipleImagesButton = QPushButton("Add Multiple Images")
+        self.AddImageButton.clicked.connect(self.AddMultipleImages)
+        self.RenameImageButton = QPushButton("Rename Image")
         self.RenameImageButton.clicked.connect(self.RenameImage)
-        self.ExportImageButton = QPushButton("Export")
+        self.RenameImageButton.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.ExportImageButton = QPushButton("Export Image")
         self.ExportImageButton.clicked.connect(self.ExportImage)
-        self.DeleteImageButton = QPushButton("Delete")
+        self.ExportAllImagesButton = QPushButton("Export All Images")
+        self.ExportAllImagesButton.clicked.connect(self.ExportAllImages)
+        self.DeleteImageButton = QPushButton("Delete Image")
         self.DeleteImageButton.clicked.connect(self.DeleteImage)
+        self.DeleteAllImagesButton = QPushButton("Delete All Images")
+        self.DeleteAllImagesButton.clicked.connect(self.DeleteAllImages)
         self.DoneButton = QPushButton("Done")
         self.DoneButton.clicked.connect(self.Done)
+        self.DoneButton.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
         # Create, Populate, and Set Layout
         self.Layout = QGridLayout()
@@ -85,10 +93,13 @@ class ImageManagerDialog(QDialog):
         self.Layout.addWidget(self.Splitter, 1, 0)
         self.ButtonLayout = QGridLayout()
         self.ButtonLayout.addWidget(self.AddImageButton, 0, 0)
-        self.ButtonLayout.addWidget(self.RenameImageButton, 0, 1)
-        self.ButtonLayout.addWidget(self.ExportImageButton, 0, 2)
-        self.ButtonLayout.addWidget(self.DeleteImageButton, 0, 3)
-        self.ButtonLayout.addWidget(self.DoneButton, 0, 4)
+        self.ButtonLayout.addWidget(self.AddMultipleImagesButton, 1, 0)
+        self.ButtonLayout.addWidget(self.ExportImageButton, 0, 1)
+        self.ButtonLayout.addWidget(self.ExportAllImagesButton, 1, 1)
+        self.ButtonLayout.addWidget(self.DeleteImageButton, 0, 2)
+        self.ButtonLayout.addWidget(self.DeleteAllImagesButton, 1, 2)
+        self.ButtonLayout.addWidget(self.RenameImageButton, 0, 3, 2, 1)
+        self.ButtonLayout.addWidget(self.DoneButton, 0, 4, 2, 1)
         self.Layout.addLayout(self.ButtonLayout, 2, 0)
         self.setLayout(self.Layout)
 
@@ -154,6 +165,9 @@ class ImageManagerDialog(QDialog):
             self.PopulateImageList()
             self.ImageList.setCurrentRow(self.GetImageIndexFromName(os.path.basename(ImageFilePath)))
 
+    def AddMultipleImages(self):
+        pass
+
     def RenameImage(self):
         SelectedItems = self.ImageList.selectedItems()
         if len(SelectedItems) > 0:
@@ -187,6 +201,16 @@ class ImageManagerDialog(QDialog):
                     ExportImagePath += CurrentFileExtension
                 Base64Converters.WriteFileFromBase64String(SelectedItems[0].Base64String, ExportImagePath)
 
+    def ExportAllImages(self):
+        ExportDirectory = QFileDialog.getExistingDirectory(parent=self, caption="Export All Image Files")
+        ExportDirectoryContents = os.listdir(ExportDirectory)
+        if len(ExportDirectoryContents) == 0:
+            for Image in self.Notebook.Images.keys():
+                ExportImagePath = os.path.join(ExportDirectory, Image)
+                Base64Converters.WriteFileFromBase64String(self.Notebook.Images[Image], ExportImagePath)
+        else:
+            self.MainWindow.DisplayMessageBox("Choose an empty folder to export all image files.")
+
     def DeleteImage(self):
         SelectedItems = self.ImageList.selectedItems()
         if len(SelectedItems) > 0:
@@ -202,6 +226,12 @@ class ImageManagerDialog(QDialog):
                     self.ImageList.setCurrentRow(CurrentImageRow - 1)
                 else:
                     self.ImageList.setCurrentRow(CurrentImageRow)
+
+    def DeleteAllImages(self):
+        if self.MainWindow.DisplayMessageBox("Are you sure you want to delete all images from the notebook?  This cannot be undone.", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+            self.Notebook.Images.clear()
+            self.UnsavedChanges = True
+            self.PopulateImageList()
 
     def GetImageIndexFromName(self, ImageName):
         ImageNames = sorted(self.Notebook.Images.keys(), key=lambda Image: Image.lower())

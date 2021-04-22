@@ -155,6 +155,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToggleSearchIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Toggle Search Icon.png"))
 
     def CreateActions(self):
+        # File Actions
         self.NewAction = QAction("New")
         self.NewAction.triggered.connect(self.NewActionTriggered)
 
@@ -188,72 +189,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ExitAction = QAction("Exit")
         self.ExitAction.triggered.connect(self.close)
 
+        # Edit Actions
         self.ToggleReadModeAction = QAction(self.ToggleReadModeIcon, "Toggle Read Mode")
         self.ToggleReadModeAction.triggered.connect(self.ToggleReadMode)
-
-        self.BackAction = QAction(self.BackIcon, "Back")
-        self.BackAction.triggered.connect(self.Back)
-        self.BackAction.setEnabled(False)
-
-        self.ForwardAction = QAction(self.ForwardIcon, "Forward")
-        self.ForwardAction.triggered.connect(self.Forward)
-        self.ForwardAction.setEnabled(False)
-
-        self.NewPageAction = QAction(self.NewPageIcon, "New Page")
-        self.NewPageAction.triggered.connect(self.NewPage)
-        self.ToggleReadModeActionsList.append(self.NewPageAction)
-
-        self.DeletePageAction = QAction(self.DeletePageIcon, "Delete Page")
-        self.DeletePageAction.triggered.connect(self.DeletePage)
-        self.ToggleReadModeActionsList.append(self.DeletePageAction)
-
-        self.MovePageUpAction = QAction(self.MovePageUpIcon, "Move Page Up")
-        self.MovePageUpAction.triggered.connect(lambda: self.MovePage(-1))
-        self.ToggleReadModeActionsList.append(self.MovePageUpAction)
-
-        self.MovePageDownAction = QAction(self.MovePageDownIcon, "Move Page Down")
-        self.MovePageDownAction.triggered.connect(lambda: self.MovePage(1))
-        self.ToggleReadModeActionsList.append(self.MovePageDownAction)
-
-        self.PromotePageAction = QAction(self.PromotePageIcon, "Promote Page")
-        self.PromotePageAction.triggered.connect(self.PromotePage)
-        self.ToggleReadModeActionsList.append(self.PromotePageAction)
-
-        self.DemotePageAction = QAction(self.DemotePageIcon, "Demote Page")
-        self.DemotePageAction.triggered.connect(self.DemotePage)
-        self.ToggleReadModeActionsList.append(self.DemotePageAction)
-
-        self.RenamePageAction = QAction(self.RenamePageIcon, "Rename Page")
-        self.RenamePageAction.triggered.connect(self.RenamePage)
-        self.ToggleReadModeActionsList.append(self.RenamePageAction)
-
-        self.ExpandAllAction = QAction(self.ExpandAllIcon, "Expand All")
-        self.ExpandAllAction.triggered.connect(self.NotebookDisplayWidgetInst.expandAll)
-
-        self.CollapseAllAction = QAction(self.CollapseAllIcon, "Collapse All")
-        self.CollapseAllAction.triggered.connect(self.NotebookDisplayWidgetInst.collapseAll)
-
-        self.HighlightSyntaxAction = QAction("Highlight Syntax")
-        self.HighlightSyntaxAction.setCheckable(True)
-        self.HighlightSyntaxAction.setChecked(False)
-        self.HighlightSyntaxAction.triggered.connect(self.ToggleHighlightSyntax)
-        self.ToggleReadModeActionsList.append(self.HighlightSyntaxAction)
-
-        self.ImageManagerAction = QAction("Image Manager")
-        self.ImageManagerAction.triggered.connect(self.ImageManager)
-        self.ToggleReadModeActionsList.append(self.ImageManagerAction)
-
-        self.TemplateManagerAction = QAction("Template Manager")
-        self.TemplateManagerAction.triggered.connect(self.TemplateManager)
-        self.ToggleReadModeActionsList.append(self.TemplateManagerAction)
-
-        self.EditHeaderAction = QAction("Edit Header")
-        self.EditHeaderAction.triggered.connect(lambda: self.EditHeaderOrFooter("Header"))
-        self.ToggleReadModeActionsList.append(self.EditHeaderAction)
-
-        self.EditFooterAction = QAction("Edit Footer")
-        self.EditFooterAction.triggered.connect(lambda: self.EditHeaderOrFooter("Footer"))
-        self.ToggleReadModeActionsList.append(self.EditFooterAction)
 
         self.ItalicsAction = QAction(self.ItalicsIcon, "Italics")
         self.ItalicsAction.triggered.connect(self.TextWidgetInst.Italics)
@@ -263,11 +201,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.BoldAction.triggered.connect(self.TextWidgetInst.Bold)
         self.ToggleReadModeActionsList.append(self.BoldAction)
 
-        self.StrikethroughAction = QAction(self.StrikethroughIcon, "Strikethrough")
+        self.StrikethroughAction = QAction(self.StrikethroughIcon, "&Strikethrough")
         self.StrikethroughAction.triggered.connect(self.TextWidgetInst.Strikethrough)
         self.ToggleReadModeActionsList.append(self.StrikethroughAction)
 
-        self.CodeSpanAction = QAction("Code Span")
+        self.CodeSpanAction = QAction("&Code Span")
         self.CodeSpanAction.triggered.connect(self.TextWidgetInst.CodeSpan)
         self.ToggleReadModeActionsList.append(self.CodeSpanAction)
 
@@ -295,23 +233,23 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.HeaderSixAction.triggered.connect(lambda: self.TextWidgetInst.Header(6))
         self.ToggleReadModeActionsList.append(self.HeaderSixAction)
 
-        self.BulletListAction = QAction(self.BulletListIcon, "Bullet List")
+        self.BulletListAction = QAction(self.BulletListIcon, "&Bullet List")
         self.BulletListAction.triggered.connect(self.TextWidgetInst.BulletList)
         self.ToggleReadModeActionsList.append(self.BulletListAction)
 
-        self.NumberListAction = QAction(self.NumberListIcon, "Number List")
+        self.NumberListAction = QAction(self.NumberListIcon, "&Number List")
         self.NumberListAction.triggered.connect(self.TextWidgetInst.NumberList)
         self.ToggleReadModeActionsList.append(self.NumberListAction)
 
-        self.QuoteAction = QAction(self.QuoteIcon, "Quote")
+        self.QuoteAction = QAction(self.QuoteIcon, "&Quote")
         self.QuoteAction.triggered.connect(self.TextWidgetInst.Quote)
         self.ToggleReadModeActionsList.append(self.QuoteAction)
 
-        self.CodeBlockAction = QAction("Code Block")
+        self.CodeBlockAction = QAction("C&ode Block")
         self.CodeBlockAction.triggered.connect(self.TextWidgetInst.CodeBlock)
         self.ToggleReadModeActionsList.append(self.CodeBlockAction)
 
-        self.HorizontalRuleAction = QAction("Horizontal Rule")
+        self.HorizontalRuleAction = QAction("&Horizontal Rule")
         self.HorizontalRuleAction.triggered.connect(self.TextWidgetInst.HorizontalRule)
         self.ToggleReadModeActionsList.append(self.HorizontalRuleAction)
 
@@ -369,6 +307,24 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DeleteLineAction.triggered.connect(self.TextWidgetInst.DeleteLine)
         self.ToggleReadModeActionsList.append(self.DeleteLineAction)
 
+        # View Actions
+        self.BackAction = QAction(self.BackIcon, "Back")
+        self.BackAction.triggered.connect(self.Back)
+        self.BackAction.setEnabled(False)
+
+        self.ForwardAction = QAction(self.ForwardIcon, "Forward")
+        self.ForwardAction.triggered.connect(self.Forward)
+        self.ForwardAction.setEnabled(False)
+
+        self.SearchAction = QAction(self.SearchIcon, "Search")
+        self.SearchAction.triggered.connect(self.SearchWidgetInst.GrabFocus)
+
+        self.ToggleSearchAction = QAction(self.ToggleSearchIcon, "Toggle Search")
+        self.ToggleSearchAction.triggered.connect(self.SearchWidgetInst.ToggleVisibility)
+
+        self.SearchForLinkingPagesAction = QAction("&Search for Linking Pages")
+        self.SearchForLinkingPagesAction.triggered.connect(self.SearchForLinkingPages)
+
         self.ZoomOutAction = QAction(self.ZoomOutIcon, "Zoom Out")
         self.ZoomOutAction.triggered.connect(self.ZoomOut)
 
@@ -378,19 +334,67 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultZoomAction = QAction("Default Zoom")
         self.DefaultZoomAction.triggered.connect(self.DefaultZoom)
 
-        self.SearchAction = QAction(self.SearchIcon, "Search")
-        self.SearchAction.triggered.connect(self.SearchWidgetInst.GrabFocus)
+        self.ExpandAllAction = QAction(self.ExpandAllIcon, "&Expand All")
+        self.ExpandAllAction.triggered.connect(self.NotebookDisplayWidgetInst.expandAll)
 
-        self.ToggleSearchAction = QAction(self.ToggleSearchIcon, "Toggle Search")
-        self.ToggleSearchAction.triggered.connect(self.SearchWidgetInst.ToggleVisibility)
+        self.CollapseAllAction = QAction(self.CollapseAllIcon, "&Collapse All")
+        self.CollapseAllAction.triggered.connect(self.NotebookDisplayWidgetInst.collapseAll)
 
-        self.SearchForLinkingPagesAction = QAction("Search for Linking Pages")
-        self.SearchForLinkingPagesAction.triggered.connect(self.SearchForLinkingPages)
+        self.HighlightSyntaxAction = QAction("Highlight Syntax")
+        self.HighlightSyntaxAction.setCheckable(True)
+        self.HighlightSyntaxAction.setChecked(False)
+        self.HighlightSyntaxAction.triggered.connect(self.ToggleHighlightSyntax)
+        self.ToggleReadModeActionsList.append(self.HighlightSyntaxAction)
+
+        # Notebook Actions
+        self.NewPageAction = QAction(self.NewPageIcon, "New Page")
+        self.NewPageAction.triggered.connect(self.NewPage)
+        self.ToggleReadModeActionsList.append(self.NewPageAction)
+
+        self.DeletePageAction = QAction(self.DeletePageIcon, "Delete Page")
+        self.DeletePageAction.triggered.connect(self.DeletePage)
+        self.ToggleReadModeActionsList.append(self.DeletePageAction)
+
+        self.RenamePageAction = QAction(self.RenamePageIcon, "Rename Page")
+        self.RenamePageAction.triggered.connect(self.RenamePage)
+        self.ToggleReadModeActionsList.append(self.RenamePageAction)
+
+        self.MovePageUpAction = QAction(self.MovePageUpIcon, "Move Page Up")
+        self.MovePageUpAction.triggered.connect(lambda: self.MovePage(-1))
+        self.ToggleReadModeActionsList.append(self.MovePageUpAction)
+
+        self.MovePageDownAction = QAction(self.MovePageDownIcon, "Move Page Down")
+        self.MovePageDownAction.triggered.connect(lambda: self.MovePage(1))
+        self.ToggleReadModeActionsList.append(self.MovePageDownAction)
+
+        self.PromotePageAction = QAction(self.PromotePageIcon, "Promote Page")
+        self.PromotePageAction.triggered.connect(self.PromotePage)
+        self.ToggleReadModeActionsList.append(self.PromotePageAction)
+
+        self.DemotePageAction = QAction(self.DemotePageIcon, "Demote Page")
+        self.DemotePageAction.triggered.connect(self.DemotePage)
+        self.ToggleReadModeActionsList.append(self.DemotePageAction)
+
+        self.ImageManagerAction = QAction("&Image Manager")
+        self.ImageManagerAction.triggered.connect(self.ImageManager)
+        self.ToggleReadModeActionsList.append(self.ImageManagerAction)
+
+        self.TemplateManagerAction = QAction("&Template Manager")
+        self.TemplateManagerAction.triggered.connect(self.TemplateManager)
+        self.ToggleReadModeActionsList.append(self.TemplateManagerAction)
+
+        self.EditHeaderAction = QAction("Edit &Header")
+        self.EditHeaderAction.triggered.connect(lambda: self.EditHeaderOrFooter("Header"))
+        self.ToggleReadModeActionsList.append(self.EditHeaderAction)
+
+        self.EditFooterAction = QAction("Edit &Footer")
+        self.EditFooterAction.triggered.connect(lambda: self.EditHeaderOrFooter("Footer"))
+        self.ToggleReadModeActionsList.append(self.EditFooterAction)
 
     def CreateMenuBar(self):
         self.MenuBar = self.menuBar()
 
-        self.FileMenu = self.MenuBar.addMenu("File")
+        self.FileMenu = self.MenuBar.addMenu("&File")
         self.FileMenu.addAction(self.NewAction)
         self.FileMenu.addAction(self.OpenAction)
         self.FileMenu.addAction(self.FavoritesAction)
@@ -407,7 +411,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.FileMenu.addSeparator()
         self.FileMenu.addAction(self.ExitAction)
 
-        self.EditMenu = self.MenuBar.addMenu("Edit")
+        self.EditMenu = self.MenuBar.addMenu("&Edit")
         self.EditMenu.addAction(self.ToggleReadModeAction)
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.ItalicsAction)
@@ -445,7 +449,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.DuplicateLinesAction)
         self.EditMenu.addAction(self.DeleteLineAction)
 
-        self.ViewMenu = self.MenuBar.addMenu("View")
+        self.ViewMenu = self.MenuBar.addMenu("&View")
         self.ViewMenu.addAction(self.BackAction)
         self.ViewMenu.addAction(self.ForwardAction)
         self.ViewMenu.addSeparator()
@@ -462,7 +466,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.HighlightSyntaxAction)
 
-        self.NotebookMenu = self.MenuBar.addMenu("Notebook")
+        self.NotebookMenu = self.MenuBar.addMenu("&Notebook")
         self.NotebookMenu.addAction(self.NewPageAction)
         self.NotebookMenu.addAction(self.DeletePageAction)
         self.NotebookMenu.addAction(self.RenamePageAction)

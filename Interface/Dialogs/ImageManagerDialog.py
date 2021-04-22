@@ -57,7 +57,7 @@ class ImageManagerDialog(QDialog):
         self.AddImageButton = QPushButton("Add Image")
         self.AddImageButton.clicked.connect(self.AddImage)
         self.AddMultipleImagesButton = QPushButton("Add Multiple Images")
-        self.AddImageButton.clicked.connect(self.AddMultipleImages)
+        self.AddMultipleImagesButton.clicked.connect(self.AddMultipleImages)
         self.RenameImageButton = QPushButton("Rename Image")
         self.RenameImageButton.clicked.connect(self.RenameImage)
         self.RenameImageButton.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
@@ -150,7 +150,7 @@ class ImageManagerDialog(QDialog):
 
     def AddImage(self):
         AttachNewFile = False
-        ImageFilePath = QFileDialog.getOpenFileName(caption="Attach Image File", filter="Images (*.jpg *.jpeg *.png *.gif *.bmp)")[0]
+        ImageFilePath = QFileDialog.getOpenFileName(parent=self, caption="Attach Image File", filter="Images (*.jpg *.jpeg *.png *.gif *.bmp)")[0]
         if ImageFilePath != "":
             ImageFileName = os.path.basename(ImageFilePath)
             if self.Notebook.HasImage(ImageFileName):
@@ -166,7 +166,23 @@ class ImageManagerDialog(QDialog):
             self.ImageList.setCurrentRow(self.GetImageIndexFromName(os.path.basename(ImageFilePath)))
 
     def AddMultipleImages(self):
-        pass
+        ImageFilePaths = QFileDialog.getOpenFileNames(parent=self, caption="Attach Image Files", filter="Images (*.jpg *.jpeg *.png *.gif *.bmp)")[0]
+        ImageAdded = False
+        for ImageFilePath in ImageFilePaths:
+            AttachNewFile = False
+            ImageFileName = os.path.basename(ImageFilePath)
+            if self.Notebook.HasImage(ImageFileName):
+                if self.MainWindow.DisplayMessageBox("A file named \"" + ImageFileName + "\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+                    AttachNewFile = True
+            else:
+                AttachNewFile = True
+            if AttachNewFile:
+                self.Notebook.AddImage(ImageFilePath)
+                ImageAdded = True
+        if ImageAdded:
+            self.UnsavedChanges = True
+            self.SearchLineEdit.clear()
+            self.PopulateImageList()
 
     def RenameImage(self):
         SelectedItems = self.ImageList.selectedItems()

@@ -86,10 +86,9 @@ class SearchWidget(QFrame):
         else:
             ResultsStatsString = "No search results."
         self.MainWindow.SearchResultsStatsLabel.setText(ResultsStatsString)
-        self.ResultsList.setCurrentIndex(self.ResultsList.model().index(0))
+        self.ResultsList.setCurrentRow(0)
         if not self.RefreshingSearchResults:
             self.ResultsList.setFocus()
-        self.RehighlightTextWidget()
 
     def SearchResultSelected(self):
         SelectedItems = self.ResultsList.selectedItems()

@@ -573,6 +573,17 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         return self.AbsoluteDirectoryPath + "/" + RelativeLocation
 
     def LoadConfigs(self):
+        # Tool Bar Area
+        ToolBarAreaFile = self.GetResourcePath("Configs/ToolBarArea.cfg")
+        if os.path.isfile(ToolBarAreaFile):
+            with open(ToolBarAreaFile, "r") as ConfigFile:
+                ToolBarArea = json.loads(ConfigFile.read())
+        else:
+            ToolBarArea = 4
+        self.removeToolBar(self.ToolBar)
+        self.addToolBar(ToolBarArea, self.ToolBar)
+        self.ToolBar.show()
+
         # Favorites
         FavoritesFile = self.GetResourcePath("Configs/Favorites.cfg")
         if os.path.isfile(FavoritesFile):
@@ -648,6 +659,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def SaveConfigs(self):
         if not os.path.isdir(self.GetResourcePath("Configs")):
             os.mkdir(self.GetResourcePath("Configs"))
+
+        # Tool Bar Area
+        with open(self.GetResourcePath("Configs/ToolBarArea.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.toolBarArea(self.ToolBar)))
 
         # Favorites
         with open(self.GetResourcePath("Configs/Favorites.cfg"), "w") as ConfigFile:

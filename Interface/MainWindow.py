@@ -350,6 +350,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.HighlightSyntaxAction.triggered.connect(self.ToggleHighlightSyntax)
         self.ToggleReadModeActionsList.append(self.HighlightSyntaxAction)
 
+        self.SetThemeAction = QAction("Set Theme")
+        self.SetThemeAction.triggered.connect(self.SetTheme)
+
         # Notebook Actions
         self.NewPageAction = QAction(self.NewPageIcon, "New Page")
         self.NewPageAction.triggered.connect(self.NewPage)
@@ -469,6 +472,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.CollapseAllAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.HighlightSyntaxAction)
+        self.ViewMenu.addSeparator()
+        self.ViewMenu.addAction(self.SetThemeAction)
 
         self.NotebookMenu = self.MenuBar.addMenu("&Notebook")
         self.NotebookMenu.addAction(self.NewPageAction)
@@ -1253,3 +1258,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.Theme = "Light"
         self.AppInst.setStyle("Fusion")
         self.AppInst.setPalette(self.Themes[self.Theme])
+
+    def SetTheme(self):
+        Themes = list(self.Themes.keys())
+        Themes.sort()
+        CurrentThemeIndex = Themes.index(self.Theme)
+        Theme, OK = QInputDialog.getItem(self, "Set Theme", "Set theme (requires restart to take effect):", Themes, current=CurrentThemeIndex, editable=False)
+        if OK:
+            self.Theme = Theme
+            self.DisplayMessageBox("The new theme will be active after SerpentNotes is restarted.")

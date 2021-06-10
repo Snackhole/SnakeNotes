@@ -804,6 +804,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             elif self.DisplayMessageBox("Are you sure you want to delete this page?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.Yes:
                 OldLinkData = self.GetLinkData()
                 self.Notebook.DeleteSubPage(CurrentPageIndexPath)
+                CurrentPageLinkString = "](" + json.dumps(CurrentPage["IndexPath"]) + ")"
+                self.SearchWidgetInst.ReplaceAllInNotebook(CurrentPageLinkString, "]([deleted])", MatchCase=True, DelayTextUpdate=True)
                 NewLinkData = self.GetLinkData()
                 self.UpdateLinks(OldLinkData, NewLinkData)
                 self.NotebookDisplayWidgetInst.FillFromRootPage()

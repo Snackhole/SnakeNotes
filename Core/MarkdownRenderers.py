@@ -15,6 +15,8 @@ class Renderer(mistune.Renderer):
         Link = mistune.escape_link(Link)
         if Link.startswith("[0,") and not self.Notebook.StringIsValidIndexPath(Link):
             return Text + " (LINKED PAGE NOT FOUND)"
+        if Link == "[deleted]":
+            return Text + " (LINKED PAGE DELETED)"
         if not Title:
             return "<a href=\"" + Link + "\">" + Text + "</a>"
         Title = mistune.escape(Title, quote=True)

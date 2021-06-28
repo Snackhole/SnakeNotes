@@ -80,6 +80,14 @@ class HTMLExportRenderer(Renderer):
             return "<a href=\"" + Link + "\" title=\"" + Title + "\" target=\"_blank\">" + Text + "</a>"
 
 
+class PDFExportRenderer(Renderer):
+    def __init__(self, Notebook):
+        super().__init__(Notebook)
+
+    def link(self, Link, Title, Text):
+        return Text
+
+
 def ConstructMarkdownStringFromPage(Page, Notebook):
     HeaderString = Notebook.Header + "\n\n"
     HeaderString = HeaderString.replace("{PAGETITLE}", Page["Title"])
@@ -175,3 +183,9 @@ def GeneratePageDictionaryEntries(Notebook, Page, PageDictionary, HTMLExportPars
     PageDictionary[str(Page["IndexPath"])] = [HTMLContent, MarkdownContent, Title]
     for SubPage in Page["SubPages"]:
         GeneratePageDictionaryEntries(Notebook, SubPage, PageDictionary, HTMLExportParser)
+
+
+def ConstructPDFExportHTML(Page, Notebook):
+    PDFExportParser = mistune.Markdown(renderer=PDFExportRenderer(Notebook))
+    PDFExportHTML = PDFExportParser(ConstructMarkdownStringFromPage(Page, Notebook))
+    return PDFExportHTML

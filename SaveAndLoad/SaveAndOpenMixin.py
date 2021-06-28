@@ -48,11 +48,21 @@ class SaveAndOpenMixin:
                     SaveFileName += Extension
             SaveString = self.JSONSerializer.SerializeDataToJSONString(ObjectToSave) if not SkipSerialization else ObjectToSave
             if GzipMode:
-                with gzip.open(SaveFileName, "wt") as SaveFile:
-                    SaveFile.write(SaveString)
+                try:
+                    with gzip.open(SaveFileName, "wt") as SaveFile:
+                        SaveFile.write(SaveString)
+                except FileNotFoundError as Error:
+                    self.DisplayMessageBox("Failed to " + ActionString.lower() + " with the following error:\n\n" + str(Error) + "\n\nThis is most likely due to the excessive length of the file paths needed.  Try to " + ActionString.lower() + " to a different location.")
+                    self.FlashStatusBar("No file " + ActionDoneString + ".")
+                    return False
             else:
-                with open(SaveFileName, "w") as SaveFile:
-                    SaveFile.write(SaveString)
+                try:
+                    with open(SaveFileName, "w") as SaveFile:
+                        SaveFile.write(SaveString)
+                except FileNotFoundError as Error:
+                    self.DisplayMessageBox("Failed to " + ActionString.lower() + " with the following error:\n\n" + str(Error) + "\n\nThis is most likely due to the excessive length of the file paths needed.  Try to " + ActionString.lower() + " to a different location.")
+                    self.FlashStatusBar("No file " + ActionDoneString + ".")
+                    return False
             SaveFileNameShort = os.path.basename(SaveFileName)
             self.LastOpenedDirectory = os.path.dirname(SaveFileName)
             self.FlashStatusBar("File " + ActionDoneString + " as:  " + SaveFileNameShort)

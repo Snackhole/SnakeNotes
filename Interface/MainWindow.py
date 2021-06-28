@@ -1124,14 +1124,43 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if ExportFileName != "":
             if not ExportFileName.endswith(".pdf"):
                 ExportFileName += ".pdf"
-            self.CreatePDFFileFromPage(self.TextWidgetInst.CurrentPage, self.Notebook, ExportFileName)
+            try:
+                self.CreatePDFFileFromPage(self.TextWidgetInst.CurrentPage, self.Notebook, ExportFileName)
+            except FileNotFoundError as Error:
+                self.DisplayMessageBox("The page export failed with the following error:\n\n" + str(Error) + "\n\nThis is most likely due to the excessive length of the file paths needed.  Try exporting to a different location.")
+                self.FlashStatusBar("Page not exported.")
+                return
             ExportFileNameShort = os.path.basename(ExportFileName)
             self.FlashStatusBar("Page exported as:  " + ExportFileNameShort)
         else:
             self.FlashStatusBar("Page not exported.")
 
     def ExportNotebookAsPDFs(self):
-        pass
+        ExportFolderName = QFileDialog.getExistingDirectory(caption="Export Notebook as PDF Files", directory=self.LastOpenedDirectory)
+        if ExportFolderName != "":
+            if len(os.listdir(ExportFolderName)) > 0:
+                self.DisplayMessageBox("Select an empty folder to export the entire notebook as PDF files.")
+                self.FlashStatusBar("Notebook not exported.")
+                return
+            try:
+                self.ExportNotebookPagesAsPDFs(self.Notebook.RootPage, ExportFolderName)
+            except FileNotFoundError as Error:
+                self.DisplayMessageBox("The notebook export failed with the following error:\n\n" + str(Error) + "\n\nThis is most likely due to the excessive length of the file paths needed.  Try exporting to a different location.")
+                self.FlashStatusBar("Notebook not exported.")
+                return
+            ExportFolderNameShort = os.path.basename(ExportFolderName)
+            self.FlashStatusBar("Notebook exported to:  " + ExportFolderNameShort)
+        else:
+            self.FlashStatusBar("Notebook not exported.")
+
+    def ExportNotebookPagesAsPDFs(self, CurrentPage, CurrentFolderName):
+        if not os.path.isdir(CurrentFolderName):
+            os.mkdir(CurrentFolderName)
+        PageFileName = os.path.join(CurrentFolderName, str(CurrentPage["IndexPath"]) + " " + CurrentPage["Title"] + ".pdf")
+        self.CreatePDFFileFromPage(CurrentPage, self.Notebook, PageFileName)
+        SubPageFolderName = os.path.join(CurrentFolderName, str(CurrentPage["IndexPath"]) + " " + CurrentPage["Title"])
+        for SubPage in CurrentPage["SubPages"]:
+            self.ExportNotebookPagesAsPDFs(SubPage, SubPageFolderName)
 
     def ExportPage(self):
         self.Save(self.TextWidgetInst.CurrentPage, SaveAs=True, AlternateFileDescription="Page", AlternateFileExtension=".ntbkpg", ExportMode=True)

@@ -3,10 +3,10 @@ import json
 import os
 
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtGui import QColor, QIcon, QPalette, QTextCursor
-from PyQt5.QtWidgets import QLabel, QMainWindow, QInputDialog, QMessageBox, QAction, QSplitter, QApplication
+from PyQt5.QtGui import QColor, QIcon, QPalette, QPdfWriter, QTextCursor
+from PyQt5.QtWidgets import QFileDialog, QLabel, QMainWindow, QInputDialog, QMessageBox, QAction, QSplitter, QApplication, QTextEdit
 
-from Core.MarkdownRenderers import ConstructHTMLExportString
+from Core.MarkdownRenderers import ConstructHTMLExportString, ConstructPDFExportHTML
 from Core.Notebook import Notebook
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
@@ -175,8 +175,14 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SaveAsAction = QAction("Save As")
         self.SaveAsAction.triggered.connect(lambda: self.SaveActionTriggered(SaveAs=True))
 
-        self.ExportHTMLAction = QAction("Export HTML File")
+        self.ExportHTMLAction = QAction("Export Notebook as HTML File")
         self.ExportHTMLAction.triggered.connect(self.ExportHTML)
+
+        self.ExportPageAsPDFAction = QAction("Export Page as PDF File")
+        self.ExportPageAsPDFAction.triggered.connect(self.ExportPageAsPDF)
+
+        self.ExportNotebookAsPDFsAction = QAction("Export Notebook as PDF Files")
+        self.ExportNotebookAsPDFsAction.triggered.connect(self.ExportNotebookAsPDFs)
 
         self.ExportPageAction = QAction("Export Page File")
         self.ExportPageAction.triggered.connect(self.ExportPage)
@@ -410,6 +416,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.FileMenu.addAction(self.SaveAsAction)
         self.FileMenu.addSeparator()
         self.FileMenu.addAction(self.ExportHTMLAction)
+        self.FileMenu.addAction(self.ExportPageAsPDFAction)
+        self.FileMenu.addAction(self.ExportNotebookAsPDFsAction)
         self.FileMenu.addSeparator()
         self.FileMenu.addAction(self.ExportPageAction)
         self.FileMenu.addAction(self.ImportPageAction)
@@ -1102,6 +1110,28 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         AssetPaths["CollapseButtonPath"] = self.GetResourcePath("Assets/SerpentNotes Collapse All Icon.png")
         HTMLText = ConstructHTMLExportString(self.Notebook, AssetPaths)
         self.Save(HTMLText, SaveAs=True, AlternateFileDescription="HTML", AlternateFileExtension=".html", SkipSerialization=True, ExportMode=True)
+
+    def CreatePDFFileFromPage(self, Page, Notebook, ExportFileName):
+        PDFWriter = QPdfWriter(ExportFileName)
+        PDFWriter.setPageSize(QPdfWriter.Letter)
+        PDFTextWidget = QTextEdit()
+        PDFTextWidget.setHtml(ConstructPDFExportHTML(Page, Notebook))
+        PDFTextWidget.print(PDFWriter)
+        PDFTextWidget.destroy()
+
+    def ExportPageAsPDF(self):
+        ExportFileName = QFileDialog.getSaveFileName(caption="Export PDF File", filter="PDF files (*.pdf)", directory=self.LastOpenedDirectory)[0]
+        if ExportFileName != "":
+            if not ExportFileName.endswith(".pdf"):
+                ExportFileName += ".pdf"
+            self.CreatePDFFileFromPage(self.TextWidgetInst.CurrentPage, self.Notebook, ExportFileName)
+            ExportFileNameShort = os.path.basename(ExportFileName)
+            self.FlashStatusBar("Page exported as:  " + ExportFileNameShort)
+        else:
+            self.FlashStatusBar("Page not exported.")
+
+    def ExportNotebookAsPDFs(self):
+        pass
 
     def ExportPage(self):
         self.Save(self.TextWidgetInst.CurrentPage, SaveAs=True, AlternateFileDescription="Page", AlternateFileExtension=".ntbkpg", ExportMode=True)

@@ -185,7 +185,7 @@ def GeneratePageDictionaryEntries(Notebook, Page, PageDictionary, HTMLExportPars
         GeneratePageDictionaryEntries(Notebook, SubPage, PageDictionary, HTMLExportParser)
 
 
-def ConstructPDFExportHTML(Page, Notebook):
+def ConstructPDFExportHTMLString(Page, Notebook):
     PDFExportParser = mistune.Markdown(renderer=PDFExportRenderer(Notebook))
     PDFExportHTML = PDFExportParser(ConstructMarkdownStringFromPage(Page, Notebook))
     return PDFExportHTML

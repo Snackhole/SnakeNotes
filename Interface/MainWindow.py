@@ -6,7 +6,7 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QColor, QIcon, QPalette, QPdfWriter, QTextCursor
 from PyQt5.QtWidgets import QFileDialog, QLabel, QMainWindow, QInputDialog, QMessageBox, QAction, QSplitter, QApplication, QTextEdit
 
-from Core.MarkdownRenderers import ConstructHTMLExportString, ConstructPDFExportHTML
+from Core.MarkdownRenderers import ConstructHTMLExportString, ConstructPDFExportHTMLString
 from Core.Notebook import Notebook
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
@@ -1115,7 +1115,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         PDFWriter = QPdfWriter(ExportFileName)
         PDFWriter.setPageSize(QPdfWriter.Letter)
         PDFTextWidget = QTextEdit()
-        PDFTextWidget.setHtml(ConstructPDFExportHTML(Page, Notebook))
+        PDFTextWidget.setHtml(ConstructPDFExportHTMLString(Page, Notebook))
         PDFTextWidget.print(PDFWriter)
         PDFTextWidget.destroy()
 

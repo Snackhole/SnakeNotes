@@ -731,6 +731,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.TextWidgetInst.Notebook = self.Notebook
         self.TextWidgetInst.Renderer.Notebook = self.Notebook
         self.SearchWidgetInst.Notebook = self.Notebook
+        self.PopOutMarkdownRenderer.Notebook = self.Notebook
+        self.CloseAllPopOutPages()
 
     def PageSelected(self, IndexPath=None, SkipUpdatingBackAndForward=False):
         IndexPath = IndexPath if IndexPath is not None else self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
@@ -1070,6 +1072,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         for PopOut in self.PopOutPages:
             if Page is PopOut[0]:
                 PopOut[1].close()
+
+    def CloseAllPopOutPages(self):
+        for PopOut in self.PopOutPages:
+            PopOut[1].close()
+        self.PopOutPages.clear()
 
     # Save and Open Methods
     def SaveActionTriggered(self, SaveAs=False):

@@ -1,5 +1,5 @@
 from Interface.Widgets.PopOutTextWidget import PopOutTextWidget
-from PyQt5.QtWidgets import QDialog, QGridLayout
+from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton
 
 
 class PopOutTextDialog(QDialog):
@@ -20,9 +20,17 @@ class PopOutTextDialog(QDialog):
         # Pop-Out Text Widget
         self.PopOutTextWidget = PopOutTextWidget(self.Page, self.Notebook, self.PopOutMarkdownParser)
 
+        # Buttons
+        self.RefreshButton = QPushButton("Refresh")
+        self.RefreshButton.clicked.connect(self.RefreshPageDisplay)
+        self.CloseButton = QPushButton("Close")
+        self.CloseButton.clicked.connect(self.close)
+
         # Create, Populate, and Set Layout
         self.Layout = QGridLayout()
-        self.Layout.addWidget(self.PopOutTextWidget, 0, 0)
+        self.Layout.addWidget(self.PopOutTextWidget, 0, 0, 1, 2)
+        self.Layout.addWidget(self.RefreshButton, 1, 0)
+        self.Layout.addWidget(self.CloseButton, 1, 1)
         self.setLayout(self.Layout)
 
         # Set Window Icon

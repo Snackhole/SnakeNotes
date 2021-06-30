@@ -996,12 +996,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def ZoomOut(self):
         self.TextWidgetInst.zoomOut(1)
         self.CurrentZoomLevel -= 1
-        self.RefreshPopOutPages()
 
     def ZoomIn(self):
         self.TextWidgetInst.zoomIn(1)
         self.CurrentZoomLevel += 1
-        self.RefreshPopOutPages()
 
     def DefaultZoom(self):
         if self.CurrentZoomLevel > 0:
@@ -1010,7 +1008,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         elif self.CurrentZoomLevel < 0:
             self.TextWidgetInst.zoomIn(-self.CurrentZoomLevel)
             self.CurrentZoomLevel = 0
-        self.RefreshPopOutPages()
 
     def ToggleInlineFootnoteStyle(self):
         self.InlineFootnoteStyle = not self.InlineFootnoteStyle

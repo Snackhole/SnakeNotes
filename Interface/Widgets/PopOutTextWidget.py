@@ -1,3 +1,4 @@
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QTextEdit
 
 from Core import MarkdownRenderers
@@ -25,3 +26,10 @@ class PopOutTextWidget(QTextEdit):
         DisplayText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.Page, self.Notebook)
         HTMLText = self.PopOutMarkdownParser(DisplayText)
         self.setHtml(HTMLText)
+
+    # Mouse Wheel Event
+    def wheelEvent(self, QWheelEvent):
+        if QWheelEvent.modifiers() == QtCore.Qt.ControlModifier:
+            QWheelEvent.accept()
+        else:
+            super().wheelEvent(QWheelEvent)

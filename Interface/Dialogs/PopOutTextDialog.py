@@ -13,6 +13,7 @@ class PopOutTextDialog(QDialog):
         self.MainWindow = MainWindow
 
         # Variables
+        self.CurrentZoomLevel = 0
         self.Width = max(self.MainWindow.width() - 100, 100)
         self.Height = max(self.MainWindow.height() - 100, 100)
 
@@ -38,10 +39,33 @@ class PopOutTextDialog(QDialog):
 
     def RefreshPageDisplay(self):
         self.setWindowTitle(self.Page["Title"])
+        self.UpdateZoomLevel()
         self.PopOutTextWidget.RefreshPageDisplay()
 
     def Resize(self):
         self.resize(self.Width, self.Height)
+
+    def UpdateZoomLevel(self):
+        if self.CurrentZoomLevel > 0:
+            self.PopOutTextWidget.zoomOut(self.CurrentZoomLevel)
+            self.CurrentZoomLevel = 0
+        elif self.CurrentZoomLevel < 0:
+            self.PopOutTextWidget.zoomIn(-self.CurrentZoomLevel)
+            self.CurrentZoomLevel = 0
+        if self.MainWindow.CurrentZoomLevel > 0:
+            for ZoomLevel in range(self.MainWindow.CurrentZoomLevel):
+                self.ZoomIn()
+        elif self.MainWindow.CurrentZoomLevel < 0:
+            for ZoomLevel in range(-self.MainWindow.CurrentZoomLevel):
+                self.ZoomOut()
+
+    def ZoomOut(self):
+        self.PopOutTextWidget.zoomOut(1)
+        self.CurrentZoomLevel -= 1
+
+    def ZoomIn(self):
+        self.PopOutTextWidget.zoomIn(1)
+        self.CurrentZoomLevel += 1
 
     def closeEvent(self, event):
         PopOut = (self.Page, self)

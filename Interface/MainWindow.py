@@ -827,6 +827,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             elif self.DisplayMessageBox("Are you sure you want to delete this page?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.Yes:
                 OldLinkData = self.GetLinkData()
                 self.Notebook.DeleteSubPage(CurrentPageIndexPath)
+                self.CloseDeletedPopOutPage(CurrentPage)
                 CurrentPageLinkString = "](" + json.dumps(CurrentPage["IndexPath"]) + ")"
                 self.SearchWidgetInst.ReplaceAllInNotebook(CurrentPageLinkString, "]([deleted])", MatchCase=True, DelayTextUpdate=True)
                 NewLinkData = self.GetLinkData()
@@ -1064,19 +1065,20 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         NewPopOut = PopOutTextDialog(self.TextWidgetInst.CurrentPage, self.Notebook, self.PopOutMarkdownParser, self)
         self.PopOutPages.append((self.TextWidgetInst.CurrentPage, NewPopOut))
 
-    def RefreshPopOutPages(self):
-        for PopOut in self.PopOutPages:
-            PopOut[1].RefreshPageDisplay()
-
     def CloseDeletedPopOutPage(self, Page):
+        CloseQueue = []
         for PopOut in self.PopOutPages:
             if Page is PopOut[0]:
-                PopOut[1].close()
+                CloseQueue.append(PopOut)
+        for PopOut in CloseQueue:
+            PopOut[1].close()
 
     def CloseAllPopOutPages(self):
+        CloseQueue = []
         for PopOut in self.PopOutPages:
+            CloseQueue.append(PopOut)
+        for PopOut in CloseQueue:
             PopOut[1].close()
-        self.PopOutPages.clear()
 
     # Save and Open Methods
     def SaveActionTriggered(self, SaveAs=False):

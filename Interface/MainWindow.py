@@ -2,11 +2,12 @@ import copy
 import json
 import os
 
+import mistune
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QColor, QIcon, QPalette, QPdfWriter, QTextCursor
 from PyQt5.QtWidgets import QFileDialog, QLabel, QMainWindow, QInputDialog, QMessageBox, QAction, QSplitter, QApplication, QTextEdit
 
-from Core.MarkdownRenderers import ConstructHTMLExportString, ConstructPDFExportHTMLString
+from Core.MarkdownRenderers import ConstructHTMLExportString, ConstructPDFExportHTMLString, Renderer
 from Core.Notebook import Notebook
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
@@ -15,6 +16,7 @@ from Interface.Dialogs.ImageManagerDialog import ImageManagerDialog
 from Interface.Dialogs.NewPageDialog import NewPageDialog
 from Interface.Dialogs.TemplateManagerDialog import TemplateManagerDialog
 from Interface.Dialogs.AddToPageAndSubpagesDialog import AddToPageAndSubpagesDialog
+from Interface.Dialogs.PopOutTextDialog import PopOutTextDialog
 from Interface.Widgets.NotebookDisplayWidget import NotebookDisplayWidget
 from Interface.Widgets.SearchWidget import SearchWidget
 from Interface.Widgets.TextWidget import TextWidget
@@ -39,6 +41,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.BackNavigation = False
         self.AutoScrollQueue = None
         self.HighlightSyntax = False
+        self.PopOutPages = []
 
         # Set Up Save and Open
         self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
@@ -49,6 +52,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Create Interface
         self.CreateInterface()
         self.show()
+
+        # Create Pop-Out Markdown Parser
+        self.PopOutMarkdownRenderer = Renderer(self.Notebook)
+        self.PopOutMarkdownParser = mistune.Markdown(renderer=self.PopOutMarkdownRenderer)
 
         # Load Configs
         self.LoadConfigs()
@@ -154,6 +161,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.InsertImageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Insert Image Icon.png"))
         self.ZoomOutIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Zoom Out Icon.png"))
         self.ZoomInIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Zoom In Icon.png"))
+        self.PopOutPageIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Pop Out Page Icon.png"))
         self.FavoritesIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Favorites Icon.png"))
         self.SearchIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Search Icon.png"))
         self.ToggleSearchIcon = QIcon(self.GetResourcePath("Assets/SerpentNotes Toggle Search Icon.png"))
@@ -344,6 +352,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultZoomAction = QAction("Default Zoom")
         self.DefaultZoomAction.triggered.connect(self.DefaultZoom)
 
+        self.PopOutPageAction = QAction(self.PopOutPageIcon, "Pop Out Page")
+        self.PopOutPageAction.triggered.connect(self.PopOutPage)
+
         self.ExpandAllAction = QAction(self.ExpandAllIcon, "&Expand All")
         self.ExpandAllAction.triggered.connect(self.NotebookDisplayWidgetInst.expandAll)
 
@@ -475,6 +486,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.ZoomOutAction)
         self.ViewMenu.addAction(self.ZoomInAction)
         self.ViewMenu.addAction(self.DefaultZoomAction)
+        self.ViewMenu.addAction(self.PopOutPageAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.ExpandAllAction)
         self.ViewMenu.addAction(self.CollapseAllAction)
@@ -532,6 +544,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ToolBar.addSeparator()
         self.ToolBar.addAction(self.ZoomOutAction)
         self.ToolBar.addAction(self.ZoomInAction)
+        self.ToolBar.addAction(self.PopOutPageAction)
         self.ToolBar.addSeparator()
         self.ToolBar.addAction(self.FavoritesAction)
 
@@ -1038,6 +1051,25 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def UpdateWindowTitle(self):
         self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + (" *" if self.UnsavedChanges else ""))
+
+    def PopOutPage(self):
+        for PopOut in self.PopOutPages:
+            if self.TextWidgetInst.CurrentPage is PopOut[0]:
+                PopOut[1].activateWindow()
+                PopOut[1].raise_()
+                PopOut[1].setFocus()
+                return
+        NewPopOut = PopOutTextDialog(self.TextWidgetInst.CurrentPage, self.Notebook, self.PopOutMarkdownParser, self)
+        self.PopOutPages.append((self.TextWidgetInst.CurrentPage, NewPopOut))
+
+    def RefreshPopOutPages(self):
+        for PopOut in self.PopOutPages:
+            PopOut[1].RefreshPageDisplay()
+
+    def CloseDeletedPopOutPage(self, Page):
+        for PopOut in self.PopOutPages:
+            if Page is PopOut[0]:
+                PopOut[1].close()
 
     # Save and Open Methods
     def SaveActionTriggered(self, SaveAs=False):

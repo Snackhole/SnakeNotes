@@ -173,6 +173,8 @@ class SaveAndOpenMixin:
 
     def SaveLastOpenedDirectory(self):
         assert isinstance(self, self.MainWindowClass)
+        if not os.path.isdir(self.GetResourcePath("Configs")):
+            os.mkdir(self.GetResourcePath("Configs"))
         FileSavingConfig = self.GetResourcePath("Configs/LastOpenedDirectory.cfg")
         if type(self.LastOpenedDirectory) == str:
             if os.path.isdir(self.LastOpenedDirectory):
@@ -181,6 +183,8 @@ class SaveAndOpenMixin:
 
     def SaveGzipMode(self):
         assert isinstance(self, self.MainWindowClass)
+        if not os.path.isdir(self.GetResourcePath("Configs")):
+            os.mkdir(self.GetResourcePath("Configs"))
         GzipModeConfig = self.GetResourcePath("Configs/GzipMode.cfg")
         with open(GzipModeConfig, "w") as OpenedConfig:
             OpenedConfig.write(json.dumps(self.GzipMode))

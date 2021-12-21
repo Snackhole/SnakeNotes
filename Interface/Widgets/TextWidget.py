@@ -409,6 +409,7 @@ class TextWidget(QTextEdit):
                 Cursor = self.textCursor()
                 Cursor.setPosition(NewPosition)
                 self.setTextCursor(Cursor)
+                self.VerticallyCenterCursor()
 
 
 class SyntaxHighlighter(QSyntaxHighlighter):

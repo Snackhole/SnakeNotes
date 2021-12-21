@@ -1,10 +1,10 @@
 import os
 
-AppName = "SerpentNotes"
+AppName = "SnakeNotes"
 ExecutableZip = AppName + ".pyzw"
 CurrentWorkingDirectory = os.getcwd()
 AbsolutePathToExecutableZip = CurrentWorkingDirectory + "/" + ExecutableZip
-AbsolutePathToIconPNG = CurrentWorkingDirectory + "/Assets/SerpentNotes Icon.png"
+AbsolutePathToIconPNG = CurrentWorkingDirectory + "/Assets/SnakeNotes Icon.png"
 
 DesktopFileContents = """[Desktop Entry]
 Type=Application

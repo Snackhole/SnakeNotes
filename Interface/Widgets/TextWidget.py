@@ -317,7 +317,7 @@ class TextWidget(QTextEdit):
                 Cursor = self.textCursor()
                 Cursor.beginEditBlock()
                 if InsertLinksDialogInst.InsertIndexPath is not None:
-                    self.SelectionSpanWrap("[", "](" + json.dumps(InsertLinksDialogInst.InsertIndexPath, indent=None) + ")")
+                    self.SelectionSpanWrap("[", "](" + json.dumps(InsertLinksDialogInst.InsertIndexPath, indent=None) + (" \"" + InsertLinksDialogInst.ToolTipText + "\"" if InsertLinksDialogInst.AddToolTip else "") + ")")
                 elif InsertLinksDialogInst.InsertIndexPaths is not None and InsertLinksDialogInst.SubPageLinksSeparator is not None:
                     InsertString = ""
                     for SubPagePath in InsertLinksDialogInst.InsertIndexPaths:

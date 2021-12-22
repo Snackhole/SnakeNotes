@@ -24,6 +24,8 @@ class InsertLinksDialog(QDialog):
         self.InsertSubPageLinks = False
         self.SubPageLinksSeparator = None
         self.InsertIndexPath = None
+        self.AddToolTip = None
+        self.ToolTipText = None
         self.InsertIndexPaths = None
         self.Separators = {}
         self.Separators["Paragraph"] = "\n\n"
@@ -61,6 +63,13 @@ class InsertLinksDialog(QDialog):
         self.SubPageLinksSeparatorComboBox.addItems(["Paragraph", "New Line"])
         self.SubPageLinksSeparatorComboBox.setEditable(False)
 
+        # Tool Tip
+        self.AddToolTipCheckBox = QCheckBox("Add Tool Tip")
+        self.AddToolTipCheckBox.setChecked(True)
+        self.ToolTipTextLabel = QLabel("Tool Tip Text:")
+        self.ToolTipTextLineEdit = QLineEdit()
+        self.ToolTipTextLineEdit.setPlaceholderText("Page Name")
+
         # Buttons
         self.InsertButton = QPushButton("Insert")
         self.InsertButton.clicked.connect(self.Insert)
@@ -72,19 +81,23 @@ class InsertLinksDialog(QDialog):
         self.SearchLayout = QGridLayout()
         self.SearchLayout.addWidget(self.SearchLineEdit, 0, 0)
         self.SearchLayout.addWidget(self.MatchCaseCheckBox, 0, 1)
-        self.Layout.addLayout(self.SearchLayout, 0, 0, 1, 3)
+        self.Layout.addLayout(self.SearchLayout, 0, 0, 1, 6)
         self.NotebookDisplayLayout = QGridLayout()
         self.NotebookDisplayLayout.addWidget(self.NotebookDisplay, 0, 0)
         self.NotebookDisplayLayout.addWidget(self.PreviewTextEdit, 0, 1)
         self.NotebookDisplayLayout.setColumnStretch(1, 1)
-        self.Layout.addLayout(self.NotebookDisplayLayout, 1, 0, 1, 3)
-        self.Layout.addWidget(self.InsertSubPageLinksCheckBox, 2, 0)
-        self.Layout.addWidget(self.SubPageLinksSeparatorLabel, 2, 1)
-        self.Layout.addWidget(self.SubPageLinksSeparatorComboBox, 2, 2)
+        self.Layout.addLayout(self.NotebookDisplayLayout, 1, 0, 1, 6)
+        self.Layout.addWidget(self.AddToolTipCheckBox, 2, 0)
+        self.Layout.addWidget(self.ToolTipTextLabel, 2, 1)
+        self.Layout.addWidget(self.ToolTipTextLineEdit, 2, 2)
+        self.Layout.addWidget(self.InsertSubPageLinksCheckBox, 2, 3)
+        self.Layout.addWidget(self.SubPageLinksSeparatorLabel, 2, 4)
+        self.Layout.addWidget(self.SubPageLinksSeparatorComboBox, 2, 5)
         self.ButtonsLayout = QGridLayout()
         self.ButtonsLayout.addWidget(self.InsertButton, 0, 0)
         self.ButtonsLayout.addWidget(self.CancelButton, 0, 1)
-        self.Layout.addLayout(self.ButtonsLayout, 3, 0, 1, 3)
+        self.Layout.addLayout(self.ButtonsLayout, 3, 0, 1, 6)
+        self.Layout.setColumnStretch(2, 1)
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
@@ -110,6 +123,8 @@ class InsertLinksDialog(QDialog):
             self.SubPageLinksSeparator = self.Separators[self.SubPageLinksSeparatorComboBox.currentText()]
         else:
             self.InsertIndexPath = SelectedItems[0].IndexPath
+            self.AddToolTip = self.AddToolTipCheckBox.isChecked()
+            self.ToolTipText = self.ToolTipTextLineEdit.text() if self.ToolTipTextLineEdit.text() != "" else SelectedItems[0].Title
         self.InsertAccepted = True
         self.close()
 
@@ -171,9 +186,14 @@ class InsertLinksDialog(QDialog):
 class NotebookDisplayItem(QTreeWidgetItem):
     def __init__(self, Title, IndexPath, SubPageIndexPaths):
         super().__init__()
-        self.setText(0, Title)
+
+        # Store Parameters
+        self.Title = Title
         self.IndexPath = IndexPath
         self.SubPageIndexPaths = SubPageIndexPaths
+
+        # Set Text
+        self.setText(0, Title)
 
 
 class SearchLineEdit(QLineEdit):

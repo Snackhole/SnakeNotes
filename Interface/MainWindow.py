@@ -782,6 +782,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
             self.TextWidgetInst.verticalScrollBar().setValue(TargetPageScrollPosition)
             self.BackNavigation = False
+            self.NotebookDisplayWidgetInst.setFocus()
 
     def Forward(self):
         if len(self.ForwardList) > 0:
@@ -801,6 +802,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
             self.TextWidgetInst.verticalScrollBar().setValue(TargetPageScrollPosition)
             self.BackNavigation = False
+            self.NotebookDisplayWidgetInst.setFocus()
 
     def NewPage(self):
         if not self.TextWidgetInst.ReadMode:

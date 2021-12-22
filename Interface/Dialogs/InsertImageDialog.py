@@ -35,6 +35,9 @@ class InsertImageDialog(QDialog):
 
         # Image Display
         self.ImageDisplay = QLabel()
+        self.ImageDisplayScrollArea = QScrollArea()
+        self.ImageDisplayScrollArea.setWidget(self.ImageDisplay)
+        self.ImageDisplayScrollArea.setAlignment(QtCore.Qt.AlignCenter)
 
         # Buttons
         self.InsertImageButton = QPushButton("Insert")
@@ -50,8 +53,6 @@ class InsertImageDialog(QDialog):
         self.Layout.addLayout(self.SearchLayout, 0, 0)
         self.Splitter = QSplitter()
         self.Splitter.addWidget(self.ImageList)
-        self.ImageDisplayScrollArea = QScrollArea()
-        self.ImageDisplayScrollArea.setWidget(self.ImageDisplay)
         self.Splitter.addWidget(self.ImageDisplayScrollArea)
         self.Splitter.setStretchFactor(1, 1)
         self.Layout.addWidget(self.Splitter, 1, 0)
@@ -91,6 +92,7 @@ class InsertImageDialog(QDialog):
             SearchTerm = SearchTerm.lower()
         self.ImageList.clear()
         self.ImageDisplay.clear()
+        self.ImageDisplay.resize(QtCore.QSize(0, 0))
         Images = sorted(self.Notebook.Images.items(), key=lambda Image: Image[0].lower())
         if SearchTerm != "":
             Images = [Image for Image in Images if SearchTerm in (Image[0].lower() if not MatchCase else Image[0])]

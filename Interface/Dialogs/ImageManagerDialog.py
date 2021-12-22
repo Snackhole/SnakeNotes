@@ -52,6 +52,9 @@ class ImageManagerDialog(QDialog):
 
         # Image Display
         self.ImageDisplay = QLabel()
+        self.ImageDisplayScrollArea = QScrollArea()
+        self.ImageDisplayScrollArea.setWidget(self.ImageDisplay)
+        self.ImageDisplayScrollArea.setAlignment(QtCore.Qt.AlignCenter)
 
         # Buttons
         self.AddImageButton = QPushButton("Add Image")
@@ -81,8 +84,6 @@ class ImageManagerDialog(QDialog):
         self.Layout.addLayout(self.SearchLayout, 0, 0)
         self.Splitter = QSplitter()
         self.Splitter.addWidget(self.ImageList)
-        self.ImageDisplayScrollArea = QScrollArea()
-        self.ImageDisplayScrollArea.setWidget(self.ImageDisplay)
         self.Splitter.addWidget(self.ImageDisplayScrollArea)
         self.LinkingPagesLayout = QGridLayout()
         self.LinkingPagesLayout.addWidget(self.LinkingPagesLabel, 0, 0)
@@ -140,6 +141,7 @@ class ImageManagerDialog(QDialog):
             SearchTerm = SearchTerm.lower()
         self.ImageList.clear()
         self.ImageDisplay.clear()
+        self.ImageDisplay.resize(QtCore.QSize(0, 0))
         self.LinkingPagesList.clear()
         Images = sorted(self.Notebook.Images.items(), key=lambda Image: Image[0].lower())
         if SearchTerm != "":

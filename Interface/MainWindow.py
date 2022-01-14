@@ -927,13 +927,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def GetLinkData(self, Page=None):
         LinkData = {}
         Page = Page if Page is not None else self.Notebook.RootPage
-        LinkData[id(Page)] = "](" + json.dumps(Page["IndexPath"], indent=None) + ")"
+        LinkData[id(Page)] = {"NoToolTip": "](" + json.dumps(Page["IndexPath"], indent=None) + ")", "ToolTip": "](" + json.dumps(Page["IndexPath"], indent=None) + " \"" + Page["Title"] + "\"" + ")"}
         self.AddSubPageLinkData(Page, LinkData)
         return LinkData
 
     def AddSubPageLinkData(self, CurrentPage, LinkData):
         for SubPage in CurrentPage["SubPages"]:
-            LinkData[id(SubPage)] = "](" + json.dumps(SubPage["IndexPath"], indent=None) + ")"
+            LinkData[id(SubPage)] = {"NoToolTip": "](" + json.dumps(SubPage["IndexPath"], indent=None) + ")", "ToolTip": "](" + json.dumps(SubPage["IndexPath"], indent=None) + " \"" + SubPage["Title"] + "\"" + ")"}
             self.AddSubPageLinkData(SubPage, LinkData)
 
     def UpdateLinks(self, OldLinkData, NewLinkData, Page=None):
@@ -941,7 +941,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         for PageID in NewLinkData:
             if PageID in OldLinkData:
                 if NewLinkData[PageID] != OldLinkData[PageID]:
-                    ReplaceStrings = (OldLinkData[PageID], "<<LINK UPDATE TOKEN " + str(PageID) + ">>", NewLinkData[PageID])
+                    ReplaceStrings = (OldLinkData[PageID]["NoToolTip"], "<<LINK UPDATE TOKEN WITHOUT TOOL TIP " + str(PageID) + ">>", NewLinkData[PageID]["NoToolTip"])
+                    ReplaceQueue.append(ReplaceStrings)
+                    ReplaceStrings = (OldLinkData[PageID]["ToolTip"], "<<LINK UPDATE TOKEN WITH TOOL TIP " + str(PageID) + ">>", NewLinkData[PageID]["ToolTip"])
                     ReplaceQueue.append(ReplaceStrings)
         for ReplaceStrings in ReplaceQueue:
             if Page is None:

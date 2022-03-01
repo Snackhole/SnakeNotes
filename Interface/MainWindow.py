@@ -832,6 +832,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.CloseDeletedPopOutPage(CurrentPage)
                 CurrentPageLinkString = "](" + json.dumps(CurrentPage["IndexPath"]) + ")"
                 self.SearchWidgetInst.ReplaceAllInNotebook(CurrentPageLinkString, "]([deleted])", MatchCase=True, DelayTextUpdate=True)
+                CurrentPageLinkString = "](" + json.dumps(CurrentPage["IndexPath"]) + " \"" + CurrentPage["Title"] + "\"" + ")"
+                self.SearchWidgetInst.ReplaceAllInNotebook(CurrentPageLinkString, "]([deleted])", MatchCase=True, DelayTextUpdate=True)
                 NewLinkData = self.GetLinkData()
                 self.UpdateLinks(OldLinkData, NewLinkData)
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
@@ -980,7 +982,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def SearchForLinkingPages(self):
         self.SearchAction.trigger()
-        self.SearchWidgetInst.SearchTextLineEdit.setText("](" + json.dumps(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath(), indent=None) + ")")
+        self.SearchWidgetInst.SearchTextLineEdit.setText("](" + json.dumps(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath(), indent=None))
         self.SearchWidgetInst.SearchButton.click()
 
     # Text Methods

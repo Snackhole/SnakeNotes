@@ -127,7 +127,7 @@ class ImageManagerDialog(QDialog):
             self.ImageDisplay.setPixmap(ImagePixmap)
             self.ImageDisplay.resize(self.ImageDisplay.pixmap().size())
             CurrentFileName = SelectedItems[0].FileName
-            SearchTerm = "](" + CurrentFileName + ")"
+            SearchTerm = "](" + CurrentFileName
             SearchResults = self.Notebook.GetSearchResults(SearchTerm, MatchCase=True)
             self.LinkingPagesList.clear()
             for Result in SearchResults["ResultsList"]:

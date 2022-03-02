@@ -202,7 +202,7 @@ class ImageManagerDialog(QDialog):
                     ImageContent = self.Notebook.Images[CurrentFileName + CurrentFileExtension]
                     self.Notebook.Images[NewName + CurrentFileExtension] = ImageContent
                     del self.Notebook.Images[CurrentFileName + CurrentFileExtension]
-                    self.MainWindow.SearchWidgetInst.ReplaceAllInNotebook(SearchText="](" + CurrentFileName + CurrentFileExtension + ")", ReplaceText="](" + NewName + CurrentFileExtension + ")", MatchCase=True)
+                    self.MainWindow.SearchWidgetInst.ReplaceAllInNotebook(SearchText="](" + CurrentFileName + CurrentFileExtension, ReplaceText="](" + NewName + CurrentFileExtension, MatchCase=True)
                     self.UnsavedChanges = True
                     self.SearchLineEdit.clear()
                     self.PopulateImageList()

@@ -317,11 +317,11 @@ class TextWidget(QTextEdit):
                 Cursor = self.textCursor()
                 Cursor.beginEditBlock()
                 if InsertLinksDialogInst.InsertIndexPath is not None:
-                    self.SelectionSpanWrap("[", "](" + json.dumps(InsertLinksDialogInst.InsertIndexPath, indent=None) + (" \"" + InsertLinksDialogInst.ToolTipText + "\"" if InsertLinksDialogInst.AddToolTip else "") + ")")
+                    self.SelectionSpanWrap("[", "](" + json.dumps(InsertLinksDialogInst.InsertIndexPath) + (" \"" + InsertLinksDialogInst.ToolTipText + "\"" if InsertLinksDialogInst.AddToolTip else "") + ")")
                 elif InsertLinksDialogInst.InsertIndexPaths is not None and InsertLinksDialogInst.SubPageLinksSeparator is not None:
                     InsertString = ""
                     for SubPagePath in InsertLinksDialogInst.InsertIndexPaths:
-                        InsertString += "[" + SubPagePath[0] + "](" + json.dumps(SubPagePath[1], indent=None) + ")" + InsertLinksDialogInst.SubPageLinksSeparator
+                        InsertString += "[" + SubPagePath[0] + "](" + json.dumps(SubPagePath[1]) + ")" + InsertLinksDialogInst.SubPageLinksSeparator
                     InsertString = InsertString.rstrip()
                     self.InsertOnBlankLine(InsertString)
                     self.MakeCursorVisible()
@@ -345,7 +345,7 @@ class TextWidget(QTextEdit):
                         self.MainWindow.DisplayMessageBox("Multiple pages found.  Use the full link dialog to insert a link.", Icon=QMessageBox.Warning)
                     else:
                         TopResultIndexPath = SearchResults["ResultsList"][0][1]
-                        self.SelectionSpanWrap("[", "](" + json.dumps(TopResultIndexPath, indent=None) + ")")
+                        self.SelectionSpanWrap("[", "](" + json.dumps(TopResultIndexPath) + ")")
                 else:
                     self.MainWindow.DisplayMessageBox("No pages with this title found.")
 

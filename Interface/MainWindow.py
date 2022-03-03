@@ -919,7 +919,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 if NewName == "":
                     self.DisplayMessageBox("Page names cannot be blank.")
                 else:
+                    OldLinkData = self.GetLinkData()
                     CurrentPage["Title"] = NewName
+                    NewLinkData = self.GetLinkData()
+                    self.UpdateLinks(OldLinkData, NewLinkData)
                     self.NotebookDisplayWidgetInst.FillFromRootPage()
                     self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
                     self.SearchWidgetInst.RefreshSearch()
@@ -929,13 +932,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def GetLinkData(self, Page=None):
         LinkData = {}
         Page = Page if Page is not None else self.Notebook.RootPage
-        LinkData[id(Page)] = {"NoToolTip": "](" + json.dumps(Page["IndexPath"], indent=None) + ")", "ToolTip": "](" + json.dumps(Page["IndexPath"], indent=None) + " \"" + Page["Title"] + "\"" + ")"}
+        LinkData[id(Page)] = {"NoToolTip": "](" + json.dumps(Page["IndexPath"]) + ")", "ToolTip": "](" + json.dumps(Page["IndexPath"]) + " \"" + Page["Title"] + "\"" + ")"}
         self.AddSubPageLinkData(Page, LinkData)
         return LinkData
 
     def AddSubPageLinkData(self, CurrentPage, LinkData):
         for SubPage in CurrentPage["SubPages"]:
-            LinkData[id(SubPage)] = {"NoToolTip": "](" + json.dumps(SubPage["IndexPath"], indent=None) + ")", "ToolTip": "](" + json.dumps(SubPage["IndexPath"], indent=None) + " \"" + SubPage["Title"] + "\"" + ")"}
+            LinkData[id(SubPage)] = {"NoToolTip": "](" + json.dumps(SubPage["IndexPath"]) + ")", "ToolTip": "](" + json.dumps(SubPage["IndexPath"]) + " \"" + SubPage["Title"] + "\"" + ")"}
             self.AddSubPageLinkData(SubPage, LinkData)
 
     def UpdateLinks(self, OldLinkData, NewLinkData, Page=None):
@@ -982,7 +985,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def SearchForLinkingPages(self):
         self.SearchAction.trigger()
-        self.SearchWidgetInst.SearchTextLineEdit.setText("](" + json.dumps(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath(), indent=None))
+        self.SearchWidgetInst.SearchTextLineEdit.setText("](" + json.dumps(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()))
         self.SearchWidgetInst.SearchButton.click()
 
     # Text Methods

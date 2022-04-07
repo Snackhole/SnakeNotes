@@ -677,6 +677,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             with open(SearchHighlightFile, "r") as ConfigFile:
                 self.SearchWidgetInst.HighlightCheckBox.setChecked(json.loads(ConfigFile.read()))
 
+        # Highlight Pages
+        HighlightPagesFile = self.GetResourcePath("Configs/HighlightPages.cfg")
+        if os.path.isfile(HighlightPagesFile):
+            with open(HighlightPagesFile, "r") as ConfigFile:
+                self.SearchWidgetInst.HighlightPagesCheckBox.setChecked(json.loads(ConfigFile.read()))
+
     def SaveConfigs(self):
         if not os.path.isdir(self.GetResourcePath("Configs")):
             os.mkdir(self.GetResourcePath("Configs"))
@@ -713,6 +719,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Search Highlight
         with open(self.GetResourcePath("Configs/SearchHighlight.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.SearchWidgetInst.HighlightCheckBox.isChecked()))
+
+        # Highlight Pages
+        with open(self.GetResourcePath("Configs/HighlightPages.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.SearchWidgetInst.HighlightPagesCheckBox.isChecked()))
 
         # Theme
         with open(self.GetResourcePath("Configs/Theme.cfg"), "w") as ConfigFile:

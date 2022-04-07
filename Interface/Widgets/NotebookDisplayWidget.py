@@ -1,6 +1,8 @@
 import json
 
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QHeaderView, QMenu
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator, QHeaderView, QMenu
 
 
 class NotebookDisplayWidget(QTreeWidget):
@@ -41,6 +43,23 @@ class NotebookDisplayWidget(QTreeWidget):
             return None
         SelectedItem = SelectedItems[0]
         return SelectedItem.IndexPath
+
+    def HighlightPages(self, HighlightedPageIndexPaths):
+        Iterator = QTreeWidgetItemIterator(self)
+        while Iterator.value():
+            Page = Iterator.value()
+            if Page.IndexPath in HighlightedPageIndexPaths:
+                Page.setForeground(0, QColor("white"))
+                Page.setBackground(0, QColor("darkMagenta"))
+            Iterator += 1
+
+    def ClearPageHighlighting(self):
+        Iterator = QTreeWidgetItemIterator(self)
+        while Iterator.value():
+            Page = Iterator.value()
+            Page.setData(0, Qt.ForegroundRole, None)
+            Page.setData(0, Qt.BackgroundRole, None)
+            Iterator += 1
 
     def SelectTreeItemFromIndexPath(self, IndexPath, SelectParent=False, ScrollToLastChild=False, SelectDelta=0):
         if SelectParent:

@@ -361,6 +361,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ExpandAllAction = QAction(self.ExpandAllIcon, "&Expand All")
         self.ExpandAllAction.triggered.connect(self.NotebookDisplayWidgetInst.expandAll)
 
+        self.ExpandRecursivelyAction = QAction("Expand Current Page Recursively")
+        self.ExpandRecursivelyAction.triggered.connect(self.NotebookDisplayWidgetInst.ExpandRecursively)
+
         self.CollapseAllAction = QAction(self.CollapseAllIcon, "&Collapse All")
         self.CollapseAllAction.triggered.connect(self.NotebookDisplayWidgetInst.collapseAll)
 
@@ -493,6 +496,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.PopOutPageAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.ExpandAllAction)
+        self.ViewMenu.addAction(self.ExpandRecursivelyAction)
         self.ViewMenu.addAction(self.CollapseAllAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.HighlightSyntaxAction)

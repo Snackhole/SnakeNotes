@@ -88,8 +88,14 @@ class NotebookDisplayWidget(QTreeWidget):
         ContextMenu.addAction(self.MainWindow.DemotePageAction)
         ContextMenu.addSeparator()
         ContextMenu.addAction(self.MainWindow.ExpandAllAction)
+        ContextMenu.addAction(self.MainWindow.ExpandRecursivelyAction)
         ContextMenu.addAction(self.MainWindow.CollapseAllAction)
         ContextMenu.exec_(self.mapToGlobal(event.pos()))
+
+    def ExpandRecursively(self):
+        SelectedIndexes = self.selectedIndexes()
+        if len(SelectedIndexes) == 1:
+            self.expandRecursively(SelectedIndexes[0])
 
     def collapseAll(self):
         super().collapseAll()

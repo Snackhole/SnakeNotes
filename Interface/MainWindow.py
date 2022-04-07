@@ -343,6 +343,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SearchForLinkingPagesAction = QAction("&Search for Linking Pages")
         self.SearchForLinkingPagesAction.triggered.connect(self.SearchForLinkingPages)
 
+        self.CopySearchResultsAction = QAction("Copy Search Results")
+        self.CopySearchResultsAction.triggered.connect(self.SearchWidgetInst.CopySearchResults)
+
         self.ZoomOutAction = QAction(self.ZoomOutIcon, "Zoom Out")
         self.ZoomOutAction.triggered.connect(self.ZoomOut)
 
@@ -482,6 +485,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.SearchAction)
         self.ViewMenu.addAction(self.ToggleSearchAction)
         self.ViewMenu.addAction(self.SearchForLinkingPagesAction)
+        self.ViewMenu.addAction(self.CopySearchResultsAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.ZoomOutAction)
         self.ViewMenu.addAction(self.ZoomInAction)

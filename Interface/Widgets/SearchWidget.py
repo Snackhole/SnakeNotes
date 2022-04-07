@@ -2,7 +2,7 @@ import re
 
 from PyQt5 import QtCore
 from PyQt5.QtGui import QTextCursor, QTextDocument
-from PyQt5.QtWidgets import QFrame, QLineEdit, QListWidget, QGridLayout, QListWidgetItem, QPushButton, QCheckBox, QSizePolicy
+from PyQt5.QtWidgets import QFrame, QLineEdit, QListWidget, QGridLayout, QListWidgetItem, QPushButton, QCheckBox, QSizePolicy, QApplication
 
 
 class SearchWidget(QFrame):
@@ -192,6 +192,16 @@ class SearchWidget(QFrame):
             CurrentPage["Content"] = re.sub(re.escape(SearchText), lambda x: ReplaceText, CurrentPage["Content"], flags=re.IGNORECASE)
         for SubPage in CurrentPage["SubPages"]:
             self.ReplaceAllInPageAndSubPages(SubPage, SearchText, ReplaceText, MatchCase)
+
+    def CopySearchResults(self):
+        ResultsCount = self.ResultsList.count()
+        if ResultsCount > 0:
+            ResultsString = ""
+            for ResultIndex in range(ResultsCount):
+                Result = self.ResultsList.item(ResultIndex)
+                ResultsString += Result.Title + " | Index Path:  " + str(Result.IndexPath) + "\n"
+            ResultsString = ResultsString.rstrip()
+            QApplication.clipboard().setText(ResultsString)
 
     def ClearSearch(self):
         self.SearchTextLineEdit.clear()

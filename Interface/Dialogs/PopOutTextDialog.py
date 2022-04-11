@@ -58,6 +58,9 @@ class PopOutTextDialog(QDialog):
 
     def GoTo(self):
         self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(self.Page["IndexPath"])
+        self.MainWindow.activateWindow()
+        self.MainWindow.raise_()
+        self.MainWindow.setFocus()
 
     def CopySource(self):
         self.RefreshPageDisplay()

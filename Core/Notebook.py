@@ -91,6 +91,8 @@ class Notebook(SerializableMixin):
 
     def AlphabetizeSubPages(self, IndexPath):
         CurrentPage = self.GetPageFromIndexPath(IndexPath)
+        if len(CurrentPage["SubPages"]) < 2:
+            return
         CurrentPage["SubPages"].sort(key=lambda SubPage: SubPage["Title"].casefold())
         self.UpdateIndexPaths()
 

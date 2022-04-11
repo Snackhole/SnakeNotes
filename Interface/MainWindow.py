@@ -68,10 +68,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Create Icons
         self.CreateIcons()
 
-        # Window Icon and Title
-        self.setWindowIcon(self.WindowIcon)
-        self.UpdateWindowTitle()
-
         # Toggle Read Mode Actions List
         self.ToggleReadModeActionsList = []
 
@@ -765,6 +761,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             if not SkipUpdatingBackAndForward:
                 self.UpdateBackAndForward()
             self.TextWidgetInst.SetCurrentPage(self.Notebook.GetPageFromIndexPath(IndexPath))
+            self.UpdateWindowTitle()
 
     def UpdateBackAndForward(self):
         if not self.BackNavigation and self.TextWidgetInst.ReadMode:
@@ -1106,7 +1103,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         QTimer.singleShot(Duration, self.StatusBar.clearMessage)
 
     def UpdateWindowTitle(self):
-        self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + (" *" if self.UnsavedChanges else ""))
+        self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + " - \"" + self.TextWidgetInst.CurrentPage["Title"] + "\"" + (" *" if self.UnsavedChanges else ""))
 
     def PopOutPage(self):
         for PopOut in self.PopOutPages:
@@ -1274,6 +1271,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     # Window Management Methods
     def WindowSetup(self):
+        self.setWindowIcon(self.WindowIcon)
+        self.UpdateWindowTitle()
         self.Resize()
         self.Center()
 

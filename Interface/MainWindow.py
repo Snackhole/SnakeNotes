@@ -406,6 +406,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.MovePageToAction.triggered.connect(self.MovePageTo)
         self.ToggleReadModeActionsList.append(self.MovePageToAction)
 
+        self.AlphabetizeSubPagesAction = QAction("Alphabetize Sub Pages")
+        self.AlphabetizeSubPagesAction.triggered.connect(self.AlphabetizeSubPages)
+        self.ToggleReadModeActionsList.append(self.AlphabetizeSubPagesAction)
+
         self.ImageManagerAction = QAction("&Image Manager")
         self.ImageManagerAction.triggered.connect(self.ImageManager)
         self.ToggleReadModeActionsList.append(self.ImageManagerAction)
@@ -514,6 +518,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookMenu.addAction(self.PromotePageAction)
         self.NotebookMenu.addAction(self.DemotePageAction)
         self.NotebookMenu.addAction(self.MovePageToAction)
+        self.NotebookMenu.addAction(self.AlphabetizeSubPagesAction)
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.ImageManagerAction)
         self.NotebookMenu.addAction(self.TemplateManagerAction)
@@ -949,6 +954,19 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                     self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
                     self.SearchWidgetInst.RefreshSearch()
                     self.UpdateUnsavedChangesFlag(True)
+            self.NotebookDisplayWidgetInst.setFocus()
+
+    def AlphabetizeSubPages(self):
+        if not self.TextWidgetInst.ReadMode:
+            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            OldLinkData = self.GetLinkData()
+            self.Notebook.AlphabetizeSubPages(CurrentPageIndexPath)
+            NewLinkData = self.GetLinkData()
+            self.UpdateLinks(OldLinkData, NewLinkData)
+            self.NotebookDisplayWidgetInst.FillFromRootPage()
+            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
+            self.SearchWidgetInst.RefreshSearch()
+            self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
     def RenamePage(self):

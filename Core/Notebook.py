@@ -89,6 +89,11 @@ class Notebook(SerializableMixin):
         self.AddSubPage(SuperPageIndexPath=DestinationPage["IndexPath"], PageToAdd=CurrentPage)
         return True
 
+    def AlphabetizeSubPages(self, IndexPath):
+        CurrentPage = self.GetPageFromIndexPath(IndexPath)
+        CurrentPage["SubPages"].sort(key=lambda SubPage: SubPage["Title"].casefold())
+        self.UpdateIndexPaths()
+
     def GetPageFromIndexPath(self, IndexPath):
         if len(IndexPath) < 1:
             return None
@@ -163,7 +168,7 @@ class Notebook(SerializableMixin):
         return self.Images[FileName]
 
     def GetImageNames(self):
-        return sorted(self.Images.keys(), key=lambda ImageName: ImageName.lower())
+        return sorted(self.Images.keys(), key=lambda ImageName: ImageName.casefold())
 
     # Template Methods
     def HasTemplate(self, TemplateName):
@@ -178,7 +183,7 @@ class Notebook(SerializableMixin):
         return self.PageTemplates[TemplateName]
 
     def GetTemplateNames(self):
-        return sorted(self.PageTemplates.keys(), key=lambda TemplateName: TemplateName.lower())
+        return sorted(self.PageTemplates.keys(), key=lambda TemplateName: TemplateName.casefold())
 
     # Search Methods
     def BuildSearchIndex(self):

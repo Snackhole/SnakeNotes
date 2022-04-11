@@ -107,9 +107,9 @@ class TemplateManagerDialog(QDialog):
             NewName, OK = QInputDialog.getText(self, "Rename " + CurrentTemplateName, "Enter a name:", text=CurrentTemplateName)
             if OK:
                 if NewName == "":
-                    self.MainWindow.DisplayMessageBox("Template names cannot be blank.")
+                    self.MainWindow.DisplayMessageBox("Template names cannot be blank.", Parent=self)
                 elif NewName in self.Notebook.PageTemplates:
-                    self.MainWindow.DisplayMessageBox("There is already a template by that name.")
+                    self.MainWindow.DisplayMessageBox("There is already a template by that name.", Parent=self)
                 else:
                     TemplateContent = self.Notebook.PageTemplates[CurrentTemplateName]
                     self.Notebook.PageTemplates[NewName] = TemplateContent

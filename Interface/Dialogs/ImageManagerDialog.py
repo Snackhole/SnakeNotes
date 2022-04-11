@@ -195,9 +195,9 @@ class ImageManagerDialog(QDialog):
             NewName, OK = QInputDialog.getText(self, "Rename " + CurrentFileName, "Enter a name:", text=CurrentFileName)
             if OK:
                 if NewName == "":
-                    self.MainWindow.DisplayMessageBox("Image names cannot be blank.")
+                    self.MainWindow.DisplayMessageBox("Image names cannot be blank.", Parent=self)
                 elif NewName + CurrentFileExtension in self.Notebook.Images:
-                    self.MainWindow.DisplayMessageBox("There is already an image by that name.")
+                    self.MainWindow.DisplayMessageBox("There is already an image by that name.", Parent=self)
                 else:
                     ImageContent = self.Notebook.Images[CurrentFileName + CurrentFileExtension]
                     self.Notebook.Images[NewName + CurrentFileExtension] = ImageContent
@@ -227,7 +227,7 @@ class ImageManagerDialog(QDialog):
                 ExportImagePath = os.path.join(ExportDirectory, Image)
                 Base64Converters.WriteFileFromBase64String(self.Notebook.Images[Image], ExportImagePath)
         else:
-            self.MainWindow.DisplayMessageBox("Choose an empty folder to export all image files.")
+            self.MainWindow.DisplayMessageBox("Choose an empty folder to export all image files.", Parent=self)
 
     def DeleteImage(self):
         SelectedItems = self.ImageList.selectedItems()

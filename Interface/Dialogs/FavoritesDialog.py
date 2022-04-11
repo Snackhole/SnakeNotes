@@ -57,7 +57,7 @@ class FavoritesDialog(QDialog):
         SelectedItems = self.FavoritesList.selectedItems()
         if len(SelectedItems) > 0:
             if not os.path.isfile(SelectedItems[0].FavoritePath):
-                self.MainWindow.DisplayMessageBox(SelectedItems[0].FavoriteName + " is not a notebook file.\n\nCheck whether it has been moved, deleted, or renamed.")
+                self.MainWindow.DisplayMessageBox(SelectedItems[0].FavoriteName + " is not a notebook file.\n\nCheck whether it has been moved, deleted, or renamed.", Parent=self)
                 return
             self.OpenFilePath = SelectedItems[0].FavoritePath
             self.close()
@@ -65,20 +65,20 @@ class FavoritesDialog(QDialog):
     def AddCurrentNotebookAsFavorite(self):
         CurrentOpenFileName = self.MainWindow.CurrentOpenFileName
         if CurrentOpenFileName == "":
-            self.MainWindow.DisplayMessageBox("Save or open a notebook first.")
+            self.MainWindow.DisplayMessageBox("Save or open a notebook first.", Parent=self)
             return
         CurrentModeExtension = ".ntbk" if not self.MainWindow.GzipMode else ".ntbk.gz"
         if not CurrentOpenFileName.endswith(CurrentModeExtension):
-            self.MainWindow.DisplayMessageBox("The current file must be saved as a " + CurrentModeExtension + " file before it can be added to your favorites for the current mode.")
+            self.MainWindow.DisplayMessageBox("The current file must be saved as a " + CurrentModeExtension + " file before it can be added to your favorites for the current mode.", Parent=self)
             return
         CurrentOpenFileNameShort = os.path.basename(CurrentOpenFileName)[:-len(CurrentModeExtension)]
         FavoriteName, OK = QInputDialog.getText(self, "Name Favorite", "Enter a name:", text=CurrentOpenFileNameShort)
         if OK:
             if FavoriteName == "":
-                self.MainWindow.DisplayMessageBox("Favorite names cannot be blank.")
+                self.MainWindow.DisplayMessageBox("Favorite names cannot be blank.", Parent=self)
                 return
             if FavoriteName in self.FavoritesData:
-                if self.MainWindow.DisplayMessageBox("There is already a notebook called " + FavoriteName + " in your favorites.\n\nOverwrite?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.No:
+                if self.MainWindow.DisplayMessageBox("There is already a notebook called " + FavoriteName + " in your favorites.\n\nOverwrite?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.No:
                     return
             self.FavoritesData[FavoriteName] = CurrentOpenFileName
             self.PopulateFavoritesList()
@@ -86,7 +86,7 @@ class FavoritesDialog(QDialog):
     def DeleteFavorite(self):
         SelectedItems = self.FavoritesList.selectedItems()
         if len(SelectedItems) > 0:
-            if self.MainWindow.DisplayMessageBox("Delete " + SelectedItems[0].FavoriteName + " from your favorites?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.Yes:
+            if self.MainWindow.DisplayMessageBox("Delete " + SelectedItems[0].FavoriteName + " from your favorites?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
                 del self.FavoritesData[SelectedItems[0].FavoriteName]
                 self.PopulateFavoritesList()
 

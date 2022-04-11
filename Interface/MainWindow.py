@@ -13,6 +13,7 @@ from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
 from Interface.Dialogs.FavoritesDialog import FavoritesDialog
 from Interface.Dialogs.ImageManagerDialog import ImageManagerDialog
+from Interface.Dialogs.MovePageToDialog import MovePageToDialog
 from Interface.Dialogs.NewPageDialog import NewPageDialog
 from Interface.Dialogs.TemplateManagerDialog import TemplateManagerDialog
 from Interface.Dialogs.AddToPageAndSubpagesDialog import AddToPageAndSubpagesDialog
@@ -405,6 +406,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DemotePageAction.triggered.connect(self.DemotePage)
         self.ToggleReadModeActionsList.append(self.DemotePageAction)
 
+        self.MovePageToAction = QAction("Move Page To...")
+        self.MovePageToAction.triggered.connect(self.MovePageTo)
+        self.ToggleReadModeActionsList.append(self.MovePageToAction)
+
         self.ImageManagerAction = QAction("&Image Manager")
         self.ImageManagerAction.triggered.connect(self.ImageManager)
         self.ToggleReadModeActionsList.append(self.ImageManagerAction)
@@ -512,6 +517,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookMenu.addAction(self.MovePageDownAction)
         self.NotebookMenu.addAction(self.PromotePageAction)
         self.NotebookMenu.addAction(self.DemotePageAction)
+        self.NotebookMenu.addAction(self.MovePageToAction)
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.ImageManagerAction)
         self.NotebookMenu.addAction(self.TemplateManagerAction)
@@ -573,6 +579,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultKeybindings["MovePageDownAction"] = "Ctrl+PgDown"
         self.DefaultKeybindings["PromotePageAction"] = "Ctrl+Shift+PgUp"
         self.DefaultKeybindings["DemotePageAction"] = "Ctrl+Shift+PgDown"
+        self.DefaultKeybindings["MovePageToAction"] = "Ctrl+M"
         self.DefaultKeybindings["RenamePageAction"] = "Ctrl+R"
         self.DefaultKeybindings["ItalicsAction"] = "Ctrl+I"
         self.DefaultKeybindings["BoldAction"] = "Ctrl+B"
@@ -920,6 +927,25 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 if SiblingPageIndex is not None:
                     OldLinkData = self.GetLinkData()
                     self.Notebook.DemoteSubPage(CurrentPageIndexPath, SiblingPageIndex)
+                    NewLinkData = self.GetLinkData()
+                    self.UpdateLinks(OldLinkData, NewLinkData)
+                    self.NotebookDisplayWidgetInst.FillFromRootPage()
+                    self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
+                    self.SearchWidgetInst.RefreshSearch()
+                    self.UpdateUnsavedChangesFlag(True)
+            self.NotebookDisplayWidgetInst.setFocus()
+
+    def MovePageTo(self):
+        if not self.TextWidgetInst.ReadMode:
+            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            if CurrentPageIndexPath == [0]:
+                self.DisplayMessageBox("The root page of a notebook cannot be moved.")
+            else:
+                CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+                DestinationIndexPath = MovePageToDialog(CurrentPageIndexPath, self.Notebook, self).DestinationIndexPath
+                if DestinationIndexPath is not None:
+                    OldLinkData = self.GetLinkData()
+                    self.Notebook.MoveSubPageTo(CurrentPageIndexPath, DestinationIndexPath)
                     NewLinkData = self.GetLinkData()
                     self.UpdateLinks(OldLinkData, NewLinkData)
                     self.NotebookDisplayWidgetInst.FillFromRootPage()

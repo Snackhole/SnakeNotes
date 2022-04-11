@@ -86,6 +86,7 @@ class NotebookDisplayWidget(QTreeWidget):
         ContextMenu.addAction(self.MainWindow.MovePageDownAction)
         ContextMenu.addAction(self.MainWindow.PromotePageAction)
         ContextMenu.addAction(self.MainWindow.DemotePageAction)
+        ContextMenu.addAction(self.MainWindow.MovePageToAction)
         ContextMenu.addSeparator()
         ContextMenu.addAction(self.MainWindow.ExpandAllAction)
         ContextMenu.addAction(self.MainWindow.ExpandRecursivelyAction)

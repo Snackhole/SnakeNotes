@@ -79,6 +79,16 @@ class Notebook(SerializableMixin):
         self.DeleteSubPage(IndexPath)
         self.AddSubPage(SuperPageIndexPath=TargetSiblingPage["IndexPath"], PageToAdd=CurrentPage)
 
+    def MoveSubPageTo(self, IndexPath, DestinationIndexPath):
+        SuperPage = self.GetSuperOfPageFromIndexPath(IndexPath)
+        if IndexPath == [0] or SuperPage["IndexPath"] == DestinationIndexPath or IndexPath == DestinationIndexPath[:len(IndexPath)]:
+            return False
+        CurrentPage = self.GetPageFromIndexPath(IndexPath)
+        DestinationPage = self.GetPageFromIndexPath(DestinationIndexPath)
+        self.DeleteSubPage(IndexPath)
+        self.AddSubPage(SuperPageIndexPath=DestinationPage["IndexPath"], PageToAdd=CurrentPage)
+        return True
+
     def GetPageFromIndexPath(self, IndexPath):
         if len(IndexPath) < 1:
             return None

@@ -398,9 +398,17 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.PromotePageAction.triggered.connect(self.PromotePage)
         self.ToggleReadModeActionsList.append(self.PromotePageAction)
 
+        self.PromoteAllSubPagesAction = QAction("Promote All Sub Pages")
+        self.PromoteAllSubPagesAction.triggered.connect(self.PromoteAllSubPages)
+        self.ToggleReadModeActionsList.append(self.PromoteAllSubPagesAction)
+
         self.DemotePageAction = QAction(self.DemotePageIcon, "Demote Page")
         self.DemotePageAction.triggered.connect(self.DemotePage)
         self.ToggleReadModeActionsList.append(self.DemotePageAction)
+
+        self.DemoteAllSiblingPagesAction = QAction("Demote All Sibling Pages")
+        self.DemoteAllSiblingPagesAction.triggered.connect(self.DemoteAllSiblingPages)
+        self.ToggleReadModeActionsList.append(self.DemoteAllSiblingPagesAction)
 
         self.MovePageToAction = QAction("Move Page To...")
         self.MovePageToAction.triggered.connect(self.MovePageTo)
@@ -517,6 +525,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookMenu.addAction(self.MovePageDownAction)
         self.NotebookMenu.addAction(self.PromotePageAction)
         self.NotebookMenu.addAction(self.DemotePageAction)
+        self.NotebookMenu.addAction(self.PromoteAllSubPagesAction)
+        self.NotebookMenu.addAction(self.DemoteAllSiblingPagesAction)
         self.NotebookMenu.addAction(self.MovePageToAction)
         self.NotebookMenu.addAction(self.AlphabetizeSubPagesAction)
         self.NotebookMenu.addSeparator()
@@ -935,6 +945,45 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                     self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
                     self.SearchWidgetInst.RefreshSearch()
                     self.UpdateUnsavedChangesFlag(True)
+            self.NotebookDisplayWidgetInst.setFocus()
+
+    def PromoteAllSubPages(self):
+        if not self.TextWidgetInst.ReadMode:
+            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+            if CurrentPageIndexPath == [0]:
+                self.DisplayMessageBox("Pages cannot be promoted to the same level as the root page.")
+            elif len(CurrentPage["SubPages"]) == 0:
+                self.DisplayMessageBox("This page has no sub pages.")
+            else:
+                OldLinkData = self.GetLinkData()
+                self.Notebook.PromoteAllSubPages(CurrentPageIndexPath)
+                NewLinkData = self.GetLinkData()
+                self.UpdateLinks(OldLinkData, NewLinkData)
+                self.NotebookDisplayWidgetInst.FillFromRootPage()
+                self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
+                self.SearchWidgetInst.RefreshSearch()
+                self.UpdateUnsavedChangesFlag(True)
+            self.NotebookDisplayWidgetInst.setFocus()
+
+    def DemoteAllSiblingPages(self):
+        if not self.TextWidgetInst.ReadMode:
+            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            SuperOfCurrentPage = self.Notebook.GetSuperOfPageFromIndexPath(CurrentPageIndexPath)
+            if CurrentPageIndexPath == [0]:
+                self.DisplayMessageBox("The root page of a notebook has no sibling pages.")
+            elif len(SuperOfCurrentPage["SubPages"]) < 2:
+                self.DisplayMessageBox("This page has no sibling pages.")
+            else:
+                CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+                OldLinkData = self.GetLinkData()
+                self.Notebook.DemoteAllSiblingPages(CurrentPageIndexPath)
+                NewLinkData = self.GetLinkData()
+                self.UpdateLinks(OldLinkData, NewLinkData)
+                self.NotebookDisplayWidgetInst.FillFromRootPage()
+                self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
+                self.SearchWidgetInst.RefreshSearch()
+                self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
     def MovePageTo(self):

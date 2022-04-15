@@ -79,15 +79,40 @@ class Notebook(SerializableMixin):
         self.DeleteSubPage(IndexPath)
         self.AddSubPage(SuperPageIndexPath=TargetSiblingPage["IndexPath"], PageToAdd=CurrentPage)
 
+    def PromoteAllSubPages(self, IndexPath):
+        if IndexPath == [0]:
+            return
+        CurrentPage = self.GetPageFromIndexPath(IndexPath)
+        if len(CurrentPage["SubPages"]) == 0:
+            return
+        SuperPage = self.GetSuperOfPageFromIndexPath(IndexPath)
+        for SubPage in CurrentPage["SubPages"]:
+            SuperPage["SubPages"].append(SubPage)
+        CurrentPage["SubPages"].clear()
+        self.UpdateIndexPaths()
+
+    def DemoteAllSiblingPages(self, IndexPath):
+        if IndexPath == [0]:
+            return
+        SuperPage = self.GetSuperOfPageFromIndexPath(IndexPath)
+        if len(SuperPage["SubPages"]) < 2:
+            return
+        CurrentPage = self.GetPageFromIndexPath(IndexPath)
+        SiblingPages = [Page for Page in SuperPage["SubPages"] if Page["IndexPath"] != IndexPath]
+        SuperPage["SubPages"].clear()
+        SuperPage["SubPages"].append(CurrentPage)
+        for SiblingPage in SiblingPages:
+            CurrentPage["SubPages"].append(SiblingPage)
+        self.UpdateIndexPaths()
+
     def MoveSubPageTo(self, IndexPath, DestinationIndexPath):
         SuperPage = self.GetSuperOfPageFromIndexPath(IndexPath)
         if IndexPath == [0] or SuperPage["IndexPath"] == DestinationIndexPath or IndexPath == DestinationIndexPath[:len(IndexPath)]:
-            return False
+            return
         CurrentPage = self.GetPageFromIndexPath(IndexPath)
         DestinationPage = self.GetPageFromIndexPath(DestinationIndexPath)
         self.DeleteSubPage(IndexPath)
         self.AddSubPage(SuperPageIndexPath=DestinationPage["IndexPath"], PageToAdd=CurrentPage)
-        return True
 
     def AlphabetizeSubPages(self, IndexPath):
         CurrentPage = self.GetPageFromIndexPath(IndexPath)

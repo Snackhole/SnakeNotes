@@ -959,6 +959,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def AlphabetizeSubPages(self):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            if len(self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)["SubPages"]) < 2:
+                return
             OldLinkData = self.GetLinkData()
             self.Notebook.AlphabetizeSubPages(CurrentPageIndexPath)
             NewLinkData = self.GetLinkData()

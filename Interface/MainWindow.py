@@ -298,11 +298,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.InsertImageAction.triggered.connect(self.TextWidgetInst.InsertImage)
         self.ToggleReadModeActionsList.append(self.InsertImageAction)
 
-        self.PrependAction = QAction("Prepend Text to Page and Subpages")
+        self.PrependAction = QAction("Prepend Text to Page and Sub Pages")
         self.PrependAction.triggered.connect(lambda: self.AddTextToPageAndSubpages(Prepend=True))
         self.ToggleReadModeActionsList.append(self.PrependAction)
 
-        self.AppendAction = QAction("Append Text to Page and Subpages")
+        self.AppendAction = QAction("Append Text to Page and Sub Pages")
         self.AppendAction.triggered.connect(self.AddTextToPageAndSubpages)
         self.ToggleReadModeActionsList.append(self.AppendAction)
 

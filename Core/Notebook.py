@@ -243,6 +243,102 @@ class Notebook(SerializableMixin):
         Results = {"ResultsList": ResultsList, "TotalHits": TotalHits, "TotalPages": TotalPages}
         return Results
 
+    def GetFilteredSearchResults(self, Results, Filters):
+        # Create Filtered Results List and Counts
+        FilteredResultsList = []
+        TotalHits = 0
+        TotalPages = 0
+
+        # Filter Each Result
+        for Result in Results["ResultsList"]:
+            # Current Result Variables
+            CurrentPage = self.GetPageFromIndexPath(Result[1])
+            ValidResult = True
+
+            # Page Filtering
+            if ValidResult and "WithinPageIndexPath" in Filters:
+                WithinPageIndexPath = Filters["WithinPageIndexPath"]
+                if WithinPageIndexPath != CurrentPage["IndexPath"][:len(WithinPageIndexPath)]:
+                    ValidResult = False
+
+            # Title Filtering
+            if ValidResult and "TitleContains" in Filters:
+                CurrentTitle = CurrentPage["Title"]
+                TitleContainsText = Filters["TitleContains"]["Text"]
+                if not Filters["TitleContains"]["MatchCase"]:
+                    TitleContainsText = TitleContainsText.casefold()
+                    CurrentTitle = CurrentTitle.casefold()
+                if not TitleContainsText in CurrentTitle:
+                    ValidResult = False
+            if ValidResult and "TitleDoesNotContain" in Filters:
+                CurrentTitle = CurrentPage["Title"]
+                TitleDoesNotContainText = Filters["TitleDoesNotContain"]["Text"]
+                if not Filters["TitleDoesNotContain"]["MatchCase"]:
+                    TitleDoesNotContainText = TitleDoesNotContainText.casefold()
+                    CurrentTitle = CurrentTitle.casefold()
+                if TitleDoesNotContainText in CurrentTitle:
+                    ValidResult = False
+            if ValidResult and "TitleStartsWith" in Filters:
+                CurrentTitle = CurrentPage["Title"]
+                TitleStartsWithText = Filters["TitleStartsWith"]["Text"]
+                if not Filters["TitleStartsWith"]["MatchCase"]:
+                    TitleStartsWithText = TitleStartsWithText.casefold()
+                    CurrentTitle = CurrentTitle.casefold()
+                if not CurrentTitle.startswith(TitleStartsWithText):
+                    ValidResult = False
+            if ValidResult and "TitleEndsWith" in Filters:
+                CurrentTitle = CurrentPage["Title"]
+                TitleEndsWithText = Filters["TitleEndsWith"]["Text"]
+                if not Filters["TitleEndsWith"]["MatchCase"]:
+                    TitleEndsWithText = TitleEndsWithText.casefold()
+                    CurrentTitle = CurrentTitle.casefold()
+                if not CurrentTitle.endswith(TitleEndsWithText):
+                    ValidResult = False
+
+            # Content Filtering
+            if ValidResult and "Contains" in Filters:
+                CurrentContent = CurrentPage["Content"]
+                ContainsText = Filters["Contains"]["Text"]
+                if not Filters["Contains"]["MatchCase"]:
+                    ContainsText = ContainsText.casefold()
+                    CurrentContent = CurrentContent.casefold()
+                if not ContainsText in CurrentContent:
+                    ValidResult = False
+            if ValidResult and "DoesNotContain" in Filters:
+                CurrentContent = CurrentPage["Content"]
+                DoesNotContainText = Filters["DoesNotContain"]["Text"]
+                if not Filters["DoesNotContain"]["MatchCase"]:
+                    DoesNotContainText = DoesNotContainText.casefold()
+                    CurrentContent = CurrentContent.casefold()
+                if DoesNotContainText in CurrentContent:
+                    ValidResult = False
+            if ValidResult and "StartsWith" in Filters:
+                CurrentContent = CurrentPage["Content"]
+                StartsWithText = Filters["StartsWith"]["Text"]
+                if not Filters["StartsWith"]["MatchCase"]:
+                    StartsWithText = StartsWithText.casefold()
+                    CurrentContent = CurrentContent.casefold()
+                if not CurrentContent.startswith(StartsWithText):
+                    ValidResult = False
+            if ValidResult and "EndsWith" in Filters:
+                CurrentContent = CurrentPage["Content"]
+                EndsWithText = Filters["EndsWith"]["Text"]
+                if not Filters["EndsWith"]["MatchCase"]:
+                    EndsWithText = EndsWithText.casefold()
+                    CurrentContent = CurrentContent.casefold()
+                if not CurrentContent.endswith(EndsWithText):
+                    ValidResult = False
+
+            # Append Valid Results and Update Counts
+            if ValidResult:
+                FilteredResultsList.append(Result)
+                TotalHits += Result[3] + Result[4]
+                TotalPages += 1
+
+        # Create and Return Filtered Search Results Dictionary
+        FilteredSearchResults = {"ResultsList": FilteredResultsList, "TotalHits": TotalHits, "TotalPages": TotalPages}
+        return FilteredSearchResults
+
     # Serialization Methods
     def SetState(self, NewState):
         self.Header = NewState["Header"]

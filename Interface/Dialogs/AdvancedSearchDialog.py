@@ -1,0 +1,247 @@
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton, QApplication, QLineEdit, QCheckBox, QListWidget, QLabel, QSizePolicy, QListWidgetItem
+
+
+class AdvancedSearchDialog(QDialog):
+    def __init__(self, MainWindow):
+        super().__init__(parent=MainWindow)
+
+        # Store Parameters
+        self.MainWindow = MainWindow
+
+        # Variables
+        self.RefreshingSearchResults = False
+        self.WithinPage = None
+
+        # Inputs Size Policy
+        self.InputsSizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+
+        # Advanced Search Text Line Edit
+        self.AdvancedSearchTextLineEdit = AdvancedSearchTextLineEdit(self)
+        self.AdvancedSearchTextLineEdit.setPlaceholderText("Search")
+        self.AdvancedSearchTextLineEdit.setSizePolicy(self.InputsSizePolicy)
+        self.AdvancedSearchTextLineEdit.returnPressed.connect(self.Search)
+
+        # Match Case Check Box
+        self.MatchCaseCheckBox = QCheckBox("Match Case")
+        self.MatchCaseCheckBox.setSizePolicy(self.InputsSizePolicy)
+
+        # Content Filtering Inputs
+        self.ContentContainsLabel = QLabel("Content Contains:")
+        self.ContentContainsLineEdit = QLineEdit()
+        self.ContentContainsLineEdit.setSizePolicy(self.InputsSizePolicy)
+        self.ContentContainsMatchCaseCheckBox = QCheckBox("Match Case")
+        self.ContentContainsMatchCaseCheckBox.setSizePolicy(self.InputsSizePolicy)
+        self.ContentDoesNotContainLabel = QLabel("Content Does Not Contain:")
+        self.ContentDoesNotContainLineEdit = QLineEdit()
+        self.ContentDoesNotContainLineEdit.setSizePolicy(self.InputsSizePolicy)
+        self.ContentDoesNotContainMatchCaseCheckBox = QCheckBox("Match Case")
+        self.ContentDoesNotContainMatchCaseCheckBox.setSizePolicy(self.InputsSizePolicy)
+        self.ContentStartsWithLabel = QLabel("Content Starts With:")
+        self.ContentStartsWithLineEdit = QLineEdit()
+        self.ContentStartsWithLineEdit.setSizePolicy(self.InputsSizePolicy)
+        self.ContentStartsWithMatchCaseCheckBox = QCheckBox("Match Case")
+        self.ContentStartsWithMatchCaseCheckBox.setSizePolicy(self.InputsSizePolicy)
+        self.ContentEndsWithLabel = QLabel("Content Ends With:")
+        self.ContentEndsWithLineEdit = QLineEdit()
+        self.ContentEndsWithLineEdit.setSizePolicy(self.InputsSizePolicy)
+        self.ContentEndsWithMatchCaseCheckBox = QCheckBox("Match Case")
+        self.ContentEndsWithMatchCaseCheckBox.setSizePolicy(self.InputsSizePolicy)
+
+        # Title Filtering Inputs
+        self.TitleContainsLabel = QLabel("Title Contains:")
+        self.TitleContainsLineEdit = QLineEdit()
+        self.TitleContainsLineEdit.setSizePolicy(self.InputsSizePolicy)
+        self.TitleContainsMatchCaseCheckBox = QCheckBox("Match Case")
+        self.TitleContainsMatchCaseCheckBox.setSizePolicy(self.InputsSizePolicy)
+        self.TitleDoesNotContainLabel = QLabel("Title Does Not Contain:")
+        self.TitleDoesNotContainLineEdit = QLineEdit()
+        self.TitleDoesNotContainLineEdit.setSizePolicy(self.InputsSizePolicy)
+        self.TitleDoesNotContainMatchCaseCheckBox = QCheckBox("Match Case")
+        self.TitleDoesNotContainMatchCaseCheckBox.setSizePolicy(self.InputsSizePolicy)
+        self.TitleStartsWithLabel = QLabel("Title Starts With:")
+        self.TitleStartsWithLineEdit = QLineEdit()
+        self.TitleStartsWithLineEdit.setSizePolicy(self.InputsSizePolicy)
+        self.TitleStartsWithMatchCaseCheckBox = QCheckBox("Match Case")
+        self.TitleStartsWithMatchCaseCheckBox.setSizePolicy(self.InputsSizePolicy)
+        self.TitleEndsWithLabel = QLabel("Title Ends With:")
+        self.TitleEndsWithLineEdit = QLineEdit()
+        self.TitleEndsWithLineEdit.setSizePolicy(self.InputsSizePolicy)
+        self.TitleEndsWithMatchCaseCheckBox = QCheckBox("Match Case")
+        self.TitleEndsWithMatchCaseCheckBox.setSizePolicy(self.InputsSizePolicy)
+
+        # Within Page Inputs
+        self.WithinPageButton = QPushButton("Within Page...")
+        self.WithinPageButton.setSizePolicy(self.InputsSizePolicy)
+        self.WithinPageButton.clicked.connect(self.SelectWithinPage)
+        self.WithinPageLineEdit = QLineEdit()
+        self.WithinPageLineEdit.setSizePolicy(self.InputsSizePolicy)
+        self.WithinPageLineEdit.setReadOnly(True)
+
+        # Results List
+        self.ResultsList = QListWidget()
+        self.ResultsList.setMinimumWidth(300)
+        self.ResultsList.itemActivated.connect(self.GoTo)
+
+        # Buttons
+        self.SearchButton = QPushButton("Search")
+        self.SearchButton.clicked.connect(self.Search)
+        self.SearchButton.setDefault(True)
+        self.GoToButton = QPushButton("Go To")
+        self.GoToButton.clicked.connect(self.GoTo)
+        self.CopySearchResultsButton = QPushButton("Copy Search Results")
+        self.CopySearchResultsButton.clicked.connect(self.CopySearchResults)
+        self.CloseButton = QPushButton("Close")
+        self.CloseButton.clicked.connect(self.close)
+
+        # Create, Populate, and Set Layout
+        self.Layout = QGridLayout()
+
+        self.SearchLayout = QGridLayout()
+        self.SearchLayout.addWidget(self.AdvancedSearchTextLineEdit, 0, 0, 1, 2)
+        self.SearchLayout.addWidget(self.MatchCaseCheckBox, 0, 2)
+        self.SearchLayout.addWidget(self.ContentContainsLabel, 1, 0)
+        self.SearchLayout.addWidget(self.ContentContainsLineEdit, 1, 1)
+        self.SearchLayout.addWidget(self.ContentContainsMatchCaseCheckBox, 1, 2)
+        self.SearchLayout.addWidget(self.ContentDoesNotContainLabel, 2, 0)
+        self.SearchLayout.addWidget(self.ContentDoesNotContainLineEdit, 2, 1)
+        self.SearchLayout.addWidget(self.ContentDoesNotContainMatchCaseCheckBox, 2, 2)
+        self.SearchLayout.addWidget(self.ContentStartsWithLabel, 3, 0)
+        self.SearchLayout.addWidget(self.ContentStartsWithLineEdit, 3, 1)
+        self.SearchLayout.addWidget(self.ContentStartsWithMatchCaseCheckBox, 3, 2)
+        self.SearchLayout.addWidget(self.ContentEndsWithLabel, 4, 0)
+        self.SearchLayout.addWidget(self.ContentEndsWithLineEdit, 4, 1)
+        self.SearchLayout.addWidget(self.ContentEndsWithMatchCaseCheckBox, 4, 2)
+        self.SearchLayout.addWidget(self.TitleContainsLabel, 5, 0)
+        self.SearchLayout.addWidget(self.TitleContainsLineEdit, 5, 1)
+        self.SearchLayout.addWidget(self.TitleContainsMatchCaseCheckBox, 5, 2)
+        self.SearchLayout.addWidget(self.TitleDoesNotContainLabel, 6, 0)
+        self.SearchLayout.addWidget(self.TitleDoesNotContainLineEdit, 6, 1)
+        self.SearchLayout.addWidget(self.TitleDoesNotContainMatchCaseCheckBox, 6, 2)
+        self.SearchLayout.addWidget(self.TitleStartsWithLabel, 7, 0)
+        self.SearchLayout.addWidget(self.TitleStartsWithLineEdit, 7, 1)
+        self.SearchLayout.addWidget(self.TitleStartsWithMatchCaseCheckBox, 7, 2)
+        self.SearchLayout.addWidget(self.TitleEndsWithLabel, 8, 0)
+        self.SearchLayout.addWidget(self.TitleEndsWithLineEdit, 8, 1)
+        self.SearchLayout.addWidget(self.TitleEndsWithMatchCaseCheckBox, 8, 2)
+        self.SearchLayout.addWidget(self.WithinPageButton, 9, 0)
+        self.SearchLayout.addWidget(self.WithinPageLineEdit, 9, 1, 1, 2)
+        self.Layout.addLayout(self.SearchLayout, 0, 0)
+
+        self.Layout.addWidget(self.ResultsList, 0, 1)
+
+        self.ButtonsLayout = QGridLayout()
+        self.ButtonsLayout.addWidget(self.SearchButton, 0, 0)
+        self.ButtonsLayout.addWidget(self.GoToButton, 0, 1)
+        self.ButtonsLayout.addWidget(self.CopySearchResultsButton, 0, 2)
+        self.ButtonsLayout.addWidget(self.CloseButton, 0, 3)
+        self.Layout.addLayout(self.ButtonsLayout, 1, 0, 1, 2)
+
+        self.Layout.setColumnStretch(1, 1)
+        self.setLayout(self.Layout)
+
+        # Set Window Title and Icon
+        self.setWindowTitle("Advanced Search")
+        self.setWindowIcon(self.MainWindow.WindowIcon)
+
+        # Show Window
+        self.show()
+
+        # Set Geometry to Minimum and Center
+        self.SetGeometryToMinimum()
+        self.Center()
+
+    def Search(self):
+        SearchText = self.AdvancedSearchTextLineEdit.text()
+        MatchCase = self.MatchCaseCheckBox.isChecked()
+        self.ResultsList.clear()
+        if SearchText == "":
+            return
+        UnfilteredResults = self.MainWindow.Notebook.GetSearchResults(SearchText, MatchCase=MatchCase)
+        Filters = {}
+        # Construct filter dictionary
+        FilteredResults = self.MainWindow.Notebook.GetFilteredSearchResults(UnfilteredResults, Filters)
+        for Result in FilteredResults["ResultsList"]:
+            self.ResultsList.addItem(SearchResult(Result[0], Result[1]))
+        # Update ResultsStatsString with totals:
+        # if len(Results["ResultsList"]) > 0:
+        #     ResultsStatsString = str(Results["TotalHits"]) + " hit" + ("" if Results["TotalHits"] == 1 else "s") + " in " + str(Results["TotalPages"]) + " page" + ("" if Results["TotalPages"] == 1 else "s") + "."
+        # else:
+        #     ResultsStatsString = "No search results."
+        # self.MainWindow.SearchResultsStatsLabel.setText(ResultsStatsString)
+        self.ResultsList.setCurrentRow(0)
+        if not self.RefreshingSearchResults:
+            self.ResultsList.setFocus()
+
+    def RefreshSearch(self):
+        if self.WithinPage is None:
+            self.WithinPageLineEdit.clear()
+        else:
+            self.WithinPageLineEdit.setText(self.WithinPage["Title"] + " | Index Path:  " + str(self.WithinPage["IndexPath"]))
+        self.RefreshingSearchResults = True
+        self.Search()
+        self.RefreshingSearchResults = False
+
+    def GoTo(self):
+        SelectedItems = self.ResultsList.selectedItems()
+        if len(SelectedItems) > 0 and not self.RefreshingSearchResults:
+            SelectedItem = SelectedItems[0]
+            if self.MainWindow.NotebookDisplayWidgetInst.GetCurrentPageIndexPath() != SelectedItem.IndexPath:
+                self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(SelectedItem.IndexPath)
+
+    def SelectWithinPage(self):
+        # Dialog to select page from tree view, or clear
+        self.RefreshSearch()
+
+    def ClearWithinPage(self):
+        self.WithinPage = None
+
+    def CopySearchResults(self):
+        pass
+
+    def ClearSearch(self):
+        self.WithinPage = None
+        self.RefreshSearch()
+
+    def SetGeometryToMinimum(self):
+        FrameGeometryRectangle = self.frameGeometry()
+        FrameGeometryRectangle.setWidth(self.minimumWidth())
+        FrameGeometryRectangle.setHeight(self.minimumHeight())
+        self.setGeometry(FrameGeometryRectangle)
+
+    def Center(self):
+        FrameGeometryRectangle = self.frameGeometry()
+        MainWindowCenterPoint = self.MainWindow.frameGeometry().center()
+        FrameGeometryRectangle.moveCenter(MainWindowCenterPoint)
+        self.move(FrameGeometryRectangle.topLeft())
+
+    def closeEvent(self, event):
+        self.MainWindow.AdvancedSearchDialogInst = None
+        return super().closeEvent(event)
+
+
+class SearchResult(QListWidgetItem):
+    def __init__(self, Title, IndexPath):
+        super().__init__()
+
+        # Store Parameters
+        self.Title = Title
+        self.IndexPath = IndexPath
+
+        # Set Text
+        self.setText(self.Title)
+
+
+class AdvancedSearchTextLineEdit(QLineEdit):
+    def __init__(self, AdvancedSearchDialog):
+        # QLineEdit Init
+        super().__init__()
+
+        # Store Parameters
+        self.AdvancedSearchDialog = AdvancedSearchDialog
+
+    def keyPressEvent(self, QKeyEvent):
+        if QKeyEvent.key() == QtCore.Qt.Key_Escape:
+            self.AdvancedSearchDialog.ClearSearch()
+        else:
+            super().keyPressEvent(QKeyEvent)

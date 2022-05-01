@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QFileDialog, QLabel, QMainWindow, QInputDialog, QMes
 
 from Core.MarkdownRenderers import ConstructHTMLExportString, ConstructPDFExportHTMLString, Renderer
 from Core.Notebook import Notebook
+from Interface.Dialogs.AdvancedSearchDialog import AdvancedSearchDialog
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
 from Interface.Dialogs.FavoritesDialog import FavoritesDialog
@@ -43,6 +44,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.AutoScrollQueue = None
         self.HighlightSyntax = False
         self.PopOutPages = []
+        self.AdvancedSearchDialogInst = None
 
         # Set Up Save and Open
         self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
@@ -343,6 +345,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CopySearchResultsAction = QAction("Copy Search Results")
         self.CopySearchResultsAction.triggered.connect(self.SearchWidgetInst.CopySearchResults)
 
+        self.AdvancedSearchAction = QAction("&Advanced Search")
+        self.AdvancedSearchAction.triggered.connect(self.AdvancedSearch)
+
         self.ZoomOutAction = QAction(self.ZoomOutIcon, "Zoom Out")
         self.ZoomOutAction.triggered.connect(self.ZoomOut)
 
@@ -502,6 +507,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.ToggleSearchAction)
         self.ViewMenu.addAction(self.SearchForLinkingPagesAction)
         self.ViewMenu.addAction(self.CopySearchResultsAction)
+        self.ViewMenu.addAction(self.AdvancedSearchAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.ZoomOutAction)
         self.ViewMenu.addAction(self.ZoomInAction)
@@ -769,6 +775,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SearchWidgetInst.Notebook = self.Notebook
         self.PopOutMarkdownRenderer.Notebook = self.Notebook
         self.CloseAllPopOutPages()
+        if self.AdvancedSearchDialogInst is not None:
+            self.AdvancedSearchDialogInst.close()
 
     def PageSelected(self, IndexPath=None, SkipUpdatingBackAndForward=False):
         IndexPath = IndexPath if IndexPath is not None else self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
@@ -854,6 +862,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
                 self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath, ScrollToLastChild=True)
                 self.SearchWidgetInst.RefreshSearch()
+                self.RefreshAdvancedSearch()
                 self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
@@ -864,6 +873,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             if CurrentPage["IndexPath"] == [0]:
                 self.DisplayMessageBox("The root page of a notebook cannot be deleted.")
             elif self.DisplayMessageBox("Are you sure you want to delete this page?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.Yes:
+                self.RemoveDeletedPageFromAdvancedSearch(CurrentPage)
                 OldLinkData = self.GetLinkData()
                 self.Notebook.DeleteSubPage(CurrentPageIndexPath)
                 self.CloseDeletedPopOutPage(CurrentPage)
@@ -883,6 +893,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                     SelectDelta = -1
                 self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath, SelectParent=SelectParent, SelectDelta=SelectDelta)
                 self.SearchWidgetInst.RefreshSearch()
+                self.RefreshAdvancedSearch()
                 self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
@@ -899,6 +910,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
                 self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath, SelectDelta=Delta)
                 self.SearchWidgetInst.RefreshSearch()
+                self.RefreshAdvancedSearch()
                 self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
@@ -919,6 +931,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
                 self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
                 self.SearchWidgetInst.RefreshSearch()
+                self.RefreshAdvancedSearch()
                 self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
@@ -944,6 +957,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                     self.NotebookDisplayWidgetInst.FillFromRootPage()
                     self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
                     self.SearchWidgetInst.RefreshSearch()
+                    self.RefreshAdvancedSearch()
                     self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
@@ -963,6 +977,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
                 self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
                 self.SearchWidgetInst.RefreshSearch()
+                self.RefreshAdvancedSearch()
                 self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
@@ -983,6 +998,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
                 self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
                 self.SearchWidgetInst.RefreshSearch()
+                self.RefreshAdvancedSearch()
                 self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
@@ -1002,6 +1018,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                     self.NotebookDisplayWidgetInst.FillFromRootPage()
                     self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPage["IndexPath"])
                     self.SearchWidgetInst.RefreshSearch()
+                    self.RefreshAdvancedSearch()
                     self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
@@ -1017,6 +1034,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.NotebookDisplayWidgetInst.FillFromRootPage()
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
             self.SearchWidgetInst.RefreshSearch()
+            self.RefreshAdvancedSearch()
             self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
@@ -1036,6 +1054,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                     self.NotebookDisplayWidgetInst.FillFromRootPage()
                     self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
                     self.SearchWidgetInst.RefreshSearch()
+                    self.RefreshAdvancedSearch()
                     self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
@@ -1098,6 +1117,27 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SearchWidgetInst.SearchTextLineEdit.setText("](" + json.dumps(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()))
         self.SearchWidgetInst.SearchButton.click()
 
+    def AdvancedSearch(self):
+        if self.AdvancedSearchDialogInst is None:
+            self.AdvancedSearchDialogInst = AdvancedSearchDialog(self)
+        else:
+            self.AdvancedSearchDialogInst.activateWindow()
+            self.AdvancedSearchDialogInst.raise_()
+            self.AdvancedSearchDialogInst.setFocus()
+
+    def RefreshAdvancedSearch(self):
+        if self.AdvancedSearchDialogInst is None:
+            return
+        self.AdvancedSearchDialogInst.RefreshSearch()
+
+    def RemoveDeletedPageFromAdvancedSearch(self, DeletedPage):
+        if self.AdvancedSearchDialogInst is None:
+            return
+        if self.AdvancedSearchDialogInst.WithinPage is None:
+            return
+        if DeletedPage["IndexPath"] == self.AdvancedSearchDialogInst.WithinPage["IndexPath"][:len(DeletedPage["IndexPath"])]:
+            self.AdvancedSearchDialogInst.ClearWithinPage()
+
     # Text Methods
     def TextChanged(self):
         if self.TextWidgetInst.DisplayChanging or self.TextWidgetInst.ReadMode:
@@ -1152,6 +1192,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
                 self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
                 self.SearchWidgetInst.RefreshSearch()
+                self.RefreshAdvancedSearch()
                 self.UpdateUnsavedChangesFlag(True)
                 self.TextWidgetInst.setFocus()
                 if not Prepend:
@@ -1204,6 +1245,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if self.Save(self.Notebook, SaveAs=SaveAs):
             self.Notebook.BuildSearchIndex()
             self.SearchWidgetInst.RefreshSearch()
+            self.RefreshAdvancedSearch()
             self.UpdateUnsavedChangesFlag(False)
         else:
             self.UpdateWindowTitle()
@@ -1335,6 +1377,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.NotebookDisplayWidgetInst.FillFromRootPage()
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(self.Notebook.RootPage["IndexPath"], ScrollToLastChild=True)
             self.SearchWidgetInst.RefreshSearch()
+            self.RefreshAdvancedSearch()
             self.UpdateUnsavedChangesFlag(True)
             self.DisplayMessageBox("Check page links in imported pages carefully!  Some may point to unexpected pages.")
 

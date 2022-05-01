@@ -153,6 +153,7 @@ class SearchWidget(QFrame):
                 self.MainWindow.TextWidgetInst.insertPlainText(ReplaceText)
             self.FindInPage()
             self.RefreshSearch()
+            self.MainWindow.RefreshAdvancedSearch()
 
     def ReplaceAllInPage(self):
         if not self.MainWindow.TextWidgetInst.ReadMode:
@@ -168,6 +169,7 @@ class SearchWidget(QFrame):
                 PageText = re.sub(re.escape(SearchText), lambda x: ReplaceText, PageText, flags=re.IGNORECASE)
             self.MainWindow.TextWidgetInst.setPlainText(PageText)
             self.RefreshSearch()
+            self.MainWindow.RefreshAdvancedSearch()
 
     def ReplaceAllInNotebook(self, SearchText=None, ReplaceText=None, MatchCase=None, DelayTextUpdate=False):
         if not self.MainWindow.TextWidgetInst.ReadMode:
@@ -184,6 +186,7 @@ class SearchWidget(QFrame):
                 self.MainWindow.TextWidgetInst.UpdateText()
                 self.MainWindow.UpdateUnsavedChangesFlag(True)
             self.RefreshSearch()
+            self.MainWindow.RefreshAdvancedSearch()
 
     def ReplaceAllInPageAndSubPages(self, CurrentPage, SearchText, ReplaceText, MatchCase):
         if MatchCase:

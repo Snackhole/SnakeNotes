@@ -1,5 +1,5 @@
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton, QApplication, QLineEdit, QCheckBox, QListWidget, QLabel, QSizePolicy, QListWidgetItem
+from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton, QApplication, QLineEdit, QCheckBox, QListWidget, QLabel, QSizePolicy, QListWidgetItem, QTreeWidget, QTreeWidgetItem, QHeaderView
 
 
 class AdvancedSearchDialog(QDialog):
@@ -158,8 +158,7 @@ class AdvancedSearchDialog(QDialog):
         if SearchText == "":
             return
         UnfilteredResults = self.MainWindow.Notebook.GetSearchResults(SearchText, MatchCase=MatchCase)
-        Filters = {}
-        # Construct filter dictionary
+        Filters = self.GetFilters()
         FilteredResults = self.MainWindow.Notebook.GetFilteredSearchResults(UnfilteredResults, Filters)
         for Result in FilteredResults["ResultsList"]:
             self.ResultsList.addItem(SearchResult(Result[0], Result[1]))
@@ -172,6 +171,10 @@ class AdvancedSearchDialog(QDialog):
         self.ResultsList.setCurrentRow(0)
         if not self.RefreshingSearchResults:
             self.ResultsList.setFocus()
+
+    def GetFilters(self):
+        Filters = {}
+        return Filters
 
     def RefreshSearch(self):
         if self.WithinPage is None:
@@ -190,7 +193,7 @@ class AdvancedSearchDialog(QDialog):
                 self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(SelectedItem.IndexPath)
 
     def SelectWithinPage(self):
-        # Dialog to select page from tree view, or clear
+        GetWithinPageDialog(self.MainWindow.Notebook, self)
         self.RefreshSearch()
 
     def ClearWithinPage(self):
@@ -245,3 +248,87 @@ class AdvancedSearchTextLineEdit(QLineEdit):
             self.AdvancedSearchDialog.ClearSearch()
         else:
             super().keyPressEvent(QKeyEvent)
+
+
+class GetWithinPageDialog(QDialog):
+    def __init__(self, Notebook, AdvancedSearchDialog) -> None:
+        super().__init__(parent=AdvancedSearchDialog)
+
+        # Store Parameters
+        self.Notebook = Notebook
+        self.AdvancedSearchDialog = AdvancedSearchDialog
+
+        # Label
+        self.WithinPagePrompt = QLabel("Search within which page?")
+
+        # Notebook Display Tree Widget
+        self.NotebookDisplay = QTreeWidget()
+        self.NotebookDisplay.setHeaderHidden(True)
+        self.NotebookDisplay.header().setStretchLastSection(False)
+        self.NotebookDisplay.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.NotebookDisplay.itemActivated.connect(self.Done)
+
+        # Buttons
+        self.DoneButton = QPushButton("Done")
+        self.DoneButton.clicked.connect(self.Done)
+        self.ClearButton = QPushButton("Clear")
+        self.ClearButton.clicked.connect(self.Clear)
+        self.CancelButton = QPushButton("Cancel")
+        self.CancelButton.clicked.connect(self.Cancel)
+
+        # Create, Populate, and Set Layout
+        self.Layout = QGridLayout()
+        self.Layout.addWidget(self.WithinPagePrompt, 0, 0, 1, 3)
+        self.Layout.addWidget(self.NotebookDisplay, 1, 0, 1, 3)
+        self.Layout.addWidget(self.DoneButton, 2, 0)
+        self.Layout.addWidget(self.ClearButton, 2, 1)
+        self.Layout.addWidget(self.CancelButton, 2, 2)
+        self.setLayout(self.Layout)
+
+        # Populate Notebook Display
+        self.PopulateNotebookDisplay()
+
+        # Execute Dialog
+        self.exec_()
+
+    def PopulateNotebookDisplay(self):
+        self.NotebookDisplay.clear()
+        self.FillNotebookWidgetItem(self.NotebookDisplay.invisibleRootItem(), self.Notebook.RootPage, IsRootPage=True)
+
+    def FillNotebookWidgetItem(self, CurrentTreeItem, CurrentPage, IsRootPage=False):
+        ChildTreeItem = NotebookDisplayItem(CurrentPage["Title"], CurrentPage["IndexPath"])
+        CurrentTreeItem.addChild(ChildTreeItem)
+
+        for SubPage in CurrentPage["SubPages"]:
+            self.FillNotebookWidgetItem(ChildTreeItem, SubPage)
+
+        if IsRootPage:
+            ChildTreeItem.setExpanded(True)
+            self.NotebookDisplay.setCurrentIndex(self.NotebookDisplay.model().index(0, 0))
+
+    def Done(self):
+        SelectedItems = self.NotebookDisplay.selectedItems()
+        if len(SelectedItems) < 1:
+            return
+        SelectedItem = SelectedItems[0]
+        self.AdvancedSearchDialog.WithinPage = self.Notebook.GetPageFromIndexPath(SelectedItem.IndexPath)
+        self.close()
+
+    def Clear(self):
+        self.AdvancedSearchDialog.WithinPage = None
+        self.close()
+
+    def Cancel(self):
+        self.close()
+
+
+class NotebookDisplayItem(QTreeWidgetItem):
+    def __init__(self, Title, IndexPath):
+        super().__init__()
+
+        # Store Parameters
+        self.Title = Title
+        self.IndexPath = IndexPath
+
+        # Set Text
+        self.setText(0, Title)

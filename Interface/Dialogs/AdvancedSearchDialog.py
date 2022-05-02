@@ -263,7 +263,14 @@ class AdvancedSearchDialog(QDialog):
         self.WithinPage = None
 
     def CopySearchResults(self):
-        pass
+        ResultsCount = self.ResultsList.count()
+        if ResultsCount > 0:
+            ResultsString = ""
+            for ResultIndex in range(ResultsCount):
+                Result = self.ResultsList.item(ResultIndex)
+                ResultsString += Result.Title + " | Index Path:  " + str(Result.IndexPath) + "\n"
+            ResultsString = ResultsString.rstrip()
+            QApplication.clipboard().setText(ResultsString)
 
     def ClearSearch(self):
         for LineEdit in [self.SearchTextLineEdit, self.ContentContainsLineEdit, self.ContentDoesNotContainLineEdit, self.ContentStartsWithLineEdit, self.ContentEndsWithLineEdit, self.TitleContainsLineEdit, self.TitleDoesNotContainLineEdit, self.TitleStartsWithLineEdit, self.TitleEndsWithLineEdit]:

@@ -82,6 +82,10 @@ class AdvancedSearchDialog(QDialog):
         self.ResultsList.setMinimumWidth(300)
         self.ResultsList.itemActivated.connect(self.GoTo)
 
+        # Search Results Stats Label
+        self.SearchResultsStatsLabel = QLabel("No search results.")
+        self.SearchResultsStatsLabel.setAlignment(QtCore.Qt.AlignCenter)
+
         # Buttons
         self.SearchButton = QPushButton("Search")
         self.SearchButton.clicked.connect(self.Search)
@@ -127,9 +131,11 @@ class AdvancedSearchDialog(QDialog):
         self.SearchLayout.addWidget(self.TitleEndsWithMatchCaseCheckBox, 8, 2)
         self.SearchLayout.addWidget(self.WithinPageButton, 9, 0)
         self.SearchLayout.addWidget(self.WithinPageLineEdit, 9, 1, 1, 2)
-        self.Layout.addLayout(self.SearchLayout, 0, 0)
+        self.Layout.addLayout(self.SearchLayout, 0, 0, 2, 1)
 
         self.Layout.addWidget(self.ResultsList, 0, 1)
+
+        self.Layout.addWidget(self.SearchResultsStatsLabel, 1, 1)
 
         self.ButtonsLayout = QGridLayout()
         self.ButtonsLayout.addWidget(self.SearchButton, 0, 0)
@@ -137,9 +143,8 @@ class AdvancedSearchDialog(QDialog):
         self.ButtonsLayout.addWidget(self.CopySearchResultsButton, 0, 2)
         self.ButtonsLayout.addWidget(self.ClearButton, 0, 3)
         self.ButtonsLayout.addWidget(self.CloseButton, 0, 4)
-        self.Layout.addLayout(self.ButtonsLayout, 1, 0, 1, 2)
+        self.Layout.addLayout(self.ButtonsLayout, 2, 0, 1, 2)
 
-        self.Layout.setColumnStretch(1, 1)
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
@@ -168,8 +173,7 @@ class AdvancedSearchDialog(QDialog):
             ResultsStatsString = str(FilteredResults["TotalHits"]) + " hit" + ("" if FilteredResults["TotalHits"] == 1 else "s") + " in " + str(FilteredResults["TotalPages"]) + " page" + ("" if FilteredResults["TotalPages"] == 1 else "s") + "."
         else:
             ResultsStatsString = "No search results."
-        print(ResultsStatsString)
-        # self.MainWindow.SearchResultsStatsLabel.setText(ResultsStatsString)
+        self.SearchResultsStatsLabel.setText(ResultsStatsString)
         self.ResultsList.setCurrentRow(0)
         if not self.RefreshingSearchResults:
             self.ResultsList.setFocus()
@@ -277,6 +281,7 @@ class AdvancedSearchDialog(QDialog):
         for CheckBox in [self.MatchCaseCheckBox, self.ContentContainsMatchCaseCheckBox, self.ContentDoesNotContainMatchCaseCheckBox, self.ContentStartsWithMatchCaseCheckBox, self.ContentEndsWithMatchCaseCheckBox, self.TitleContainsMatchCaseCheckBox, self.TitleDoesNotContainMatchCaseCheckBox, self.TitleStartsWithMatchCaseCheckBox, self.TitleEndsWithMatchCaseCheckBox]:
             CheckBox.setChecked(False)
         self.WithinPage = None
+        self.SearchResultsStatsLabel.setText("No search results.")
         self.RefreshSearch()
 
     def SetGeometryToMinimum(self):

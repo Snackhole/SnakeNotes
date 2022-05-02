@@ -345,7 +345,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CopySearchResultsAction = QAction("Copy Search Results")
         self.CopySearchResultsAction.triggered.connect(self.SearchWidgetInst.CopySearchResults)
 
-        self.AdvancedSearchAction = QAction("&Advanced Search")
+        self.AdvancedSearchAction = QAction("Advanced Search")
         self.AdvancedSearchAction.triggered.connect(self.AdvancedSearch)
 
         self.ZoomOutAction = QAction(self.ZoomOutIcon, "Zoom Out")
@@ -621,6 +621,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultKeybindings["DefaultZoomAction"] = "Ctrl+0"
         self.DefaultKeybindings["SearchAction"] = "Ctrl+F"
         self.DefaultKeybindings["ToggleSearchAction"] = "Ctrl+Shift+F"
+        self.DefaultKeybindings["AdvancedSearchAction"] = "Ctrl+Alt+F"
 
     def GetResourcePath(self, RelativeLocation):
         return self.AbsoluteDirectoryPath + "/" + RelativeLocation

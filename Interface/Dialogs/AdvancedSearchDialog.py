@@ -20,7 +20,6 @@ class AdvancedSearchDialog(QDialog):
         self.SearchTextLineEdit = QLineEdit()
         self.SearchTextLineEdit.setPlaceholderText("Search")
         self.SearchTextLineEdit.setSizePolicy(self.InputsSizePolicy)
-        self.SearchTextLineEdit.returnPressed.connect(self.Search)
 
         # Match Case Check Box
         self.MatchCaseCheckBox = QCheckBox("Match Case")
@@ -165,11 +164,11 @@ class AdvancedSearchDialog(QDialog):
         FilteredResults = self.MainWindow.Notebook.GetFilteredSearchResults(UnfilteredResults, Filters)
         for Result in FilteredResults["ResultsList"]:
             self.ResultsList.addItem(SearchResult(Result[0], Result[1]))
-        # Update ResultsStatsString with totals:
-        # if len(Results["ResultsList"]) > 0:
-        #     ResultsStatsString = str(Results["TotalHits"]) + " hit" + ("" if Results["TotalHits"] == 1 else "s") + " in " + str(Results["TotalPages"]) + " page" + ("" if Results["TotalPages"] == 1 else "s") + "."
-        # else:
-        #     ResultsStatsString = "No search results."
+        if len(FilteredResults["ResultsList"]) > 0:
+            ResultsStatsString = str(FilteredResults["TotalHits"]) + " hit" + ("" if FilteredResults["TotalHits"] == 1 else "s") + " in " + str(FilteredResults["TotalPages"]) + " page" + ("" if FilteredResults["TotalPages"] == 1 else "s") + "."
+        else:
+            ResultsStatsString = "No search results."
+        print(ResultsStatsString)
         # self.MainWindow.SearchResultsStatsLabel.setText(ResultsStatsString)
         self.ResultsList.setCurrentRow(0)
         if not self.RefreshingSearchResults:
@@ -300,6 +299,8 @@ class AdvancedSearchDialog(QDialog):
         KeyPressed = QKeyEvent.key()
         if KeyPressed == QtCore.Qt.Key_Escape:
             self.close()
+        elif KeyPressed == QtCore.Qt.Key_Return and self.ResultsList.hasFocus():
+            return
         else:
             super().keyPressEvent(QKeyEvent)
 

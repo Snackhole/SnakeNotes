@@ -296,37 +296,37 @@ class Notebook(SerializableMixin):
                     ValidResult = False
 
             # Content Filtering
-            if ValidResult and "Contains" in Filters:
+            if ValidResult and "ContentContains" in Filters:
                 CurrentContent = CurrentPage["Content"]
-                ContainsText = Filters["Contains"]["Text"]
-                if not Filters["Contains"]["MatchCase"]:
-                    ContainsText = ContainsText.casefold()
+                ContentContainsText = Filters["ContentContains"]["Text"]
+                if not Filters["ContentContains"]["MatchCase"]:
+                    ContentContainsText = ContentContainsText.casefold()
                     CurrentContent = CurrentContent.casefold()
-                if not ContainsText in CurrentContent:
+                if not ContentContainsText in CurrentContent:
                     ValidResult = False
-            if ValidResult and "DoesNotContain" in Filters:
+            if ValidResult and "ContentDoesNotContain" in Filters:
                 CurrentContent = CurrentPage["Content"]
-                DoesNotContainText = Filters["DoesNotContain"]["Text"]
-                if not Filters["DoesNotContain"]["MatchCase"]:
-                    DoesNotContainText = DoesNotContainText.casefold()
+                ContentDoesNotContainText = Filters["ContentDoesNotContain"]["Text"]
+                if not Filters["ContentDoesNotContain"]["MatchCase"]:
+                    ContentDoesNotContainText = ContentDoesNotContainText.casefold()
                     CurrentContent = CurrentContent.casefold()
-                if DoesNotContainText in CurrentContent:
+                if ContentDoesNotContainText in CurrentContent:
                     ValidResult = False
-            if ValidResult and "StartsWith" in Filters:
+            if ValidResult and "ContentStartsWith" in Filters:
                 CurrentContent = CurrentPage["Content"]
-                StartsWithText = Filters["StartsWith"]["Text"]
-                if not Filters["StartsWith"]["MatchCase"]:
-                    StartsWithText = StartsWithText.casefold()
+                ContentStartsWithText = Filters["ContentStartsWith"]["Text"]
+                if not Filters["ContentStartsWith"]["MatchCase"]:
+                    ContentStartsWithText = ContentStartsWithText.casefold()
                     CurrentContent = CurrentContent.casefold()
-                if not CurrentContent.startswith(StartsWithText):
+                if not CurrentContent.startswith(ContentStartsWithText):
                     ValidResult = False
-            if ValidResult and "EndsWith" in Filters:
+            if ValidResult and "ContentEndsWith" in Filters:
                 CurrentContent = CurrentPage["Content"]
-                EndsWithText = Filters["EndsWith"]["Text"]
-                if not Filters["EndsWith"]["MatchCase"]:
-                    EndsWithText = EndsWithText.casefold()
+                ContentEndsWithText = Filters["ContentEndsWith"]["Text"]
+                if not Filters["ContentEndsWith"]["MatchCase"]:
+                    ContentEndsWithText = ContentEndsWithText.casefold()
                     CurrentContent = CurrentContent.casefold()
-                if not CurrentContent.endswith(EndsWithText):
+                if not CurrentContent.endswith(ContentEndsWithText):
                     ValidResult = False
 
             # Append Valid Results and Update Counts

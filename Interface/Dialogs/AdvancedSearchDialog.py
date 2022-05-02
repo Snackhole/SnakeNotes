@@ -17,10 +17,10 @@ class AdvancedSearchDialog(QDialog):
         self.InputsSizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         # Advanced Search Text Line Edit
-        self.AdvancedSearchTextLineEdit = AdvancedSearchTextLineEdit(self)
-        self.AdvancedSearchTextLineEdit.setPlaceholderText("Search")
-        self.AdvancedSearchTextLineEdit.setSizePolicy(self.InputsSizePolicy)
-        self.AdvancedSearchTextLineEdit.returnPressed.connect(self.Search)
+        self.SearchTextLineEdit = QLineEdit()
+        self.SearchTextLineEdit.setPlaceholderText("Search")
+        self.SearchTextLineEdit.setSizePolicy(self.InputsSizePolicy)
+        self.SearchTextLineEdit.returnPressed.connect(self.Search)
 
         # Match Case Check Box
         self.MatchCaseCheckBox = QCheckBox("Match Case")
@@ -91,6 +91,8 @@ class AdvancedSearchDialog(QDialog):
         self.GoToButton.clicked.connect(self.GoTo)
         self.CopySearchResultsButton = QPushButton("Copy Search Results")
         self.CopySearchResultsButton.clicked.connect(self.CopySearchResults)
+        self.ClearButton = QPushButton("Clear")
+        self.ClearButton.clicked.connect(self.ClearSearch)
         self.CloseButton = QPushButton("Close")
         self.CloseButton.clicked.connect(self.close)
 
@@ -98,7 +100,7 @@ class AdvancedSearchDialog(QDialog):
         self.Layout = QGridLayout()
 
         self.SearchLayout = QGridLayout()
-        self.SearchLayout.addWidget(self.AdvancedSearchTextLineEdit, 0, 0, 1, 2)
+        self.SearchLayout.addWidget(self.SearchTextLineEdit, 0, 0, 1, 2)
         self.SearchLayout.addWidget(self.MatchCaseCheckBox, 0, 2)
         self.SearchLayout.addWidget(self.ContentContainsLabel, 1, 0)
         self.SearchLayout.addWidget(self.ContentContainsLineEdit, 1, 1)
@@ -134,7 +136,8 @@ class AdvancedSearchDialog(QDialog):
         self.ButtonsLayout.addWidget(self.SearchButton, 0, 0)
         self.ButtonsLayout.addWidget(self.GoToButton, 0, 1)
         self.ButtonsLayout.addWidget(self.CopySearchResultsButton, 0, 2)
-        self.ButtonsLayout.addWidget(self.CloseButton, 0, 3)
+        self.ButtonsLayout.addWidget(self.ClearButton, 0, 3)
+        self.ButtonsLayout.addWidget(self.CloseButton, 0, 4)
         self.Layout.addLayout(self.ButtonsLayout, 1, 0, 1, 2)
 
         self.Layout.setColumnStretch(1, 1)
@@ -152,7 +155,7 @@ class AdvancedSearchDialog(QDialog):
         self.Center()
 
     def Search(self):
-        SearchText = self.AdvancedSearchTextLineEdit.text()
+        SearchText = self.SearchTextLineEdit.text()
         MatchCase = self.MatchCaseCheckBox.isChecked()
         self.ResultsList.clear()
         if SearchText == "":
@@ -174,6 +177,66 @@ class AdvancedSearchDialog(QDialog):
 
     def GetFilters(self):
         Filters = {}
+
+        ContentContains = self.ContentContainsLineEdit.text()
+        ContentContainsMatchCase = self.ContentContainsMatchCaseCheckBox.isChecked()
+        if ContentContains != "":
+            Filters["ContentContains"] = {}
+            Filters["ContentContains"]["Text"] = ContentContains
+            Filters["ContentContains"]["MatchCase"] = ContentContainsMatchCase
+
+        ContentDoesNotContain = self.ContentDoesNotContainLineEdit.text()
+        ContentDoesNotContainMatchCase = self.ContentDoesNotContainMatchCaseCheckBox.isChecked()
+        if ContentDoesNotContain != "":
+            Filters["ContentDoesNotContain"] = {}
+            Filters["ContentDoesNotContain"]["Text"] = ContentDoesNotContain
+            Filters["ContentDoesNotContain"]["MatchCase"] = ContentDoesNotContainMatchCase
+
+        ContentStartsWith = self.ContentStartsWithLineEdit.text()
+        ContentStartsWithMatchCase = self.ContentStartsWithMatchCaseCheckBox.isChecked()
+        if ContentStartsWith != "":
+            Filters["ContentStartsWith"] = {}
+            Filters["ContentStartsWith"]["Text"] = ContentStartsWith
+            Filters["ContentStartsWith"]["MatchCase"] = ContentStartsWithMatchCase
+
+        ContentEndsWith = self.ContentEndsWithLineEdit.text()
+        ContentEndsWithMatchCase = self.ContentEndsWithMatchCaseCheckBox.isChecked()
+        if ContentEndsWith != "":
+            Filters["ContentEndsWith"] = {}
+            Filters["ContentEndsWith"]["Text"] = ContentEndsWith
+            Filters["ContentEndsWith"]["MatchCase"] = ContentEndsWithMatchCase
+
+        TitleContains = self.TitleContainsLineEdit.text()
+        TitleContainsMatchCase = self.TitleContainsMatchCaseCheckBox.isChecked()
+        if TitleContains != "":
+            Filters["TitleContains"] = {}
+            Filters["TitleContains"]["Text"] = TitleContains
+            Filters["TitleContains"]["MatchCase"] = TitleContainsMatchCase
+
+        TitleDoesNotContain = self.TitleDoesNotContainLineEdit.text()
+        TitleDoesNotContainMatchCase = self.TitleDoesNotContainMatchCaseCheckBox.isChecked()
+        if TitleDoesNotContain != "":
+            Filters["TitleDoesNotContain"] = {}
+            Filters["TitleDoesNotContain"]["Text"] = TitleDoesNotContain
+            Filters["TitleDoesNotContain"]["MatchCase"] = TitleDoesNotContainMatchCase
+
+        TitleStartsWith = self.TitleStartsWithLineEdit.text()
+        TitleStartsWithMatchCase = self.TitleStartsWithMatchCaseCheckBox.isChecked()
+        if TitleStartsWith != "":
+            Filters["TitleStartsWith"] = {}
+            Filters["TitleStartsWith"]["Text"] = TitleStartsWith
+            Filters["TitleStartsWith"]["MatchCase"] = TitleStartsWithMatchCase
+
+        TitleEndsWith = self.TitleEndsWithLineEdit.text()
+        TitleEndsWithMatchCase = self.TitleEndsWithMatchCaseCheckBox.isChecked()
+        if TitleEndsWith != "":
+            Filters["TitleEndsWith"] = {}
+            Filters["TitleEndsWith"]["Text"] = TitleEndsWith
+            Filters["TitleEndsWith"]["MatchCase"] = TitleEndsWithMatchCase
+
+        if self.WithinPage is not None:
+            Filters["WithinPageIndexPath"] = self.WithinPage["IndexPath"]
+
         return Filters
 
     def RefreshSearch(self):
@@ -203,6 +266,10 @@ class AdvancedSearchDialog(QDialog):
         pass
 
     def ClearSearch(self):
+        for LineEdit in [self.SearchTextLineEdit, self.ContentContainsLineEdit, self.ContentDoesNotContainLineEdit, self.ContentStartsWithLineEdit, self.ContentEndsWithLineEdit, self.TitleContainsLineEdit, self.TitleDoesNotContainLineEdit, self.TitleStartsWithLineEdit, self.TitleEndsWithLineEdit]:
+            LineEdit.clear()
+        for CheckBox in [self.MatchCaseCheckBox, self.ContentContainsMatchCaseCheckBox, self.ContentDoesNotContainMatchCaseCheckBox, self.ContentStartsWithMatchCaseCheckBox, self.ContentEndsWithMatchCaseCheckBox, self.TitleContainsMatchCaseCheckBox, self.TitleDoesNotContainMatchCaseCheckBox, self.TitleStartsWithMatchCaseCheckBox, self.TitleEndsWithMatchCaseCheckBox]:
+            CheckBox.setChecked(False)
         self.WithinPage = None
         self.RefreshSearch()
 
@@ -222,6 +289,13 @@ class AdvancedSearchDialog(QDialog):
         self.MainWindow.AdvancedSearchDialogInst = None
         return super().closeEvent(event)
 
+    def keyPressEvent(self, QKeyEvent):
+        KeyPressed = QKeyEvent.key()
+        if KeyPressed == QtCore.Qt.Key_Escape:
+            self.close()
+        else:
+            super().keyPressEvent(QKeyEvent)
+
 
 class SearchResult(QListWidgetItem):
     def __init__(self, Title, IndexPath):
@@ -233,21 +307,6 @@ class SearchResult(QListWidgetItem):
 
         # Set Text
         self.setText(self.Title)
-
-
-class AdvancedSearchTextLineEdit(QLineEdit):
-    def __init__(self, AdvancedSearchDialog):
-        # QLineEdit Init
-        super().__init__()
-
-        # Store Parameters
-        self.AdvancedSearchDialog = AdvancedSearchDialog
-
-    def keyPressEvent(self, QKeyEvent):
-        if QKeyEvent.key() == QtCore.Qt.Key_Escape:
-            self.AdvancedSearchDialog.ClearSearch()
-        else:
-            super().keyPressEvent(QKeyEvent)
 
 
 class GetWithinPageDialog(QDialog):

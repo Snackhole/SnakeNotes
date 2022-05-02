@@ -775,8 +775,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SearchWidgetInst.Notebook = self.Notebook
         self.PopOutMarkdownRenderer.Notebook = self.Notebook
         self.CloseAllPopOutPages()
-        if self.AdvancedSearchDialogInst is not None:
-            self.AdvancedSearchDialogInst.close()
 
     def PageSelected(self, IndexPath=None, SkipUpdatingBackAndForward=False):
         IndexPath = IndexPath if IndexPath is not None else self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
@@ -1125,6 +1123,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.AdvancedSearchDialogInst.raise_()
             self.AdvancedSearchDialogInst.setFocus()
 
+    def ClearAdvancedSearch(self):
+        if self.AdvancedSearchDialogInst is None:
+            return
+        self.AdvancedSearchDialogInst.ClearSearch()
+
     def RefreshAdvancedSearch(self):
         if self.AdvancedSearchDialogInst is None:
             return
@@ -1257,6 +1260,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.NotebookDisplayWidgetInst.FillFromRootPage()
             self.Notebook.BuildSearchIndex()
             self.SearchWidgetInst.ClearSearch()
+            self.ClearAdvancedSearch()
             self.ClearBackAndForward()
             self.UpdateUnsavedChangesFlag(False)
         else:
@@ -1275,6 +1279,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookDisplayWidgetInst.FillFromRootPage()
         self.Notebook.BuildSearchIndex()
         self.SearchWidgetInst.ClearSearch()
+        self.ClearAdvancedSearch()
         self.ClearBackAndForward()
         self.UpdateUnsavedChangesFlag(False)
 

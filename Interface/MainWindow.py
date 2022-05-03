@@ -16,6 +16,7 @@ from Interface.Dialogs.FavoritesDialog import FavoritesDialog
 from Interface.Dialogs.ImageManagerDialog import ImageManagerDialog
 from Interface.Dialogs.MovePageToDialog import MovePageToDialog
 from Interface.Dialogs.NewPageDialog import NewPageDialog
+from Interface.Dialogs.SearchForLinkedPagesDialog import SearchForLinkedPagesDialog
 from Interface.Dialogs.TemplateManagerDialog import TemplateManagerDialog
 from Interface.Dialogs.AddToPageAndSubpagesDialog import AddToPageAndSubpagesDialog
 from Interface.Dialogs.PopOutTextDialog import PopOutTextDialog
@@ -342,6 +343,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SearchForLinkingPagesAction = QAction("&Search for Linking Pages")
         self.SearchForLinkingPagesAction.triggered.connect(self.SearchForLinkingPages)
 
+        self.SearchForLinkedPagesAction = QAction("Search for &Linked Pages")
+        self.SearchForLinkedPagesAction.triggered.connect(self.SearchForLinkedPages)
+
         self.CopySearchResultsAction = QAction("Copy Search Results")
         self.CopySearchResultsAction.triggered.connect(self.SearchWidgetInst.CopySearchResults)
 
@@ -506,6 +510,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.SearchAction)
         self.ViewMenu.addAction(self.ToggleSearchAction)
         self.ViewMenu.addAction(self.SearchForLinkingPagesAction)
+        self.ViewMenu.addAction(self.SearchForLinkedPagesAction)
         self.ViewMenu.addAction(self.CopySearchResultsAction)
         self.ViewMenu.addAction(self.AdvancedSearchAction)
         self.ViewMenu.addSeparator()
@@ -1115,6 +1120,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SearchAction.trigger()
         self.SearchWidgetInst.SearchTextLineEdit.setText("](" + json.dumps(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()))
         self.SearchWidgetInst.SearchButton.click()
+
+    def SearchForLinkedPages(self):
+        SearchForLinkedPagesDialogInst = SearchForLinkedPagesDialog(self)
+        if SearchForLinkedPagesDialogInst.DestinationIndexPath is not None:
+            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(SearchForLinkedPagesDialogInst.DestinationIndexPath)
 
     def AdvancedSearch(self):
         if self.AdvancedSearchDialogInst is None:

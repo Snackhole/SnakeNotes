@@ -321,7 +321,7 @@ class TextWidget(QTextEdit):
                 elif InsertLinksDialogInst.InsertIndexPaths is not None and InsertLinksDialogInst.SubPageLinksSeparator is not None:
                     InsertString = ""
                     for SubPagePath in InsertLinksDialogInst.InsertIndexPaths:
-                        InsertString += "[" + SubPagePath[0] + "](" + json.dumps(SubPagePath[1]) + ")" + InsertLinksDialogInst.SubPageLinksSeparator
+                        InsertString += "[" + SubPagePath[0] + "](" + json.dumps(SubPagePath[1]) + (" \"" + SubPagePath[0] + "\"" if InsertLinksDialogInst.AddToolTip else "") + ")" + InsertLinksDialogInst.SubPageLinksSeparator
                     InsertString = InsertString.rstrip()
                     self.InsertOnBlankLine(InsertString)
                     self.MakeCursorVisible()

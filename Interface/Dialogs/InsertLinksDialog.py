@@ -120,6 +120,7 @@ class InsertLinksDialog(QDialog):
         self.InsertSubPageLinks = self.InsertSubPageLinksCheckBox.isChecked()
         if self.InsertSubPageLinks:
             self.InsertIndexPaths = SelectedItems[0].SubPageIndexPaths
+            self.AddToolTip = self.AddToolTipCheckBox.isChecked()
             self.SubPageLinksSeparator = self.Separators[self.SubPageLinksSeparatorComboBox.currentText()]
         else:
             self.InsertIndexPath = SelectedItems[0].IndexPath

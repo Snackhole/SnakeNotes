@@ -345,7 +345,8 @@ class TextWidget(QTextEdit):
                         self.MainWindow.DisplayMessageBox("Multiple pages found.  Use the full link dialog to insert a link.", Icon=QMessageBox.Warning)
                     else:
                         TopResultIndexPath = SearchResults["ResultsList"][0][1]
-                        self.SelectionSpanWrap("[", "](" + json.dumps(TopResultIndexPath) + ")")
+                        TopResultTitle = SearchResults["ResultsList"][0][0]
+                        self.SelectionSpanWrap("[", "](" + json.dumps(TopResultIndexPath) + " \"" + TopResultTitle + "\"" + ")")
                 else:
                     self.MainWindow.DisplayMessageBox("No pages with this title found.")
 

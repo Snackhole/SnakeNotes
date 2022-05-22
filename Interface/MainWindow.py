@@ -880,11 +880,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.RemoveDeletedPageFromAdvancedSearch(CurrentPage)
                 OldLinkData = self.GetLinkData()
                 self.Notebook.DeleteSubPage(CurrentPageIndexPath)
-                self.CloseDeletedPopOutPage(CurrentPage)
-                CurrentPageLinkString = "](" + json.dumps(CurrentPage["IndexPath"]) + ")"
-                self.SearchWidgetInst.ReplaceAllInNotebook(CurrentPageLinkString, "]([deleted])", MatchCase=True, DelayTextUpdate=True)
-                CurrentPageLinkString = "](" + json.dumps(CurrentPage["IndexPath"]) + " \"" + CurrentPage["Title"] + "\"" + ")"
-                self.SearchWidgetInst.ReplaceAllInNotebook(CurrentPageLinkString, "]([deleted])", MatchCase=True, DelayTextUpdate=True)
+                self.CloseDeletedPopOutPages(CurrentPage)
+                self.UpdateDeletedPageLinks(CurrentPage)
                 NewLinkData = self.GetLinkData()
                 self.UpdateLinks(OldLinkData, NewLinkData)
                 self.NotebookDisplayWidgetInst.FillFromRootPage()
@@ -1094,6 +1091,14 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             else:
                 self.SearchWidgetInst.ReplaceAllInPageAndSubPages(Page, SearchText=ReplaceStrings[1], ReplaceText=ReplaceStrings[2], MatchCase=True)
 
+    def UpdateDeletedPageLinks(self, CurrentPage):
+        CurrentPageLinkString = "](" + json.dumps(CurrentPage["IndexPath"]) + ")"
+        self.SearchWidgetInst.ReplaceAllInNotebook(CurrentPageLinkString, "]([deleted])", MatchCase=True, DelayTextUpdate=True)
+        CurrentPageLinkString = "](" + json.dumps(CurrentPage["IndexPath"]) + " \"" + CurrentPage["Title"] + "\"" + ")"
+        self.SearchWidgetInst.ReplaceAllInNotebook(CurrentPageLinkString, "]([deleted])", MatchCase=True, DelayTextUpdate=True)
+        for SubPage in CurrentPage["SubPages"]:
+            self.UpdateDeletedPageLinks(SubPage)
+
     def ImageManager(self):
         if not self.TextWidgetInst.ReadMode:
             ImageManagerDialogInst = ImageManagerDialog(self.Notebook, self)
@@ -1239,13 +1244,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         NewPopOut = PopOutTextDialog(self.TextWidgetInst.CurrentPage, self.Notebook, self.PopOutMarkdownParser, self)
         self.PopOutPages.append((self.TextWidgetInst.CurrentPage, NewPopOut))
 
-    def CloseDeletedPopOutPage(self, Page):
+    def CloseDeletedPopOutPages(self, Page):
         CloseQueue = []
         for PopOut in self.PopOutPages:
             if Page is PopOut[0]:
                 CloseQueue.append(PopOut)
         for PopOut in CloseQueue:
             PopOut[1].close()
+        for SubPage in Page["SubPages"]:
+            self.CloseDeletedPopOutPages(SubPage)
 
     def CloseAllPopOutPages(self):
         CloseQueue = []

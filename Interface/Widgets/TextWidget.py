@@ -427,9 +427,14 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.CreateHighlightTargets()
 
     def CreateFormats(self):
+        # Headers
+        self.HeaderFormat = QTextCharFormat()
+        self.HeaderFormat.setBackground(QColor("seagreen"))
+        self.HeaderFormat.setForeground(QColor("white"))
+
         # External Links
         self.ExternalLinksFormat = QTextCharFormat()
-        self.ExternalLinksFormat.setBackground(QColor("darkBlue"))
+        self.ExternalLinksFormat.setBackground(QColor("darkSlateBlue"))
         self.ExternalLinksFormat.setForeground(QColor("white"))
 
         # Internal Links
@@ -444,7 +449,7 @@ class SyntaxHighlighter(QSyntaxHighlighter):
 
         # Footnotes
         self.FootnotesFormat = QTextCharFormat()
-        self.FootnotesFormat.setBackground(QColor("darkGreen"))
+        self.FootnotesFormat.setBackground(QColor("darkGoldenrod"))
         self.FootnotesFormat.setForeground(QColor("white"))
 
         # Search Highlight
@@ -456,11 +461,17 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         # Highlight Targets
         self.HighlightTargets = []
 
+        # Headers
+        self.HighlightTargets.append({"RegEx": r"(?m)^#{1,6}(?!#) (.+)", "FormatCallable": self.GetHeaderFormat})
+
         # Link-Type
         self.HighlightTargets.append({"RegEx": r"(!?)\[([^\[\]\n]*?)\]\((.+?)( \".+?\")?\)", "FormatCallable": self.GetLinksFormat})
 
         # Footnotes
         self.HighlightTargets.append({"RegEx": r"\[\^[^\]]+?\]", "FormatCallable": self.GetFootnotesFormat})
+
+    def GetHeaderFormat(self, Match):
+        return self.HeaderFormat
 
     def GetLinksFormat(self, Match):
         if Match.group(1) == "!":

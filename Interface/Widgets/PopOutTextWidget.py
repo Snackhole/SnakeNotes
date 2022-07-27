@@ -1,3 +1,5 @@
+import webbrowser
+
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QTextEdit
 
@@ -5,13 +7,14 @@ from Core import MarkdownRenderers
 
 
 class PopOutTextWidget(QTextEdit):
-    def __init__(self, Page, Notebook, PopOutMarkdownParser):
+    def __init__(self, Page, Notebook, PopOutMarkdownParser, MainWindow):
         super().__init__()
 
         # Store Parameters
         self.Page = Page
         self.Notebook = Notebook
         self.PopOutMarkdownParser = PopOutMarkdownParser
+        self.MainWindow = MainWindow
 
         # Tab Behavior
         self.setTabChangesFocus(True)
@@ -27,9 +30,23 @@ class PopOutTextWidget(QTextEdit):
         HTMLText = self.PopOutMarkdownParser(DisplayText)
         self.setHtml(HTMLText)
 
-    # Mouse Wheel Event
+    # Events
     def wheelEvent(self, QWheelEvent):
         if QWheelEvent.modifiers() == QtCore.Qt.ControlModifier:
             QWheelEvent.accept()
         else:
             super().wheelEvent(QWheelEvent)
+
+    def mouseDoubleClickEvent(self, QMouseEvent):
+        Anchor = self.anchorAt(QMouseEvent.pos())
+        if Anchor != "":
+            if self.Notebook.StringIsValidIndexPath(Anchor):
+                self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(Anchor)
+                QMouseEvent.accept()
+            else:
+                if Anchor.startswith("[0,"):
+                    self.MainWindow.DisplayMessageBox("Linked page not found.  Pop-out page may need to be refreshed.", Parent=self)
+                else:
+                    webbrowser.open(Anchor)
+        else:
+            super().mouseDoubleClickEvent(QMouseEvent)

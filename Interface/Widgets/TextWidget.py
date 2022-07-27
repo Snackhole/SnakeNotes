@@ -231,7 +231,10 @@ class TextWidget(QTextEdit):
                 self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(Anchor)
                 QMouseEvent.accept()
             else:
-                webbrowser.open(Anchor)
+                if Anchor.startswith("[0,"):
+                    self.MainWindow.DisplayMessageBox("Linked page not found.")
+                else:
+                    webbrowser.open(Anchor)
         else:
             super().mouseDoubleClickEvent(QMouseEvent)
 

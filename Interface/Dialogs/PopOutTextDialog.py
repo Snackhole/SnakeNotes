@@ -18,7 +18,7 @@ class PopOutTextDialog(QDialog):
         self.Height = max(self.MainWindow.height() - 100, 100)
 
         # Pop-Out Text Widget
-        self.PopOutTextWidget = PopOutTextWidget(self.Page, self.Notebook, self.PopOutMarkdownParser)
+        self.PopOutTextWidget = PopOutTextWidget(self.Page, self.Notebook, self.PopOutMarkdownParser, self.MainWindow)
 
         # Buttons
         self.RefreshButton = QPushButton("Refresh")

@@ -42,6 +42,9 @@ class PopOutTextWidget(QTextEdit):
         if Anchor != "":
             if self.Notebook.StringIsValidIndexPath(Anchor):
                 self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(Anchor)
+                self.MainWindow.activateWindow()
+                self.MainWindow.raise_()
+                self.MainWindow.setFocus()
                 QMouseEvent.accept()
             else:
                 if Anchor.startswith("[0,"):

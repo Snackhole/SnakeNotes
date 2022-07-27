@@ -238,6 +238,14 @@ class TextWidget(QTextEdit):
         else:
             super().mouseDoubleClickEvent(QMouseEvent)
 
+    def mouseMoveEvent(self, QMouseEvent):
+        Anchor = self.anchorAt(QMouseEvent.pos())
+        if Anchor != "":
+            self.viewport().setCursor(QtCore.Qt.PointingHandCursor)
+        else:
+            self.viewport().setCursor(QtCore.Qt.IBeamCursor)
+        return super().mouseMoveEvent(QMouseEvent)
+
     # Action Methods
     def Italics(self):
         if not self.ReadMode and self.hasFocus():

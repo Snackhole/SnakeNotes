@@ -627,6 +627,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultKeybindings["SearchAction"] = "Ctrl+F"
         self.DefaultKeybindings["ToggleSearchAction"] = "Ctrl+Shift+F"
         self.DefaultKeybindings["AdvancedSearchAction"] = "Ctrl+Alt+F"
+        self.DefaultKeybindings["PopOutPageAction"] = "Ctrl+P"
 
     def GetResourcePath(self, RelativeLocation):
         return self.AbsoluteDirectoryPath + "/" + RelativeLocation

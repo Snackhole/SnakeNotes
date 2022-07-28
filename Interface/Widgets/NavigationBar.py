@@ -92,7 +92,6 @@ class NavigationScrollArea(QScrollArea):
                 self.ScrollLeft()
             elif VerticalDelta < 0:
                 self.ScrollRight()
-        return super().wheelEvent(QWheelEvent)
 
 
 class ScrollButton(QPushButton):
@@ -142,7 +141,6 @@ class Separator(QLabel):
 
     def mouseDoubleClickEvent(self, QMouseEvent):
         self.GoToSubPage()
-        return super().mouseDoubleClickEvent(QMouseEvent)
 
     def GoToSubPage(self):
         ValidSubPages = [SubPage for SubPage in self.Page["SubPages"] if self.MainWindow.NotebookDisplayWidgetInst.GetCurrentPageIndexPath() != SubPage["IndexPath"]]
@@ -167,7 +165,6 @@ class NavigationPageLabel(QLabel):
 
     def mouseDoubleClickEvent(self, QMouseEvent):
         self.GoToPage()
-        return super().mouseDoubleClickEvent(QMouseEvent)
 
     def GoToPage(self):
         if self.MainWindow.NotebookDisplayWidgetInst.GetCurrentPageIndexPath() != self.Page["IndexPath"]:

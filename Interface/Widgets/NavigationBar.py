@@ -14,24 +14,16 @@ class NavigationBar(QFrame):
         super().__init__(parent=self.MainWindow)
 
         # Scroll Area
-        self.ScrollArea = QScrollArea()
-        self.ScrollAreaFrame = QFrame()
-        self.ScrollAreaLayout = QGridLayout()
-        self.ScrollAreaFrame.setLayout(self.ScrollAreaLayout)
-        self.ScrollArea.setWidget(self.ScrollAreaFrame)
-        self.ScrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.ScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.ScrollArea.setWidgetResizable(True)
-        self.ScrollArea.horizontalScrollBar().rangeChanged.connect(self.ScrollToEnd)
+        self.NavigationScrollArea = NavigationScrollArea()
 
         # Scroll Buttons
-        self.ScrollLeftButton = ScrollButton("\u2770", self.ScrollArea, -50)
-        self.ScrollRightButton = ScrollButton("\u2771", self.ScrollArea, 50)
+        self.ScrollLeftButton = ScrollButton("Left", self.NavigationScrollArea)
+        self.ScrollRightButton = ScrollButton("Right", self.NavigationScrollArea)
 
         # Create and Set Layout
         self.Layout = QGridLayout()
         self.Layout.addWidget(self.ScrollLeftButton, 0, 0)
-        self.Layout.addWidget(self.ScrollArea, 0, 1)
+        self.Layout.addWidget(self.NavigationScrollArea, 0, 1)
         self.Layout.addWidget(self.ScrollRightButton, 0, 2)
         self.Layout.setColumnStretch(1, 1)
         self.setLayout(self.Layout)
@@ -40,11 +32,11 @@ class NavigationBar(QFrame):
         self.setMaximumHeight(60)
 
     def UpdateFromIndexPath(self, IndexPath):
+        for Column in range(self.NavigationScrollArea.Layout.columnCount()):
+            self.NavigationScrollArea.Layout.setColumnStretch(Column, 0)
         for NavigationLabel in self.NavigationLabels:
-            self.ScrollAreaLayout.removeWidget(NavigationLabel)
+            self.NavigationScrollArea.Layout.removeWidget(NavigationLabel)
             del NavigationLabel
-        for Column in range(self.ScrollAreaLayout.columnCount()):
-            self.ScrollAreaLayout.setColumnStretch(Column, 0)
         self.NavigationLabels.clear()
         for SubPathEnd in range(1, len(IndexPath) + 1):
             SubPath = IndexPath[:SubPathEnd]
@@ -55,19 +47,67 @@ class NavigationBar(QFrame):
                 self.NavigationLabels.append(ParentPageLabel(Page, self.MainWindow))
                 self.NavigationLabels.append(Separator(Page, self.MainWindow))
         for NavigationLabelIndex in range(len(self.NavigationLabels)):
-            self.ScrollAreaLayout.addWidget(self.NavigationLabels[NavigationLabelIndex], 0, NavigationLabelIndex)
-        self.ScrollAreaLayout.setColumnStretch(len(self.NavigationLabels), 1)
+            self.NavigationScrollArea.Layout.addWidget(self.NavigationLabels[NavigationLabelIndex], 0, NavigationLabelIndex)
+        self.NavigationScrollArea.Layout.setColumnStretch(len(self.NavigationLabels), 1)
+
+
+class NavigationScrollArea(QScrollArea):
+    def __init__(self):
+        # Variables
+        self.LeftDelta = -50
+        self.RightDelta = 50
+
+        # Initialize
+        super().__init__()
+
+        # Create and Set Frame and Layout
+        self.Frame = QFrame()
+        self.Layout = QGridLayout()
+        self.Frame.setLayout(self.Layout)
+        self.setWidget(self.Frame)
+
+        # Configure
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setWidgetResizable(True)
+        self.horizontalScrollBar().rangeChanged.connect(self.ScrollToEnd)
+
+    def Scroll(self, Delta):
+        self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + Delta)
+
+    def ScrollLeft(self):
+        self.Scroll(self.LeftDelta)
+
+    def ScrollRight(self):
+        self.Scroll(self.RightDelta)
 
     def ScrollToEnd(self):
-        self.ScrollArea.horizontalScrollBar().setValue(self.ScrollArea.horizontalScrollBar().maximum())
+        self.horizontalScrollBar().setValue(self.horizontalScrollBar().maximum())
+
+    def wheelEvent(self, QWheelEvent):
+        Delta = QWheelEvent.angleDelta()
+        if Delta is not None:
+            VerticalDelta = Delta.y()
+            if VerticalDelta > 0:
+                self.ScrollLeft()
+            elif VerticalDelta < 0:
+                self.ScrollRight()
+        return super().wheelEvent(QWheelEvent)
 
 
 class ScrollButton(QPushButton):
-    def __init__(self, Label, ScrollArea, Delta):
+    def __init__(self, Direction, NavigationScrollArea):
         # Store Parameters
-        self.Label = Label
-        self.ScrollArea = ScrollArea
-        self.Delta = Delta
+        self.Direction = Direction
+        self.NavigationScrollArea = NavigationScrollArea
+
+        # Variables
+        if self.Direction == "Left":
+            self.Label = "\u2770"
+        elif self.Direction == "Right":
+            self.Label = "\u2771"
+        else:
+            self.Label = "Undefined Direction"
 
         # Initialize
         super().__init__(self.Label)
@@ -79,7 +119,12 @@ class ScrollButton(QPushButton):
         self.clicked.connect(self.Scroll)
 
     def Scroll(self):
-        self.ScrollArea.horizontalScrollBar().setValue(self.ScrollArea.horizontalScrollBar().value() + self.Delta)
+        if self.Direction == "Left":
+            self.NavigationScrollArea.ScrollLeft()
+        elif self.Direction == "Right":
+            self.NavigationScrollArea.ScrollRight()
+        else:
+            return
 
 
 class Separator(QLabel):

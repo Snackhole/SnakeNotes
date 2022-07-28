@@ -5,7 +5,7 @@ import os
 import mistune
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QColor, QIcon, QPalette, QPdfWriter, QTextCursor
-from PyQt5.QtWidgets import QFileDialog, QLabel, QMainWindow, QInputDialog, QMessageBox, QAction, QSplitter, QApplication, QTextEdit
+from PyQt5.QtWidgets import QFileDialog, QLabel, QMainWindow, QInputDialog, QMessageBox, QAction, QSplitter, QApplication, QTextEdit, QFrame, QGridLayout
 
 from Core.MarkdownRenderers import ConstructHTMLExportString, ConstructPDFExportHTMLString, Renderer
 from Core.Notebook import Notebook
@@ -20,6 +20,7 @@ from Interface.Dialogs.SearchForLinkedPagesDialog import SearchForLinkedPagesDia
 from Interface.Dialogs.TemplateManagerDialog import TemplateManagerDialog
 from Interface.Dialogs.AddToPageAndSubpagesDialog import AddToPageAndSubpagesDialog
 from Interface.Dialogs.PopOutTextDialog import PopOutTextDialog
+from Interface.Widgets.NavigationBar import NavigationBar
 from Interface.Widgets.NotebookDisplayWidget import NotebookDisplayWidget
 from Interface.Widgets.SearchWidget import SearchWidget
 from Interface.Widgets.TextWidget import TextWidget
@@ -74,6 +75,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Toggle Read Mode Actions List
         self.ToggleReadModeActionsList = []
 
+        # Create Frame
+        self.Frame = QFrame()
+
         # Create Notebook Display Widget
         self.NotebookDisplayWidgetInst = NotebookDisplayWidget(self.Notebook, self)
         self.NotebookDisplayWidgetInst.itemSelectionChanged.connect(self.PageSelected)
@@ -85,7 +89,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Create Search Widget
         self.SearchWidgetInst = SearchWidget(self.Notebook, self)
 
-        # Create and Populate Splitters
+        # Create Navigation Bar
+        self.NavigationBarInst = NavigationBar(self)
+
+        # Create and Populate Layout
+        self.FrameLayout = QGridLayout()
         self.NotebookAndTextSplitter = QSplitter(Qt.Horizontal)
         self.NotebookAndTextSplitter.addWidget(self.NotebookDisplayWidgetInst)
         self.NotebookAndTextSplitter.addWidget(self.TextWidgetInst)
@@ -96,7 +104,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookAndSearchSplitter.addWidget(self.SearchWidgetInst)
         self.NotebookAndSearchSplitter.setStretchFactor(0, 1)
         self.NotebookAndSearchSplitter.setChildrenCollapsible(False)
-        self.setCentralWidget(self.NotebookAndSearchSplitter)
+        self.FrameLayout.addWidget(self.NotebookAndSearchSplitter, 0, 0)
+        self.FrameLayout.addWidget(self.NavigationBarInst, 1, 0)
+        self.FrameLayout.setRowStretch(0, 1)
+        self.Frame.setLayout(self.FrameLayout)
+        self.setCentralWidget(self.Frame)
 
         # Create Actions
         self.CreateActions()
@@ -789,6 +801,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             if not SkipUpdatingBackAndForward:
                 self.UpdateBackAndForward()
             self.TextWidgetInst.SetCurrentPage(self.Notebook.GetPageFromIndexPath(IndexPath))
+            self.NavigationBarInst.UpdateFromIndexPath(IndexPath)
             self.UpdateWindowTitle()
 
     def UpdateBackAndForward(self):

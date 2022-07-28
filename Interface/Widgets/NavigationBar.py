@@ -134,10 +134,11 @@ class Separator(QLabel):
         self.MainWindow = MainWindow
 
         # Initialize
-        super().__init__("\u203a")
+        super().__init__(" \u203a ")
 
         # Configure
         self.setCursor(Qt.PointingHandCursor)
+        self.setStyleSheet("QLabel::hover {background-color: darkCyan;}")
 
     def mouseDoubleClickEvent(self, QMouseEvent):
         self.GoToSubPage()
@@ -158,10 +159,11 @@ class NavigationPageLabel(QLabel):
         self.MainWindow = MainWindow
 
         # Initialize
-        super().__init__(self.Page["Title"])
+        super().__init__(" " + self.Page["Title"] + " ")
 
         # Configure
         self.setCursor(Qt.PointingHandCursor)
+        self.setStyleSheet("QLabel::hover {background-color: darkCyan;}")
 
     def mouseDoubleClickEvent(self, QMouseEvent):
         self.GoToPage()

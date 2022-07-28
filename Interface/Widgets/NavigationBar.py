@@ -1,6 +1,8 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFrame, QGridLayout, QPushButton, QScrollArea, QSizePolicy, QLabel
 
+from Interface.Dialogs.NavigationBarSubPageDialog import NavigationBarSubPageDialog
+
 
 class NavigationBar(QFrame):
     def __init__(self, MainWindow):
@@ -41,10 +43,8 @@ class NavigationBar(QFrame):
         for SubPathEnd in range(1, len(IndexPath) + 1):
             SubPath = IndexPath[:SubPathEnd]
             Page = self.MainWindow.Notebook.GetPageFromIndexPath(SubPath)
-            if len(SubPath) == len(IndexPath):
-                self.NavigationLabels.append(QLabel(Page["Title"]))
-            else:
-                self.NavigationLabels.append(ParentPageLabel(Page, self.MainWindow))
+            self.NavigationLabels.append(NavigationPageLabel(Page, self.MainWindow))
+            if len(Page["SubPages"]) > 0:
                 self.NavigationLabels.append(Separator(Page, self.MainWindow))
         for NavigationLabelIndex in range(len(self.NavigationLabels)):
             self.NavigationScrollArea.Layout.addWidget(self.NavigationLabels[NavigationLabelIndex], 0, NavigationLabelIndex)
@@ -139,8 +139,19 @@ class Separator(QLabel):
         # Configure
         self.setCursor(Qt.PointingHandCursor)
 
+    def mouseDoubleClickEvent(self, QMouseEvent):
+        self.GoToSubPage()
+        return super().mouseDoubleClickEvent(QMouseEvent)
 
-class ParentPageLabel(QLabel):
+    def GoToSubPage(self):
+        ValidSubPages = [SubPage for SubPage in self.Page["SubPages"] if self.MainWindow.NotebookDisplayWidgetInst.GetCurrentPageIndexPath() != SubPage["IndexPath"]]
+        if len(ValidSubPages) > 0:
+            NavigationBarSubPageDialogInst = NavigationBarSubPageDialog(self.Page, ValidSubPages, self.MainWindow)
+            if NavigationBarSubPageDialogInst.SelectedSubPage is not None:
+                self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(NavigationBarSubPageDialogInst.SelectedSubPage["IndexPath"])
+
+
+class NavigationPageLabel(QLabel):
     def __init__(self, Page, MainWindow):
         # Store Parameters
         self.Page = Page
@@ -157,4 +168,5 @@ class ParentPageLabel(QLabel):
         return super().mouseDoubleClickEvent(QMouseEvent)
 
     def GoToPage(self):
-        self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(self.Page["IndexPath"])
+        if self.MainWindow.NotebookDisplayWidgetInst.GetCurrentPageIndexPath() != self.Page["IndexPath"]:
+            self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(self.Page["IndexPath"])

@@ -137,7 +137,7 @@ class Separator(QLabel):
 
         # Configure
         self.setCursor(Qt.PointingHandCursor)
-        self.setStyleSheet("QLabel::hover {background-color: darkCyan;}")
+        self.setStyleSheet("QLabel::hover {background-color: darkCyan; color: white;}")
 
     def mouseDoubleClickEvent(self, QMouseEvent):
         self.GoToSubPage()
@@ -161,7 +161,7 @@ class NavigationPageLabel(QLabel):
 
         # Configure
         self.setCursor(Qt.PointingHandCursor)
-        self.setStyleSheet("QLabel::hover {background-color: darkCyan;}")
+        self.setStyleSheet("QLabel::hover {background-color: darkCyan; color: white;}")
 
     def mouseDoubleClickEvent(self, QMouseEvent):
         self.GoToPage()

@@ -32,12 +32,21 @@ class Notebook(SerializableMixin):
     def AddSubPage(self, Title="New Page", Content="", SuperPageIndexPath=None, PageToAdd=None):
         if SuperPageIndexPath is None:
             SuperPageIndexPath = [0]
-        if PageToAdd is None:
-            PageToAdd = self.CreatePage(Title, Content)
         SuperPage = self.GetPageFromIndexPath(SuperPageIndexPath)
         if SuperPage is None:
             return
+        if PageToAdd is None:
+            PageToAdd = self.CreatePage(Title, Content)
         SuperPage["SubPages"].append(PageToAdd)
+        self.UpdateIndexPaths()
+
+    def AddSiblingPageBefore(self, IndexPath, Title="New Page", Content="", PageToAdd=None):
+        SuperPage = self.GetSuperOfPageFromIndexPath(IndexPath)
+        if SuperPage is None:
+            return
+        if PageToAdd is None:
+            PageToAdd = self.CreatePage(Title, Content)
+        SuperPage["SubPages"].insert(IndexPath[-1], PageToAdd)
         self.UpdateIndexPaths()
 
     def DeleteSubPage(self, IndexPath):

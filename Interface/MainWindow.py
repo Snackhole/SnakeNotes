@@ -411,6 +411,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.RenamePageAction.triggered.connect(self.RenamePage)
         self.ToggleReadModeActionsList.append(self.RenamePageAction)
 
+        self.AddSiblingPageBeforeAction = QAction("Add Sibling Page Before Current Page")
+        self.AddSiblingPageBeforeAction.triggered.connect(self.AddSiblingPageBefore)
+        self.ToggleReadModeActionsList.append(self.AddSiblingPageBeforeAction)
+
         self.MovePageUpAction = QAction(self.MovePageUpIcon, "Move Page Up")
         self.MovePageUpAction.triggered.connect(lambda: self.MovePage(-1))
         self.ToggleReadModeActionsList.append(self.MovePageUpAction)
@@ -548,6 +552,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookMenu.addAction(self.NewPageAction)
         self.NotebookMenu.addAction(self.DeletePageAction)
         self.NotebookMenu.addAction(self.RenamePageAction)
+        self.NotebookMenu.addAction(self.AddSiblingPageBeforeAction)
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.MovePageUpAction)
         self.NotebookMenu.addAction(self.MovePageDownAction)
@@ -917,6 +922,46 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
+    def RenamePage(self):
+        if not self.TextWidgetInst.ReadMode:
+            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+            NewName, OK = QInputDialog.getText(self, "Rename " + CurrentPage["Title"], "Enter a title:", text=CurrentPage["Title"])
+            if OK:
+                if NewName == "":
+                    self.DisplayMessageBox("Page names cannot be blank.")
+                else:
+                    OldLinkData = self.GetLinkData()
+                    CurrentPage["Title"] = NewName
+                    NewLinkData = self.GetLinkData()
+                    self.UpdateLinks(OldLinkData, NewLinkData)
+                    self.NotebookDisplayWidgetInst.FillFromRootPage()
+                    self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
+                    self.SearchWidgetInst.RefreshSearch()
+                    self.RefreshAdvancedSearch()
+                    self.UpdateUnsavedChangesFlag(True)
+            self.NotebookDisplayWidgetInst.setFocus()
+
+    def AddSiblingPageBefore(self):
+        if not self.TextWidgetInst.ReadMode:
+            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
+            if CurrentPage["IndexPath"] == [0]:
+                self.DisplayMessageBox("The root page of a notebook cannot have sibling pages.")
+            else:
+                NewPageDialogInst = NewPageDialog(CurrentPage["Title"], self.Notebook.GetTemplateNames(), self, BeforeSibling=True)
+                if NewPageDialogInst.NewPageAdded:
+                    OldLinkData = self.GetLinkData()
+                    self.Notebook.AddSiblingPageBefore(CurrentPageIndexPath, NewPageDialogInst.NewPageName, "" if NewPageDialogInst.TemplateName == "None" else self.Notebook.GetTemplate(NewPageDialogInst.TemplateName))
+                    NewLinkData = self.GetLinkData()
+                    self.UpdateLinks(OldLinkData, NewLinkData)
+                    self.NotebookDisplayWidgetInst.FillFromRootPage()
+                    self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
+                    self.SearchWidgetInst.RefreshSearch()
+                    self.RefreshAdvancedSearch()
+                    self.UpdateUnsavedChangesFlag(True)
+                self.NotebookDisplayWidgetInst.setFocus()
+
     def MovePage(self, Delta):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
@@ -1056,26 +1101,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.SearchWidgetInst.RefreshSearch()
             self.RefreshAdvancedSearch()
             self.UpdateUnsavedChangesFlag(True)
-            self.NotebookDisplayWidgetInst.setFocus()
-
-    def RenamePage(self):
-        if not self.TextWidgetInst.ReadMode:
-            CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
-            CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
-            NewName, OK = QInputDialog.getText(self, "Rename " + CurrentPage["Title"], "Enter a title:", text=CurrentPage["Title"])
-            if OK:
-                if NewName == "":
-                    self.DisplayMessageBox("Page names cannot be blank.")
-                else:
-                    OldLinkData = self.GetLinkData()
-                    CurrentPage["Title"] = NewName
-                    NewLinkData = self.GetLinkData()
-                    self.UpdateLinks(OldLinkData, NewLinkData)
-                    self.NotebookDisplayWidgetInst.FillFromRootPage()
-                    self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
-                    self.SearchWidgetInst.RefreshSearch()
-                    self.RefreshAdvancedSearch()
-                    self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
 
     def GetLinkData(self, Page=None):

@@ -2,13 +2,14 @@ from PyQt5.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QGridLayout
 
 
 class NewPageDialog(QDialog):
-    def __init__(self, CurrentPageName, TemplateNames, MainWindow):
+    def __init__(self, CurrentPageName, TemplateNames, MainWindow, BeforeSibling=False):
         super().__init__(parent=MainWindow)
 
         # Store Parameters
         self.CurrentPageName = CurrentPageName
         self.TemplateNames = TemplateNames
         self.MainWindow = MainWindow
+        self.BeforeSibling = BeforeSibling
 
         # Variables
         self.NewPageAdded = False
@@ -16,7 +17,7 @@ class NewPageDialog(QDialog):
         self.TemplateName = ""
 
         # Labels
-        self.PageNamePrompt = QLabel("Add sub page to " + self.CurrentPageName + "?")
+        self.PageNamePrompt = QLabel(("Add sibling page before " if self.BeforeSibling else "Add sub page to ") + self.CurrentPageName + "?")
         self.PageNameLabel = QLabel("Name:")
         self.TemplateLabel = QLabel("Template:")
 

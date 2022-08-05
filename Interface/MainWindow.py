@@ -297,6 +297,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.InsertLinksAction.triggered.connect(self.TextWidgetInst.InsertLinks)
         self.ToggleReadModeActionsList.append(self.InsertLinksAction)
 
+        self.AddTitleToolTipsToLinksAction = QAction("Add Title Tool Tips to Links")
+        self.AddTitleToolTipsToLinksAction.triggered.connect(self.AddTitleToolTipsToLinks)
+        self.ToggleReadModeActionsList.append(self.AddTitleToolTipsToLinksAction)
+
         self.InsertExternalLinkAction = QAction(self.InsertExternalLinkIcon, "Insert External Link")
         self.InsertExternalLinkAction.triggered.connect(self.TextWidgetInst.InsertExternalLink)
         self.ToggleReadModeActionsList.append(self.InsertExternalLinkAction)
@@ -502,6 +506,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.InlineFootnoteStyleAction)
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.InsertLinksAction)
+        self.EditMenu.addAction(self.AddTitleToolTipsToLinksAction)
         self.EditMenu.addAction(self.InsertExternalLinkAction)
         self.EditMenu.addAction(self.TextToLinkAction)
         self.EditMenu.addAction(self.InsertTableAction)
@@ -1230,6 +1235,20 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.TextWidgetInst.setFocus()
                 if not Prepend:
                     self.TextWidgetInst.moveCursor(QTextCursor.End)
+
+    def AddTitleToolTipsToLinks(self):
+        if not self.TextWidgetInst.ReadMode:
+            LinkData = self.GetLinkData()
+            ReplaceQueue = []
+            for PageID in LinkData:
+                ReplaceStrings = (LinkData[PageID]["NoToolTip"], LinkData[PageID]["ToolTip"])
+                ReplaceQueue.append(ReplaceStrings)
+            for ReplaceStrings in ReplaceQueue:
+                self.SearchWidgetInst.ReplaceAllInNotebook(SearchText=ReplaceStrings[0], ReplaceText=ReplaceStrings[1], MatchCase=True, DelayTextUpdate=True)
+            self.TextWidgetInst.UpdateText()
+            self.SearchWidgetInst.RefreshSearch()
+            self.RefreshAdvancedSearch()
+            self.UpdateUnsavedChangesFlag(True)
 
     # Interface Methods
     def DisplayMessageBox(self, Message, Icon=QMessageBox.Information, Buttons=QMessageBox.Ok, Parent=None):

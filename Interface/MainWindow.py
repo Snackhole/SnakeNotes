@@ -1227,8 +1227,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             Text = AddToPageAndSubpagesDialogInst.TextToAdd
             if Text is not None:
                 self.Notebook.AddTextToPageAndSubpages(Text, CurrentPage=CurrentPage, Prepend=Prepend)
-                self.NotebookDisplayWidgetInst.FillFromRootPage()
-                self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(CurrentPageIndexPath)
+                self.TextWidgetInst.UpdateText()
                 self.SearchWidgetInst.RefreshSearch()
                 self.RefreshAdvancedSearch()
                 self.UpdateUnsavedChangesFlag(True)

@@ -17,10 +17,13 @@ class NavigationBar(QFrame):
 
         # Scroll Area
         self.NavigationScrollArea = NavigationScrollArea()
+        self.NavigationScrollArea.setFocusPolicy(Qt.NoFocus)
 
         # Scroll Buttons
         self.ScrollLeftButton = ScrollButton("Left", self.NavigationScrollArea)
+        self.ScrollLeftButton.setFocusPolicy(Qt.NoFocus)
         self.ScrollRightButton = ScrollButton("Right", self.NavigationScrollArea)
+        self.ScrollRightButton.setFocusPolicy(Qt.NoFocus)
 
         # Create and Set Layout
         self.Layout = QGridLayout()

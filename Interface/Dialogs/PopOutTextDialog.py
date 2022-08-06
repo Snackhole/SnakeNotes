@@ -1,5 +1,7 @@
-from Interface.Widgets.PopOutTextWidget import PopOutTextWidget
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton, QApplication
+
+from Interface.Widgets.PopOutTextWidget import PopOutTextWidget
 
 
 class PopOutTextDialog(QDialog):
@@ -96,3 +98,10 @@ class PopOutTextDialog(QDialog):
         if PopOut in self.MainWindow.PopOutPages:
             del self.MainWindow.PopOutPages[self.MainWindow.PopOutPages.index(PopOut)]
         return super().closeEvent(event)
+
+    def keyPressEvent(self, QKeyEvent):
+        KeyPressed = QKeyEvent.key()
+        if KeyPressed == Qt.Key_Escape:
+            self.close()
+        else:
+            super().keyPressEvent(QKeyEvent)

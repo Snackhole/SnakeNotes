@@ -1,6 +1,6 @@
 import re
 
-from PyQt5 import QtCore
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QTextCursor, QTextDocument
 from PyQt5.QtWidgets import QFrame, QLineEdit, QListWidget, QGridLayout, QListWidgetItem, QPushButton, QCheckBox, QSizePolicy, QApplication
 
@@ -259,7 +259,7 @@ class SearchLineEdit(QLineEdit):
         self.SearchWidget = SearchWidget
 
     def keyPressEvent(self, QKeyEvent):
-        if QKeyEvent.key() == QtCore.Qt.Key_Escape:
+        if QKeyEvent.key() == Qt.Key_Escape:
             self.SearchWidget.ClearSearch()
         else:
             super().keyPressEvent(QKeyEvent)

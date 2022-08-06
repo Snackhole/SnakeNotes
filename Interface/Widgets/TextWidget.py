@@ -3,7 +3,7 @@ import re
 import webbrowser
 
 import mistune
-from PyQt5 import QtCore
+from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QColor, QSyntaxHighlighter, QTextCursor, QTextCharFormat
 from PyQt5.QtWidgets import QTextEdit, QInputDialog, QMessageBox
@@ -220,12 +220,12 @@ class TextWidget(QTextEdit):
         ContextMenu.addSeparator()
         ContextMenu.addAction(self.MainWindow.PopOutPageAction)
         ContextMenu.exec_(self.mapToGlobal(QContextMenuEvent.pos()))
-    
+
     def insertFromMimeData(self, QMimeData):
         self.insertPlainText(QMimeData.text())
 
     def wheelEvent(self, QWheelEvent):
-        if QWheelEvent.modifiers() == QtCore.Qt.ControlModifier:
+        if QWheelEvent.modifiers() == Qt.ControlModifier:
             QWheelEvent.accept()
         else:
             super().wheelEvent(QWheelEvent)
@@ -247,9 +247,9 @@ class TextWidget(QTextEdit):
     def mouseMoveEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
         if Anchor != "":
-            self.viewport().setCursor(QtCore.Qt.PointingHandCursor)
+            self.viewport().setCursor(Qt.PointingHandCursor)
         else:
-            self.viewport().setCursor(QtCore.Qt.IBeamCursor)
+            self.viewport().setCursor(Qt.IBeamCursor)
         return super().mouseMoveEvent(QMouseEvent)
 
     # Action Methods

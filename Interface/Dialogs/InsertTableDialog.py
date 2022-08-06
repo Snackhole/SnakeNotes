@@ -1,4 +1,4 @@
-from PyQt5 import QtCore
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QLineEdit, QGridLayout, QComboBox, QLabel, QPushButton, QSpinBox, QScrollArea, QFrame
 
 
@@ -193,13 +193,13 @@ class TableLineEdit(QLineEdit):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == QtCore.Qt.Key_Up or KeyPressed == QtCore.Qt.Key_Down:
+        if KeyPressed == Qt.Key_Up or KeyPressed == Qt.Key_Down:
             if self.Row > 0:
                 AdjustedRow = self.Row + 1
             else:
                 AdjustedRow = self.Row
             AdjustedColumn = self.Column + 1
-            if KeyPressed == QtCore.Qt.Key_Up:
+            if KeyPressed == Qt.Key_Up:
                 if AdjustedRow == 2:
                     NextItemRow = 0
                 else:

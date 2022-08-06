@@ -1,6 +1,6 @@
 import webbrowser
 
-from PyQt5 import QtCore
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QTextEdit
 
 from Core import MarkdownRenderers
@@ -32,7 +32,7 @@ class PopOutTextWidget(QTextEdit):
 
     # Events
     def wheelEvent(self, QWheelEvent):
-        if QWheelEvent.modifiers() == QtCore.Qt.ControlModifier:
+        if QWheelEvent.modifiers() == Qt.ControlModifier:
             QWheelEvent.accept()
         else:
             super().wheelEvent(QWheelEvent)
@@ -57,7 +57,7 @@ class PopOutTextWidget(QTextEdit):
     def mouseMoveEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
         if Anchor != "":
-            self.viewport().setCursor(QtCore.Qt.PointingHandCursor)
+            self.viewport().setCursor(Qt.PointingHandCursor)
         else:
-            self.viewport().setCursor(QtCore.Qt.IBeamCursor)
+            self.viewport().setCursor(Qt.IBeamCursor)
         return super().mouseMoveEvent(QMouseEvent)

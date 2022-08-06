@@ -1,4 +1,4 @@
-from PyQt5 import QtCore
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton, QApplication, QLineEdit, QCheckBox, QListWidget, QLabel, QSizePolicy, QListWidgetItem, QTreeWidget, QTreeWidgetItem, QHeaderView
 
 
@@ -84,7 +84,7 @@ class AdvancedSearchDialog(QDialog):
 
         # Search Results Stats Label
         self.SearchResultsStatsLabel = QLabel("No search results.")
-        self.SearchResultsStatsLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.SearchResultsStatsLabel.setAlignment(Qt.AlignCenter)
 
         # Buttons
         self.SearchButton = QPushButton("Search")
@@ -302,9 +302,9 @@ class AdvancedSearchDialog(QDialog):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == QtCore.Qt.Key_Escape:
+        if KeyPressed == Qt.Key_Escape:
             self.close()
-        elif KeyPressed == QtCore.Qt.Key_Return and self.ResultsList.hasFocus():
+        elif KeyPressed == Qt.Key_Return and self.ResultsList.hasFocus():
             return
         else:
             super().keyPressEvent(QKeyEvent)

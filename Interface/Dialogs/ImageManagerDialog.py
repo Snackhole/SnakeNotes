@@ -1,6 +1,6 @@
 import os
-from PyQt5 import QtCore
 
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QCheckBox, QDialog, QFrame, QGridLayout, QLineEdit, QListWidget, QPushButton, QListWidgetItem, QLabel, QFileDialog, QMessageBox, QScrollArea, QSizePolicy, QSplitter, QInputDialog
 
@@ -45,7 +45,7 @@ class ImageManagerDialog(QDialog):
 
         # Linking Pages Label
         self.LinkingPagesLabel = QLabel("Linking Pages")
-        self.LinkingPagesLabel.setAlignment(QtCore.Qt.AlignHCenter)
+        self.LinkingPagesLabel.setAlignment(Qt.AlignHCenter)
 
         # Linking Pages List
         self.LinkingPagesList = QListWidget()
@@ -54,7 +54,7 @@ class ImageManagerDialog(QDialog):
         self.ImageDisplay = QLabel()
         self.ImageDisplayScrollArea = QScrollArea()
         self.ImageDisplayScrollArea.setWidget(self.ImageDisplay)
-        self.ImageDisplayScrollArea.setAlignment(QtCore.Qt.AlignCenter)
+        self.ImageDisplayScrollArea.setAlignment(Qt.AlignCenter)
 
         # Buttons
         self.AddImageButton = QPushButton("Add Image")
@@ -141,7 +141,7 @@ class ImageManagerDialog(QDialog):
             SearchTerm = SearchTerm.lower()
         self.ImageList.clear()
         self.ImageDisplay.clear()
-        self.ImageDisplay.resize(QtCore.QSize(0, 0))
+        self.ImageDisplay.resize(QSize(0, 0))
         self.LinkingPagesList.clear()
         Images = sorted(self.Notebook.Images.items(), key=lambda Image: Image[0].lower())
         if SearchTerm != "":
@@ -282,7 +282,7 @@ class SearchLineEdit(QLineEdit):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == QtCore.Qt.Key_Down:
+        if KeyPressed == Qt.Key_Down:
             self.Dialog.ImageList.setFocus()
         else:
             super().keyPressEvent(QKeyEvent)
@@ -299,7 +299,7 @@ class ImageList(QListWidget):
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
         Row = self.currentRow()
-        if KeyPressed == QtCore.Qt.Key_Up and Row == 0:
+        if KeyPressed == Qt.Key_Up and Row == 0:
             self.Dialog.SearchLineEdit.setFocus()
         else:
             super().keyPressEvent(QKeyEvent)

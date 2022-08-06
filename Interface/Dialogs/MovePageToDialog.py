@@ -1,5 +1,5 @@
 import mistune
-from PyQt5 import QtCore
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QDialog, QHeaderView, QTextEdit, QPushButton, QCheckBox, QGridLayout, QLineEdit, QTreeWidget, QTreeWidgetItem
 
@@ -172,7 +172,7 @@ class SearchLineEdit(QLineEdit):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == QtCore.Qt.Key_Down:
+        if KeyPressed == Qt.Key_Down:
             self.Dialog.NotebookDisplay.setFocus()
         else:
             super().keyPressEvent(QKeyEvent)
@@ -191,5 +191,5 @@ class NotebookDisplay(QTreeWidget):
         ItemBefore = self.currentItem()
         super().keyPressEvent(QKeyEvent)
         ItemAfter = self.currentItem()
-        if ItemBefore == ItemAfter and KeyPressed == QtCore.Qt.Key_Up:
+        if ItemBefore == ItemAfter and KeyPressed == Qt.Key_Up:
             self.Dialog.SearchLineEdit.setFocus()

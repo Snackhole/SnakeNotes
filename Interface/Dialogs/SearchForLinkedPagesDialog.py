@@ -1,6 +1,6 @@
 import json
 
-from PyQt5 import QtCore
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QTreeWidget, QHeaderView, QPushButton, QTreeWidgetItem
 
@@ -82,7 +82,7 @@ class SearchForLinkedPagesDialog(QDialog):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == QtCore.Qt.Key_Return and self.NotebookDisplay.hasFocus():
+        if KeyPressed == Qt.Key_Return and self.NotebookDisplay.hasFocus():
             return
         else:
             super().keyPressEvent(QKeyEvent)

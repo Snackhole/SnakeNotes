@@ -215,6 +215,12 @@ class TextWidget(QTextEdit):
         QTimer.singleShot(0, self.ensureCursorVisible)
 
     # Events
+    def contextMenuEvent(self, QContextMenuEvent):
+        ContextMenu = self.createStandardContextMenu()
+        ContextMenu.addSeparator()
+        ContextMenu.addAction(self.MainWindow.PopOutPageAction)
+        ContextMenu.exec_(self.mapToGlobal(QContextMenuEvent.pos()))
+    
     def insertFromMimeData(self, QMimeData):
         self.insertPlainText(QMimeData.text())
 

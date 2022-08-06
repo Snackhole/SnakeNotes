@@ -76,7 +76,7 @@ class NotebookDisplayWidget(QTreeWidget):
         IndexPath = json.loads(IndexPathString)
         self.SelectTreeItemFromIndexPath(IndexPath, SelectParent=SelectParent, ScrollToLastChild=ScrollToLastChild, SelectDelta=SelectDelta)
 
-    def contextMenuEvent(self, event):
+    def contextMenuEvent(self, QContextMenuEvent):
         ContextMenu = QMenu(self)
         ContextMenu.addAction(self.MainWindow.NewPageAction)
         ContextMenu.addAction(self.MainWindow.DeletePageAction)
@@ -99,7 +99,7 @@ class NotebookDisplayWidget(QTreeWidget):
         ContextMenu.addAction(self.MainWindow.ExpandAllAction)
         ContextMenu.addAction(self.MainWindow.ExpandRecursivelyAction)
         ContextMenu.addAction(self.MainWindow.CollapseAllAction)
-        ContextMenu.exec_(self.mapToGlobal(event.pos()))
+        ContextMenu.exec_(self.mapToGlobal(QContextMenuEvent.pos()))
 
     def ExpandRecursively(self):
         SelectedIndexes = self.selectedIndexes()

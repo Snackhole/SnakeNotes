@@ -55,7 +55,7 @@ def Build():
     # Linux-Specific Build Variables
     if BuildVariables["OS"] == "Linux":
         BuildVariables["Command"] = "pip3 install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "/requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "/" + BuildVariables["BuildFolder"] + "\""
-        BuildVariables["AssetFiles"].append("CreateGNOMEDesktopFile.py")
+        BuildVariables["AssetFiles"].append("CreateLinuxDesktopFile.py")
 
     # Copy Code to Build Folder
     CopyFilesToBuildFolder(BuildVariables["CodeFiles"])

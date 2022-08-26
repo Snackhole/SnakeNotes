@@ -19,6 +19,11 @@ def Build():
             IgnoredFiles = [File for File in os.listdir(".") if File not in CopiedFiles]
             shutil.copytree(".", BuildVariables["BuildFolder"], ignore=lambda Source, Contents: IgnoredFiles)
 
+    def UnzipArchivedFilesToBuildFolder(ArchivedFiles):
+        if "BuildFolder" in BuildVariables:
+            for Archive in ArchivedFiles:
+                shutil.unpack_archive(Archive, os.path.join(BuildVariables["BuildFolder"], os.path.splitext(Archive)[0]))
+
     def CleanUp():
         if "BuildFolder" in BuildVariables:
             shutil.rmtree(BuildVariables["BuildFolder"])
@@ -33,6 +38,7 @@ def Build():
 
     BuildVariables["CodeFiles"] = ["Core", "Interface", "SaveAndLoad", "Build.py", "SnakeNotes.py"]
     BuildVariables["AssetFiles"] = ["Assets"]
+    BuildVariables["ArchivedFiles"] = []
 
     BuildVariables["ExecutableZipName"] = BuildVariables["AppName"] + ".pyzw"
     BuildVariables["Interpreter"] = "python3"
@@ -43,6 +49,8 @@ def Build():
     #  Windows-Specific Build Variables
     if BuildVariables["OS"] == "Windows":
         BuildVariables["Command"] = "python -m pip install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "\\requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "\\" + BuildVariables["BuildFolder"] + "\""
+        BuildVariables["AssetFiles"].append("Create Shortcut.bat")
+        BuildVariables["ArchivedFiles"].append("Python Interpreter.zip")
 
     # Linux-Specific Build Variables
     if BuildVariables["OS"] == "Linux":
@@ -67,6 +75,10 @@ def Build():
     shutil.move(BuildVariables["ExecutableZipName"], BuildVariables["BuildFolder"])
     print("Executable archive moved to build folder.")
 
+    # Unzip Archived Files to Build Folder
+    UnzipArchivedFilesToBuildFolder(BuildVariables["ArchivedFiles"])
+    print("Archived files moved to build folder.")
+
     # Install Dependencies
     DependenciesProcess = subprocess.run(BuildVariables["Command"], shell=True)
     if DependenciesProcess.returncode != 0:
@@ -80,6 +92,7 @@ def Build():
 
     # Clean Up
     CleanUp()
+    print("Build complete.")
 
 
 if __name__ == "__main__":

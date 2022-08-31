@@ -1,6 +1,7 @@
 import json
 import os
 import platform
+import sys
 
 import Build
 
@@ -15,7 +16,7 @@ elif OS == "Linux":
     PythonExecutable = "source " + os.path.join(WorkingDir, "venv", "bin", "activate") + "; " + os.path.join(WorkingDir, "venv", "bin", "python3")
 else:
     print("Not on Windows or Linux.  Set up tasks manually.")
-    quit()
+    sys.exit()
 
 AppPath = os.path.join(WorkingDir, Build.BuildVariables["AppName"] + ".py")
 BuildPath = os.path.join(WorkingDir, "Build.py")

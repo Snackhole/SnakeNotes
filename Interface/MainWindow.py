@@ -378,7 +378,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultZoomAction.triggered.connect(self.DefaultZoom)
 
         self.PopOutPageAction = QAction(self.PopOutPageIcon, "Pop Out Page")
-        self.PopOutPageAction.triggered.connect(self.PopOutPage)
+        self.PopOutPageAction.triggered.connect(lambda: self.PopOutPage())
 
         self.ExpandAllAction = QAction(self.ExpandAllIcon, "&Expand All")
         self.ExpandAllAction.triggered.connect(self.NotebookDisplayWidgetInst.expandAll)
@@ -1291,15 +1291,16 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def UpdateWindowTitle(self):
         self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + " - \"" + self.TextWidgetInst.CurrentPage["Title"] + "\"" + (" *" if self.UnsavedChanges else ""))
 
-    def PopOutPage(self):
+    def PopOutPage(self, IndexPath=None):
+        Page = self.TextWidgetInst.CurrentPage if IndexPath is None else self.Notebook.GetPageFromIndexPath(IndexPath)
         for PopOut in self.PopOutPages:
-            if self.TextWidgetInst.CurrentPage is PopOut[0]:
+            if Page is PopOut[0]:
                 PopOut[1].activateWindow()
                 PopOut[1].raise_()
                 PopOut[1].setFocus()
                 return
-        NewPopOut = PopOutTextDialog(self.TextWidgetInst.CurrentPage, self.Notebook, self.PopOutMarkdownParser, self)
-        self.PopOutPages.append((self.TextWidgetInst.CurrentPage, NewPopOut))
+        NewPopOut = PopOutTextDialog(Page, self.Notebook, self.PopOutMarkdownParser, self)
+        self.PopOutPages.append((Page, NewPopOut))
 
     def CloseDeletedPopOutPages(self, Page):
         CloseQueue = []

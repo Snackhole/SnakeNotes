@@ -223,14 +223,8 @@ class TextWidget(QTextEdit):
         if Anchor != "":
             if self.Notebook.StringIsValidIndexPath(Anchor):
                 IndexPath = json.loads(Anchor)
-                PopOutLinkedPageAction = self.CreateActionToPopOutLinkedPage(IndexPath)
-                ContextMenu.addAction(PopOutLinkedPageAction)
+                ContextMenu.addAction(self.MainWindow.PopOutPageIcon, "Pop Out Linked Page", lambda: self.MainWindow.PopOutPage(IndexPath))
         ContextMenu.exec_(self.mapToGlobal(QContextMenuEvent.pos()))
-
-    def CreateActionToPopOutLinkedPage(self, IndexPath):
-        PopOutLinkedPageAction = QAction(self.MainWindow.PopOutPageIcon, "Pop Out Linked Page")
-        PopOutLinkedPageAction.triggered.connect(lambda: self.MainWindow.PopOutPage(IndexPath))
-        return PopOutLinkedPageAction
 
     def insertFromMimeData(self, QMimeData):
         self.insertPlainText(QMimeData.text())

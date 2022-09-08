@@ -249,6 +249,21 @@ class TextWidget(QTextEdit):
         else:
             super().mouseDoubleClickEvent(QMouseEvent)
 
+    def mouseReleaseEvent(self, QMouseEvent):
+        Anchor = self.anchorAt(QMouseEvent.pos())
+        if Anchor != "" and QMouseEvent.button() == Qt.MiddleButton:
+            if self.Notebook.StringIsValidIndexPath(Anchor):
+                IndexPath = json.loads(Anchor)
+                self.MainWindow.PopOutPage(IndexPath)
+                QMouseEvent.accept()
+            else:
+                if Anchor.startswith("[0,"):
+                    self.MainWindow.DisplayMessageBox("Linked page not found.")
+                else:
+                    webbrowser.open(Anchor)
+        else:
+            super().mouseReleaseEvent(QMouseEvent)
+
     def mouseMoveEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
         if Anchor != "":

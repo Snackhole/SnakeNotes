@@ -237,7 +237,7 @@ class TextWidget(QTextEdit):
 
     def mouseDoubleClickEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
-        if Anchor != "":
+        if Anchor != "" and QMouseEvent.button() == Qt.LeftButton:
             if self.Notebook.StringIsValidIndexPath(Anchor):
                 self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(Anchor)
                 QMouseEvent.accept()

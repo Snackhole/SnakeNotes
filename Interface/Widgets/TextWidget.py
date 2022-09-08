@@ -6,7 +6,7 @@ import mistune
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QColor, QSyntaxHighlighter, QTextCursor, QTextCharFormat
-from PyQt5.QtWidgets import QTextEdit, QInputDialog, QMessageBox
+from PyQt5.QtWidgets import QTextEdit, QInputDialog, QMessageBox, QAction
 
 from Core import MarkdownRenderers
 from Interface.Dialogs.InsertLinksDialog import InsertLinksDialog
@@ -219,7 +219,18 @@ class TextWidget(QTextEdit):
         ContextMenu = self.createStandardContextMenu()
         ContextMenu.addSeparator()
         ContextMenu.addAction(self.MainWindow.PopOutPageAction)
+        Anchor = self.anchorAt(QContextMenuEvent.pos())
+        if Anchor != "":
+            if self.Notebook.StringIsValidIndexPath(Anchor):
+                IndexPath = json.loads(Anchor)
+                PopOutLinkedPageAction = self.CreateActionToPopOutLinkedPage(IndexPath)
+                ContextMenu.addAction(PopOutLinkedPageAction)
         ContextMenu.exec_(self.mapToGlobal(QContextMenuEvent.pos()))
+
+    def CreateActionToPopOutLinkedPage(self, IndexPath):
+        PopOutLinkedPageAction = QAction(self.MainWindow.PopOutPageIcon, "Pop Out Linked Page")
+        PopOutLinkedPageAction.triggered.connect(lambda: self.MainWindow.PopOutPage(IndexPath))
+        return PopOutLinkedPageAction
 
     def insertFromMimeData(self, QMimeData):
         self.insertPlainText(QMimeData.text())

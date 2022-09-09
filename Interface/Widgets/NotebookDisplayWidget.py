@@ -101,6 +101,16 @@ class NotebookDisplayWidget(QTreeWidget):
         ContextMenu.addAction(self.MainWindow.CollapseAllAction)
         ContextMenu.exec_(self.mapToGlobal(QContextMenuEvent.pos()))
 
+    def mouseReleaseEvent(self, QMouseEvent):
+        if QMouseEvent.button() == Qt.ForwardButton:
+            self.MainWindow.ForwardAction.trigger()
+            QMouseEvent.accept()
+        elif QMouseEvent.button() == Qt.BackButton:
+            self.MainWindow.BackAction.trigger()
+            QMouseEvent.accept()
+        else:
+            super().mouseReleaseEvent(QMouseEvent)
+
     def ExpandRecursively(self):
         SelectedIndexes = self.selectedIndexes()
         if len(SelectedIndexes) == 1:

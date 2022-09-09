@@ -261,14 +261,18 @@ class TextWidget(QTextEdit):
                     self.MainWindow.DisplayMessageBox("Linked page not found.")
                 else:
                     webbrowser.open(Anchor)
-        elif QMouseEvent.button() == Qt.ForwardButton:
+        else:
+            super().mouseReleaseEvent(QMouseEvent)
+
+    def mousePressEvent(self, QMouseEvent):
+        if QMouseEvent.button() == Qt.ForwardButton:
             self.MainWindow.ForwardAction.trigger()
             QMouseEvent.accept()
         elif QMouseEvent.button() == Qt.BackButton:
             self.MainWindow.BackAction.trigger()
             QMouseEvent.accept()
         else:
-            super().mouseReleaseEvent(QMouseEvent)
+            super().mousePressEvent(QMouseEvent)
 
     def mouseMoveEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())

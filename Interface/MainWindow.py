@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QFileDialog, QLabel, QMainWindow, QInputDialog, QMes
 from Core.MarkdownRenderers import ConstructHTMLExportString, ConstructPDFExportHTMLString, Renderer
 from Core.Notebook import Notebook
 from Interface.Dialogs.AdvancedSearchDialog import AdvancedSearchDialog
+from Interface.Dialogs.DefaultPopOutSizeDialog import DefaultPopOutSizeDialog
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
 from Interface.Dialogs.FavoritesDialog import FavoritesDialog
@@ -381,6 +382,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.PopOutPageAction = QAction(self.PopOutPageIcon, "Pop Out Page")
         self.PopOutPageAction.triggered.connect(lambda: self.PopOutPage())
 
+        self.SetDefaultPopOutSizeAction = QAction("Set Default Pop-Out Page Size")
+        self.SetDefaultPopOutSizeAction.triggered.connect(self.SetDefaultPopOutSize)
+
         self.ExpandAllAction = QAction(self.ExpandAllIcon, "&Expand All")
         self.ExpandAllAction.triggered.connect(self.NotebookDisplayWidgetInst.expandAll)
 
@@ -540,6 +544,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.ZoomInAction)
         self.ViewMenu.addAction(self.DefaultZoomAction)
         self.ViewMenu.addAction(self.PopOutPageAction)
+        self.ViewMenu.addAction(self.SetDefaultPopOutSizeAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.ExpandAllAction)
         self.ViewMenu.addAction(self.ExpandRecursivelyAction)
@@ -1312,6 +1317,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 return
         NewPopOut = PopOutTextDialog(Page, self.Notebook, self.PopOutMarkdownParser, self)
         self.PopOutPages.append((Page, NewPopOut))
+
+    def SetDefaultPopOutSize(self):
+        DefaultPopOutSizeDialogInst = DefaultPopOutSizeDialog(self)
+        if DefaultPopOutSizeDialogInst.SizeChanged:
+            self.DefaultPopOutSize["Width"] = DefaultPopOutSizeDialogInst.Width
+            self.DefaultPopOutSize["Height"] = DefaultPopOutSizeDialogInst.Height
 
     def CloseDeletedPopOutPages(self, Page):
         CloseQueue = []

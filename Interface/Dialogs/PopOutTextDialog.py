@@ -16,8 +16,8 @@ class PopOutTextDialog(QDialog):
 
         # Variables
         self.CurrentZoomLevel = 0
-        self.Width = max(self.MainWindow.width() - 100, 100)
-        self.Height = max(self.MainWindow.height() - 100, 100)
+        self.Width = max(self.MainWindow.width() - 100, 100) if self.MainWindow.DefaultPopOutSize["Width"] == 0 else self.MainWindow.DefaultPopOutSize["Width"]
+        self.Height = max(self.MainWindow.height() - 100, 100) if self.MainWindow.DefaultPopOutSize["Height"] == 0 else self.MainWindow.DefaultPopOutSize["Height"]
 
         # Pop-Out Text Widget
         self.PopOutTextWidget = PopOutTextWidget(self.Page, self.Notebook, self.PopOutMarkdownParser, self.MainWindow)

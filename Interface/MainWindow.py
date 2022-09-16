@@ -46,6 +46,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.AutoScrollQueue = None
         self.HighlightSyntax = False
         self.PopOutPages = []
+        self.DefaultPopOutSize = {"Width": 0, "Height": 0}
         self.AdvancedSearchDialogInst = None
 
         # Set Up Save and Open
@@ -744,6 +745,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             with open(HighlightPagesFile, "r") as ConfigFile:
                 self.SearchWidgetInst.HighlightPagesCheckBox.setChecked(json.loads(ConfigFile.read()))
 
+        # Default Pop-Out Size
+        DefaultPopOutSizeFile = self.GetResourcePath("Configs/DefaultPopOutSize.cfg")
+        if os.path.isfile(DefaultPopOutSizeFile):
+            with open(DefaultPopOutSizeFile, "r") as ConfigFile:
+                self.DefaultPopOutSize = json.loads(ConfigFile.read())
+
     def SaveConfigs(self):
         if not os.path.isdir(self.GetResourcePath("Configs")):
             os.mkdir(self.GetResourcePath("Configs"))
@@ -784,6 +791,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Highlight Pages
         with open(self.GetResourcePath("Configs/HighlightPages.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.SearchWidgetInst.HighlightPagesCheckBox.isChecked()))
+
+        # Default Pop-Out Size
+        with open(self.GetResourcePath("Configs/DefaultPopOutSize.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.DefaultPopOutSize))
 
         # Theme
         with open(self.GetResourcePath("Configs/Theme.cfg"), "w") as ConfigFile:

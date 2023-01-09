@@ -70,7 +70,7 @@ class TextWidget(QTextEdit):
     def AutoScroll(self):
         if self.MainWindow.AutoScrollQueue is not None:
             if self.verticalScrollBar().maximum() == self.MainWindow.AutoScrollQueue["ScrollBarMaximum"]:
-                self.verticalScrollBar().setValue(self.MainWindow.AutoScrollQueue["TargetScrollPosition"])
+                self.verticalScrollBar().setValue(int(self.MainWindow.AutoScrollQueue["TargetScrollPosition"]))
                 self.MainWindow.AutoScrollQueue = None
 
     # Internal Text and Cursor Methods
@@ -209,7 +209,7 @@ class TextWidget(QTextEdit):
         CursorVerticalPosition = self.cursorRect().top()
         ViewportHeight = self.viewport().height()
         VerticalScrollBar = self.verticalScrollBar()
-        VerticalScrollBar.setValue(VerticalScrollBar.value() + CursorVerticalPosition - (ViewportHeight / 2))
+        VerticalScrollBar.setValue(int(VerticalScrollBar.value() + CursorVerticalPosition - (ViewportHeight / 2)))
 
     def MakeCursorVisible(self):
         QTimer.singleShot(0, self.ensureCursorVisible)

@@ -869,7 +869,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             CurrentPageData = (CurrentPageIndexPath, CurrentPageScrollPosition, CurrentPageScrollMaximum)
             self.ForwardList.append(CurrentPageData)
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
-            self.TextWidgetInst.verticalScrollBar().setValue(TargetPageScrollPosition)
+            self.TextWidgetInst.verticalScrollBar().setValue(int(TargetPageScrollPosition))
             self.BackNavigation = False
             self.NotebookDisplayWidgetInst.setFocus()
 
@@ -889,7 +889,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             CurrentPageData = (CurrentPageIndexPath, CurrentPageScrollPosition, CurrentPageScrollMaximum)
             self.BackList.append(CurrentPageData)
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(TargetPageIndexPath)
-            self.TextWidgetInst.verticalScrollBar().setValue(TargetPageScrollPosition)
+            self.TextWidgetInst.verticalScrollBar().setValue(int(TargetPageScrollPosition))
             self.BackNavigation = False
             self.NotebookDisplayWidgetInst.setFocus()
 

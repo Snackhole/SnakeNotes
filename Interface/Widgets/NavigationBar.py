@@ -76,7 +76,7 @@ class NavigationScrollArea(QScrollArea):
         self.horizontalScrollBar().rangeChanged.connect(self.ScrollToEnd)
 
     def Scroll(self, Delta):
-        self.horizontalScrollBar().setValue(self.horizontalScrollBar().value() + Delta)
+        self.horizontalScrollBar().setValue(int(self.horizontalScrollBar().value() + Delta))
 
     def ScrollLeft(self):
         self.Scroll(self.LeftDelta)
@@ -85,7 +85,7 @@ class NavigationScrollArea(QScrollArea):
         self.Scroll(self.RightDelta)
 
     def ScrollToEnd(self):
-        self.horizontalScrollBar().setValue(self.horizontalScrollBar().maximum())
+        self.horizontalScrollBar().setValue(int(self.horizontalScrollBar().maximum()))
 
     def wheelEvent(self, QWheelEvent):
         Delta = QWheelEvent.angleDelta()

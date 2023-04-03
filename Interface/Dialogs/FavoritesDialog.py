@@ -1,6 +1,7 @@
 import os
 
-from PyQt5.QtWidgets import QDialog, QInputDialog, QListWidget, QPushButton, QGridLayout, QListWidgetItem, QMessageBox
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QDialog, QInputDialog, QListWidget, QPushButton, QGridLayout, QListWidgetItem, QMessageBox, QLineEdit, QCheckBox
 
 
 class FavoritesDialog(QDialog):
@@ -16,8 +17,18 @@ class FavoritesDialog(QDialog):
         self.Width = 250
         self.Height = 250
 
+        # Search Line Edit
+        self.SearchLineEdit = SearchLineEdit(self)
+        self.SearchLineEdit.setPlaceholderText("Search")
+        self.SearchLineEdit.textChanged.connect(self.PopulateFavoritesList)
+        self.SearchLineEdit.setFocus()
+
+        # Match Case Check Box
+        self.MatchCaseCheckBox = QCheckBox("Match Case")
+        self.MatchCaseCheckBox.stateChanged.connect(self.PopulateFavoritesList)
+
         # Favorites List
-        self.FavoritesList = QListWidget()
+        self.FavoritesList = FavoritesList(self)
         self.FavoritesList.itemDoubleClicked.connect(self.OpenFavorite)
 
         # Buttons
@@ -33,11 +44,15 @@ class FavoritesDialog(QDialog):
 
         # Create, Populate, and Set Layout
         self.Layout = QGridLayout()
-        self.Layout.addWidget(self.FavoritesList, 0, 0, 1, 3)
-        self.Layout.addWidget(self.AddCurrentNotebookAsFavoriteButton, 1, 0, 1, 3)
-        self.Layout.addWidget(self.OpenFavoriteButton, 2, 0)
-        self.Layout.addWidget(self.DeleteFavoriteButton, 2, 1)
-        self.Layout.addWidget(self.DoneButton, 2, 2)
+        self.SearchLayout = QGridLayout()
+        self.SearchLayout.addWidget(self.SearchLineEdit, 0, 0)
+        self.SearchLayout.addWidget(self.MatchCaseCheckBox, 0, 1)
+        self.Layout.addLayout(self.SearchLayout, 0, 0, 1, 3)
+        self.Layout.addWidget(self.FavoritesList, 1, 0, 1, 3)
+        self.Layout.addWidget(self.AddCurrentNotebookAsFavoriteButton, 2, 0, 1, 3)
+        self.Layout.addWidget(self.OpenFavoriteButton, 3, 0)
+        self.Layout.addWidget(self.DeleteFavoriteButton, 3, 1)
+        self.Layout.addWidget(self.DoneButton, 3, 2)
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
@@ -97,12 +112,51 @@ class FavoritesDialog(QDialog):
         self.resize(self.Width, self.Height)
 
     def PopulateFavoritesList(self):
+        SearchTerm = self.SearchLineEdit.text()
         self.FavoritesList.clear()
-        for FavoriteName, FavoritePath in sorted(self.FavoritesData.items()):
-            self.FavoritesList.addItem(FavoritesItem(FavoriteName, FavoritePath))
+        if SearchTerm == "":
+            for FavoriteName, FavoritePath in sorted(self.FavoritesData.items()):
+                self.FavoritesList.addItem(FavoritesItem(FavoriteName, FavoritePath))
+        else:
+            MatchCase = self.MatchCaseCheckBox.isChecked()
+            SearchResults = {FavoriteName: FavoritePath for FavoriteName, FavoritePath in sorted(self.FavoritesData.items()) if SearchTerm in (FavoriteName.lower() if not MatchCase else FavoriteName)}
+            for FavoriteName, FavoritePath in sorted(SearchResults.items()):
+                self.FavoritesList.addItem(FavoritesItem(FavoriteName, FavoritePath))
         if self.FavoritesList.count() > 0:
             self.FavoritesList.setCurrentRow(0)
-            self.FavoritesList.setFocus()
+
+
+class SearchLineEdit(QLineEdit):
+    def __init__(self, Dialog):
+        # QLineEdit Init
+        super().__init__()
+
+        # Store Parameters
+        self.Dialog = Dialog
+
+    def keyPressEvent(self, QKeyEvent):
+        KeyPressed = QKeyEvent.key()
+        if KeyPressed == Qt.Key_Down:
+            self.Dialog.FavoritesList.setFocus()
+        else:
+            super().keyPressEvent(QKeyEvent)
+
+
+class FavoritesList(QListWidget):
+    def __init__(self, Dialog):
+        # QListWidget Init
+        super().__init__()
+
+        # Store Parameters
+        self.Dialog = Dialog
+
+    def keyPressEvent(self, QKeyEvent):
+        KeyPressed = QKeyEvent.key()
+        ItemBefore = self.currentItem()
+        super().keyPressEvent(QKeyEvent)
+        ItemAfter = self.currentItem()
+        if ItemBefore == ItemAfter and KeyPressed == Qt.Key_Up:
+            self.Dialog.SearchLineEdit.setFocus()
 
 
 class FavoritesItem(QListWidgetItem):

@@ -18,6 +18,7 @@ from Interface.Dialogs.ImageManagerDialog import ImageManagerDialog
 from Interface.Dialogs.MovePageToDialog import MovePageToDialog
 from Interface.Dialogs.NewPageDialog import NewPageDialog
 from Interface.Dialogs.SearchForLinkedPagesDialog import SearchForLinkedPagesDialog
+from Interface.Dialogs.SetDefaultNotebookDialog import SetDefaultNotebookDialog
 from Interface.Dialogs.TemplateManagerDialog import TemplateManagerDialog
 from Interface.Dialogs.AddToPageAndSubpagesDialog import AddToPageAndSubpagesDialog
 from Interface.Dialogs.PopOutTextDialog import PopOutTextDialog
@@ -66,6 +67,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         # Load Configs
         self.LoadConfigs()
+
+        # Open Default Notebook if Set
+        DefaultNotebookPath = (self.GzipDefaultNotebook if self.GzipMode else self.DefaultNotebook)
+        if DefaultNotebookPath is not None:
+            if os.path.isfile(DefaultNotebookPath):
+                self.OpenActionTriggered(DefaultNotebookPath)
 
     def CreateInterface(self):
         # Load Theme
@@ -190,6 +197,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         self.FavoritesAction = QAction(self.FavoritesIcon, "Favorites")
         self.FavoritesAction.triggered.connect(self.Favorites)
+
+        self.SetDefaultNotebookAction = QAction("Set Default Notebook")
+        self.SetDefaultNotebookAction.triggered.connect(self.SetDefaultNotebook)
 
         self.SaveAction = QAction("Save")
         self.SaveAction.triggered.connect(lambda: self.SaveActionTriggered())
@@ -475,6 +485,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.FileMenu.addAction(self.NewAction)
         self.FileMenu.addAction(self.OpenAction)
         self.FileMenu.addAction(self.FavoritesAction)
+        self.FileMenu.addAction(self.SetDefaultNotebookAction)
         self.FileMenu.addSeparator()
         self.FileMenu.addAction(self.SaveAction)
         self.FileMenu.addAction(self.SaveAsAction)
@@ -756,6 +767,20 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             with open(DefaultPopOutSizeFile, "r") as ConfigFile:
                 self.DefaultPopOutSize = json.loads(ConfigFile.read())
 
+        # Default Notebook
+        DefaultNotebookFile = self.GetResourcePath("Configs/DefaultNotebook.cfg")
+        if os.path.isfile(DefaultNotebookFile):
+            with open(DefaultNotebookFile, "r") as ConfigFile:
+                self.DefaultNotebook = json.loads(ConfigFile.read())
+        else:
+            self.DefaultNotebook = None
+        GzipDefaultNotebookFile = self.GetResourcePath("Configs/GzipDefaultNotebook.cfg")
+        if os.path.isfile(GzipDefaultNotebookFile):
+            with open(GzipDefaultNotebookFile, "r") as ConfigFile:
+                self.GzipDefaultNotebook = json.loads(ConfigFile.read())
+        else:
+            self.GzipDefaultNotebook = None
+
     def SaveConfigs(self):
         if not os.path.isdir(self.GetResourcePath("Configs")):
             os.mkdir(self.GetResourcePath("Configs"))
@@ -810,6 +835,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         # Gzip Mode
         self.SaveGzipMode()
+
+        # Default Notebook
+        with open(self.GetResourcePath("Configs/DefaultNotebook.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.DefaultNotebook))
+        with open(self.GetResourcePath("Configs/GzipDefaultNotebook.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.GzipDefaultNotebook))
 
     # Notebook Methods
     def UpdateNotebook(self, Notebook):
@@ -1368,6 +1399,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         FavoritesDialogInst = FavoritesDialog(self.FavoritesData if not self.GzipMode else self.GzipFavoritesData, self)
         if FavoritesDialogInst.OpenFilePath is not None:
             self.OpenActionTriggered(FavoritesDialogInst.OpenFilePath)
+
+    def SetDefaultNotebook(self):
+        SetDefaultNotebookDialog(self)
 
     def NewActionTriggered(self):
         if not self.New(self.Notebook):

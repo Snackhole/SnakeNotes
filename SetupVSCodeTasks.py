@@ -6,7 +6,7 @@ import sys
 import Build
 
 # Establish Working Directory and OS
-WorkingDir = os.path.dirname(os.path.abspath(__file__))
+WorkingDir = os.getcwd()
 OS = platform.system()
 
 # Generate Task Commands

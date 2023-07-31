@@ -3,7 +3,7 @@
 set APPNAME=SnakeNotes
 
 set SHORTCUTNAME="%APPNAME%.lnk"
-set INTERPRETERPATH="%cd%\Python Interpreter\pythonw.exe"
+set INTERPRETERPATH="%cd%\Python Interpreter - Windows\pythonw.exe"
 set SCRIPTPATH="""%cd%\%APPNAME%.pyzw"""
 set ICONPATH="%cd%\Assets\%APPNAME% Icon.ico"
 

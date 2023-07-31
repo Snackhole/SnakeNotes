@@ -50,12 +50,14 @@ def Build():
     if BuildVariables["OS"] == "Windows":
         BuildVariables["Command"] = "python -m pip install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "\\requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "\\" + BuildVariables["BuildFolder"] + "\""
         BuildVariables["AssetFiles"].append("Create Shortcut.bat")
-        BuildVariables["ArchivedFiles"].append("Python Interpreter.zip")
+        BuildVariables["ArchivedFiles"].append("Python Interpreter - Windows.zip")
 
     # Linux-Specific Build Variables
     if BuildVariables["OS"] == "Linux":
         BuildVariables["Command"] = "pip3 install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "/requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "/" + BuildVariables["BuildFolder"] + "\""
         BuildVariables["AssetFiles"].append("CreateLinuxDesktopFile.py")
+        BuildVariables["AssetFiles"].append("CreateLinuxDesktopFileForIncludedInterpreter.py")
+        BuildVariables["ArchivedFiles"].append("Python Interpreter - Linux.zip")
 
     # Copy Code to Build Folder
     CopyFilesToBuildFolder(BuildVariables["CodeFiles"])

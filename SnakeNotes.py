@@ -1,7 +1,7 @@
 import os
 import sys
 
-AbsoluteDirectoryPath = os.path.dirname(os.path.abspath(__file__))
+AbsoluteDirectoryPath = os.path.dirname(__file__)
 if AbsoluteDirectoryPath.endswith(".pyz") or AbsoluteDirectoryPath.endswith(".pyzw"):
     AbsoluteDirectoryPath = os.path.dirname(AbsoluteDirectoryPath)
 if sys.path[0] != AbsoluteDirectoryPath:

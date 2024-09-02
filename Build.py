@@ -8,7 +8,7 @@ import zipapp
 
 # Build Variables
 BuildVariables = {}
-BuildVariables["Version"] = "67"
+BuildVariables["Version"] = "68"
 BuildVariables["AppName"] = "SnakeNotes"
 BuildVariables["VersionedAppName"] = BuildVariables["AppName"] + " " + BuildVariables["Version"]
 
@@ -23,7 +23,7 @@ def Build():
     def UnzipArchivedFilesToBuildFolder(ArchivedFiles):
         if "BuildFolder" in BuildVariables:
             for Archive in ArchivedFiles:
-                shutil.unpack_archive(Archive, os.path.join(BuildVariables["BuildFolder"], os.path.splitext(Archive)[0]))
+                shutil.unpack_archive(Archive["ArchiveName"], os.path.join(BuildVariables["BuildFolder"], Archive["ExtractedDirectoryName"]))
 
     def CleanUp():
         if "BuildFolder" in BuildVariables:
@@ -51,14 +51,14 @@ def Build():
     if BuildVariables["OS"] == "Windows":
         BuildVariables["Command"] = "python -m pip install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "\\requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "\\" + BuildVariables["BuildFolder"] + "\""
         BuildVariables["AssetFiles"].append("Create Shortcut.bat")
-        BuildVariables["ArchivedFiles"].append("Python Interpreter - Windows.zip")
+        BuildVariables["ArchivedFiles"].append({"ArchiveName": "Python Interpreter - Windows.tar.gz", "ExtractedDirectoryName": "Python Interpreter - Windows"})
 
     # Linux-Specific Build Variables
     if BuildVariables["OS"] == "Linux":
         BuildVariables["Command"] = "pip3 install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "/requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "/" + BuildVariables["BuildFolder"] + "\""
         BuildVariables["AssetFiles"].append("CreateLinuxDesktopFile.py")
         BuildVariables["AssetFiles"].append("CreateLinuxDesktopFileForIncludedInterpreter.py")
-        BuildVariables["ArchivedFiles"].append("Python Interpreter - Linux.zip")
+        BuildVariables["ArchivedFiles"].append({"ArchiveName": "Python Interpreter - Linux.tar.gz", "ExtractedDirectoryName": "Python Interpreter - Linux"})
 
     # Copy Code to Build Folder
     CopyFilesToBuildFolder(BuildVariables["CodeFiles"])

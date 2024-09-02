@@ -1,20 +1,20 @@
 # SnakeNotes
-SnakeNotes is a searchable notes application with hierarchical pages and markdown formatting, written in Python 3.10 with PyQT5.
+SnakeNotes is a searchable notes application with hierarchical pages and markdown formatting, written in Python 3.12 with PyQT5.
 
 ## Installation
-Because SnakeNotes is written in 64-bit Python and packaged as an executable zip, a 64-bit Python 3 installation is required to run it.  It was written and tested in Python 3.10, though it may or may not run in other versions of Python 3.
+Because SnakeNotes is written in 64-bit Python and packaged as an executable zip, a 64-bit Python 3 installation is required to run it.  It was written and tested in Python 3.12, though it may or may not run in other versions of Python 3.
 
 ### Windows
 On Windows, an appropriate Python installation is included with the release, and does not need to be installed or downloaded separately.
 
-Simply download the .zip file of the latest Windows release from this repository, unzip it wherever you like, and double-click on the `Create Shortcut.bat` file within the app folder.  This will create a shortcut that allows you to run the app.
+Simply download the .zip file of the latest Windows release from this repository, unzip it wherever you like, and double-click on the `Create Shortcut.bat` file within the app folder.  This will create a shortcut in your Start menu that allows you to run the app.
 
 It is recommended you place the shortcut in `\AppData\Roaming\Microsoft\Windows\Start Menu\Programs` for convenience.  This will cause the shortcut to appear in the Start menu with the correct icon.  More shortcuts can always be made by double-clicking on `Create Shortcut.bat`.
 
 ### Linux
-On Linux, SnakeNotes has only been built and tested for Kubuntu 22.04.  It probably runs just fine on many other distros, but you're on your own as far as resolving any problems or differences.
+On Linux, SnakeNotes has only been built and tested for Kubuntu 24.04.  It probably runs just fine on many other distros, but you're on your own as far as resolving any problems or differences.
 
-It is generally assumed that you already have 64-bit Python 3 installed as part of your distro.  If your distro has 3.10, you should be fine; otherwise, you may or may not need to install 3.10.
+It is generally assumed that you already have 64-bit Python 3 installed as part of your distro.  If your distro has 3.12, you should be fine; otherwise, you may or may not need to install 3.12.
 
 First, download the .zip file of the latest Linux release from this repository, and unzip it wherever you like (probably easiest somewhere in your Home).  To run the app, open a terminal in the app's directory and use the following command:
 
@@ -22,13 +22,13 @@ First, download the .zip file of the latest Linux release from this repository, 
 python3 SnakeNotes.pyzw
 ```
 
-Alternatively, you can use the included Python interpreter (after giving `Python Interpreter - Linux/bin/python3` executable permissions):
+Alternatively, you can use the included Python interpreter (after giving `Python Interpreter - Linux/bin/python3` executable permissions, if needed):
 
 ```
 "Python Interpreter - Linux/bin/python3" SnakeNotes.pyzw
 ```
 
-However, for convenience, consider running `python3 CreateLinuxDesktopFile.py` or `python3 CreateLinuxDesktopFileForIncludedInterpreter.py` (also in the app's directory; they will not work properly with any other working directory).  This will generate a .desktop file, which you should then copy to `usr/share/applications`  with `sudo cp SnakeNotes.desktop /usr/share/applications`.  Now SnakeNotes should show up along with your other apps in your desktop menus.
+However, for convenience, consider running `python3 CreateLinuxDesktopFile.py` or `python3 CreateLinuxDesktopFileForIncludedInterpreter.py` (also in the app's directory; they will not work properly with any other working directory).  This will generate a .desktop file, which will then be moved to `~/.local/share/applications/`.  Now SnakeNotes should show up along with your other apps in your desktop menus.
 
 If you prefer not to use the included interpreter, consider deleting the `Python Interpreter - Linux` folder to save space.
 
@@ -45,11 +45,11 @@ To save an existing `.ntbk` file as a `.ntbk.gz` file, just open it, turn on gzi
 It can take noticeably longer to save and open larger notebooks in gzip mode, due to the compression.
 
 ## Updates
-Updating SnakeNotes is as simple as deleting all files wherever you installed it *except* the `Configs` folder, and then extracting the contents of the latest release to the installation folder.  Any shortcuts in place should resolve without issue to the updated version.  If you are using the included interpreter, you likely must give it executable permissions after updating.
+Updating SnakeNotes is as simple as deleting all files wherever you installed it *except* the `Configs` folder, and then extracting the contents of the latest release to the installation folder.  Any shortcuts in place should resolve without issue to the updated version.  If you are using the included interpreter, you may have to give it executable permissions after updating.
 
 The `Configs` folder should be left in place as it stores settings and contexts between uses of the app.
 
 ## Uninstallation
 Uninstalling SnakeNotes itself only requires deleting the directory you extracted it to, along with any shortcuts you created.
 
-If you need to uninstall Python 3.10 or, on Linux, PyQT5, consult their documentation.
+If you need to uninstall Python 3.12 or, on Linux, PyQT5, consult their documentation.

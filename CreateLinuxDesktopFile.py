@@ -1,4 +1,5 @@
 import os
+import shutil
 
 AppName = "SnakeNotes"
 
@@ -7,13 +8,20 @@ CurrentWorkingDirectory = os.getcwd()
 AbsolutePathToExecutableZip = CurrentWorkingDirectory + "/" + ExecutableZip
 AbsolutePathToIconPNG = CurrentWorkingDirectory + "/Assets/" + AppName + " Icon.png"
 
-DesktopFileContents = """[Desktop Entry]
+DesktopFileContents = f"""[Desktop Entry]
 Type=Application
-Name={0}
-Exec=python3 "{1}"
-Icon={2}
+Name={AppName}
+Exec=python3 "{AbsolutePathToExecutableZip}"
+Icon={AbsolutePathToIconPNG}
 Categories=Application;"""
-DesktopFileContents = DesktopFileContents.format(AppName, AbsolutePathToExecutableZip, AbsolutePathToIconPNG)
 
-with open(AppName + ".desktop", "w") as DesktopFile:
+CreatedDesktopFilePath = AppName + ".desktop"
+DesktopFileDestinationPath = os.path.expanduser(os.path.join("~", ".local", "share", "applications", CreatedDesktopFilePath))
+
+with open(CreatedDesktopFilePath, "w") as DesktopFile:
     DesktopFile.write(DesktopFileContents)
+
+if os.path.isfile(DesktopFileDestinationPath):
+    os.remove(DesktopFileDestinationPath)
+
+shutil.move(CreatedDesktopFilePath, DesktopFileDestinationPath)

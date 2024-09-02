@@ -19,3 +19,7 @@ echo oLink.Save >> %SCRIPT%
 
 cscript /nologo %SCRIPT%
 del %SCRIPT%
+
+set STARTMENUPROGRAMSPATH="%AppData%\Microsoft\Windows\Start Menu\Programs"
+
+robocopy "%cd%" %STARTMENUPROGRAMSPATH% %SHORTCUTNAME% /mov

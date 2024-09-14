@@ -462,6 +462,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.AlphabetizeSubPagesAction.triggered.connect(self.AlphabetizeSubPages)
         self.ToggleReadModeActionsList.append(self.AlphabetizeSubPagesAction)
 
+        self.CopyLinkToCurrentPageAction = QAction("Copy Link to Current Page")
+        self.CopyLinkToCurrentPageAction.triggered.connect(self.CopyLinkToCurrentPage)
+
+        self.CopyIndexPathToCurrentPageAction = QAction("Copy Index Path to Current Page")
+        self.CopyIndexPathToCurrentPageAction.triggered.connect(self.CopyIndexPathToCurrentPage)
+
         self.ImageManagerAction = QAction("&Image Manager")
         self.ImageManagerAction.triggered.connect(self.ImageManager)
         self.ToggleReadModeActionsList.append(self.ImageManagerAction)
@@ -579,6 +585,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookMenu.addAction(self.DemoteAllSiblingPagesAction)
         self.NotebookMenu.addAction(self.MovePageToAction)
         self.NotebookMenu.addAction(self.AlphabetizeSubPagesAction)
+        self.NotebookMenu.addSeparator()
+        self.NotebookMenu.addAction(self.CopyLinkToCurrentPageAction)
+        self.NotebookMenu.addAction(self.CopyIndexPathToCurrentPageAction)
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.ImageManagerAction)
         self.NotebookMenu.addAction(self.TemplateManagerAction)
@@ -1149,6 +1158,17 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.RefreshAdvancedSearch()
             self.UpdateUnsavedChangesFlag(True)
             self.NotebookDisplayWidgetInst.setFocus()
+
+    def CopyLinkToCurrentPage(self):
+        IndexPathToCurrentPage = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
+        IndexPathStringToCurrentPage = json.dumps(IndexPathToCurrentPage)
+        CurrentPageTitle = self.Notebook.GetPageFromIndexPath(IndexPathToCurrentPage)["Title"]
+        LinkToCurrentPage = f"[{CurrentPageTitle}]({IndexPathStringToCurrentPage} \"{CurrentPageTitle}\")"
+        QApplication.clipboard().setText(LinkToCurrentPage)
+
+    def CopyIndexPathToCurrentPage(self):
+        IndexPathStringToCurrentPage = json.dumps(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath())
+        QApplication.clipboard().setText(IndexPathStringToCurrentPage)
 
     def GetLinkData(self, Page=None):
         LinkData = {}

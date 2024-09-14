@@ -218,6 +218,9 @@ class TextWidget(QTextEdit):
     def contextMenuEvent(self, QContextMenuEvent):
         ContextMenu = self.createStandardContextMenu()
         ContextMenu.addSeparator()
+        ContextMenu.addAction(self.MainWindow.CopyLinkToCurrentPageAction)
+        ContextMenu.addAction(self.MainWindow.CopyIndexPathToCurrentPageAction)
+        ContextMenu.addSeparator()
         ContextMenu.addAction(self.MainWindow.PopOutPageAction)
         Anchor = self.anchorAt(QContextMenuEvent.pos())
         if Anchor != "":

@@ -151,6 +151,20 @@ class TextWidget(QTextEdit):
         self.MakeCursorVisible()
         Cursor.endEditBlock()
 
+    def MultipleBlockStripPrefix(self, Prefix):
+        Cursor = self.textCursor()
+        self.SelectBlocks(Cursor)
+        Blocks = Cursor.selectedText().split("\u2029")
+        StrippedText = ""
+
+        for Block in Blocks:
+            StrippedText += (Block[len(Prefix):] + "\u2029") if Block.startswith(Prefix) else (Block + "\u2029")
+
+        Cursor.beginEditBlock()
+        Cursor.insertText(StrippedText[:-1])
+        self.MakeCursorVisible()
+        Cursor.endEditBlock()
+
     def InsertOnBlankLine(self, InsertSymbol):
         Cursor = self.textCursor()
         if self.CursorOnBlankLine(Cursor):
@@ -321,6 +335,14 @@ class TextWidget(QTextEdit):
     def CodeBlock(self):
         if not self.ReadMode and self.hasFocus():
             self.MultipleBlockWrap("```")
+
+    def Indent(self):
+        if not self.ReadMode and self.hasFocus():
+            self.MultipleBlockPrefix("  ")
+
+    def Outdent(self):
+        if not self.ReadMode and self.hasFocus():
+            self.MultipleBlockStripPrefix("  ")
 
     def HorizontalRule(self):
         if not self.ReadMode and self.hasFocus():

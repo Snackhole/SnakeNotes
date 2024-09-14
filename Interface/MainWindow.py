@@ -291,6 +291,14 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CodeBlockAction.triggered.connect(self.TextWidgetInst.CodeBlock)
         self.ToggleReadModeActionsList.append(self.CodeBlockAction)
 
+        self.IndentAction = QAction("&Indent")
+        self.IndentAction.triggered.connect(self.TextWidgetInst.Indent)
+        self.ToggleReadModeActionsList.append(self.IndentAction)
+
+        self.OutdentAction = QAction("O&utdent")
+        self.OutdentAction.triggered.connect(self.TextWidgetInst.Outdent)
+        self.ToggleReadModeActionsList.append(self.OutdentAction)
+
         self.HorizontalRuleAction = QAction("&Horizontal Rule")
         self.HorizontalRuleAction.triggered.connect(self.TextWidgetInst.HorizontalRule)
         self.ToggleReadModeActionsList.append(self.HorizontalRuleAction)
@@ -526,6 +534,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.NumberListAction)
         self.EditMenu.addAction(self.QuoteAction)
         self.EditMenu.addAction(self.CodeBlockAction)
+        self.EditMenu.addAction(self.IndentAction)
+        self.EditMenu.addAction(self.OutdentAction)
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.HorizontalRuleAction)
         self.EditMenu.addAction(self.FootnoteAction)

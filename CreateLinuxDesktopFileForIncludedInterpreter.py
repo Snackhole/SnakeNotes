@@ -3,11 +3,11 @@ import shutil
 
 AppName = "SnakeNotes"
 
-ExecutableZip = AppName + ".pyzw"
+ExecutableZip = f"{AppName}.pyzw"
 CurrentWorkingDirectory = os.getcwd()
-AbsolutePathToIncludedInterpreter = CurrentWorkingDirectory + "/Python Interpreter - Linux/bin/python3"
-AbsolutePathToExecutableZip = CurrentWorkingDirectory + "/" + ExecutableZip
-AbsolutePathToIconPNG = CurrentWorkingDirectory + "/Assets/" + AppName + " Icon.png"
+AbsolutePathToIncludedInterpreter = os.path.join(CurrentWorkingDirectory, "Python Interpreter - Linux", "bin", "python3")
+AbsolutePathToExecutableZip = os.path.join(CurrentWorkingDirectory, ExecutableZip)
+AbsolutePathToIconPNG = os.path.join(CurrentWorkingDirectory, "Assets", f"{AppName} Icon.png")
 
 DesktopFileContents = f"""[Desktop Entry]
 Type=Application
@@ -16,7 +16,7 @@ Exec="{AbsolutePathToIncludedInterpreter}" "{AbsolutePathToExecutableZip}"
 Icon={AbsolutePathToIconPNG}
 Categories=Application;"""
 
-CreatedDesktopFilePath = AppName + ".desktop"
+CreatedDesktopFilePath = f"{AppName}.desktop"
 DesktopFileDestinationPath = os.path.expanduser(os.path.join("~", ".local", "share", "applications", CreatedDesktopFilePath))
 
 with open(CreatedDesktopFilePath, "w") as DesktopFile:

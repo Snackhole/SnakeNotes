@@ -13,16 +13,16 @@ OS = platform.system()
 if OS == "Windows":
     PythonExecutable = os.path.join(WorkingDir, "venv", "Scripts", "python.exe")
 elif OS == "Linux":
-    PythonExecutable = "source " + os.path.join(WorkingDir, "venv", "bin", "activate") + "; " + os.path.join(WorkingDir, "venv", "bin", "python3")
+    PythonExecutable = f"source {os.path.join(WorkingDir, "venv", "bin", "activate")}; {os.path.join(WorkingDir, "venv", "bin", "python3")}"
 else:
     print("Not on Windows or Linux.  Set up tasks manually.")
     sys.exit()
 
-AppPath = os.path.join(WorkingDir, Build.BuildVariables["AppName"] + ".py")
+AppPath = os.path.join(WorkingDir, f"{Build.BuildVariables["AppName"]}.py")
 BuildPath = os.path.join(WorkingDir, "Build.py")
 
-AppCommand = PythonExecutable + " " + AppPath
-BuildCommand = PythonExecutable + " " + BuildPath
+AppCommand = f"{PythonExecutable} {AppPath}"
+BuildCommand = f"{PythonExecutable} {BuildPath}"
 
 # Create Tasks Dictionary
 TasksDict = {}
@@ -35,7 +35,7 @@ TasksDict["tasks"].append({})
 AppTaskDict = TasksDict["tasks"][0]
 BuildTaskDict = TasksDict["tasks"][1]
 
-AppTaskDict["label"] = Build.BuildVariables["AppName"] + ".py"
+AppTaskDict["label"] = f"{Build.BuildVariables["AppName"]}.py"
 AppTaskDict["type"] = "shell"
 AppTaskDict["command"] = AppCommand
 AppTaskDict["presentation"] = {"reveal": "silent", "showReuseMessage": False}

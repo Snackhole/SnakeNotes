@@ -10,7 +10,7 @@ import zipapp
 BuildVariables = {}
 BuildVariables["Version"] = "69"
 BuildVariables["AppName"] = "SnakeNotes"
-BuildVariables["VersionedAppName"] = BuildVariables["AppName"] + " " + BuildVariables["Version"]
+BuildVariables["VersionedAppName"] = f"{BuildVariables["AppName"]} {BuildVariables["Version"]}"
 
 
 def Build():
@@ -31,7 +31,7 @@ def Build():
             print("Build files cleaned up.")
 
     # Additional Build Variables
-    BuildVariables["BuildFolder"] = "BUILD - " + BuildVariables["VersionedAppName"]
+    BuildVariables["BuildFolder"] = f"BUILD - {BuildVariables["VersionedAppName"]}"
     BuildVariables["OS"] = platform.system()
     if BuildVariables["OS"] not in ["Windows", "Linux"]:
         print("OS unsupported; you'll have to write your own build function to package on this OS.")
@@ -41,21 +41,21 @@ def Build():
     BuildVariables["AssetFiles"] = ["Assets"]
     BuildVariables["ArchivedFiles"] = []
 
-    BuildVariables["ExecutableZipName"] = BuildVariables["AppName"] + ".pyzw"
+    BuildVariables["ExecutableZipName"] = f"{BuildVariables["AppName"]}.pyzw"
     BuildVariables["Interpreter"] = "python3"
-    BuildVariables["Main"] = BuildVariables["AppName"] + ":StartApp"
+    BuildVariables["Main"] = f"{BuildVariables["AppName"]}:StartApp"
 
     BuildVariables["CurrentWorkingDirectory"] = os.getcwd()
 
     #  Windows-Specific Build Variables
     if BuildVariables["OS"] == "Windows":
-        BuildVariables["Command"] = "python -m pip install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "\\requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "\\" + BuildVariables["BuildFolder"] + "\""
+        BuildVariables["Command"] = f"python -m pip install -r \"{BuildVariables["CurrentWorkingDirectory"]}\\requirements.txt\" --target \"{BuildVariables["CurrentWorkingDirectory"]}\\{BuildVariables["BuildFolder"]}\""
         BuildVariables["AssetFiles"].append("Create Shortcut.bat")
         BuildVariables["ArchivedFiles"].append({"ArchiveName": "Python Interpreter - Windows.tar.gz", "ExtractedDirectoryName": "Python Interpreter - Windows"})
 
     # Linux-Specific Build Variables
     if BuildVariables["OS"] == "Linux":
-        BuildVariables["Command"] = "pip3 install -r \"" + BuildVariables["CurrentWorkingDirectory"] + "/requirements.txt\" --target \"" + BuildVariables["CurrentWorkingDirectory"] + "/" + BuildVariables["BuildFolder"] + "\""
+        BuildVariables["Command"] = f"pip3 install -r \"{BuildVariables["CurrentWorkingDirectory"]}/requirements.txt\" --target \"{BuildVariables["CurrentWorkingDirectory"]}/{BuildVariables["BuildFolder"]}\""
         BuildVariables["AssetFiles"].append("CreateLinuxDesktopFile.py")
         BuildVariables["AssetFiles"].append("CreateLinuxDesktopFileForIncludedInterpreter.py")
         BuildVariables["ArchivedFiles"].append({"ArchiveName": "Python Interpreter - Linux.tar.gz", "ExtractedDirectoryName": "Python Interpreter - Linux"})
@@ -90,7 +90,7 @@ def Build():
         return
 
     # Zip Build
-    shutil.make_archive(BuildVariables["VersionedAppName"] + " - " + BuildVariables["OS"], "zip", BuildVariables["BuildFolder"])
+    shutil.make_archive(f"{BuildVariables["VersionedAppName"]} - {BuildVariables["OS"]}", "zip", BuildVariables["BuildFolder"])
     print("Build zipped.")
 
     # Clean Up

@@ -19,7 +19,7 @@ class SearchForLinkedPagesDialog(QDialog):
         self.DestinationIndexPath = None
 
         # Prompt
-        self.Prompt = QLabel("Pages linked by \"" + self.LinkingPage["Title"] + "\":")
+        self.Prompt = QLabel(f"Pages linked by \"{self.LinkingPage["Title"]}\":")
 
         # Notebook Display
         self.NotebookDisplay = QTreeWidget()
@@ -43,7 +43,7 @@ class SearchForLinkedPagesDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle("Pages Linked by \"" + self.LinkingPage["Title"] + "\"")
+        self.setWindowTitle(f"Pages Linked by \"{self.LinkingPage["Title"]}\"")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Populate Notebook Display
@@ -57,7 +57,7 @@ class SearchForLinkedPagesDialog(QDialog):
         self.FillNotebookWidgetItem(self.NotebookDisplay.invisibleRootItem(), self.MainWindow.Notebook.RootPage, IsRootPage=True)
 
     def FillNotebookWidgetItem(self, CurrentTreeItem, CurrentPage, IsRootPage=False):
-        IsLinkedPage = "](" + json.dumps(CurrentPage["IndexPath"]) in self.LinkingPage["Content"]
+        IsLinkedPage = f"]({json.dumps(CurrentPage["IndexPath"])}" in self.LinkingPage["Content"]
         ChildTreeItem = NotebookDisplayItem(CurrentPage["Title"], CurrentPage["IndexPath"], IsLinkedPage)
         CurrentTreeItem.addChild(ChildTreeItem)
 

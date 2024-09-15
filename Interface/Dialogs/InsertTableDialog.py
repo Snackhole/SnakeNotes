@@ -92,17 +92,17 @@ class InsertTableDialog(QDialog):
         TableString = ""
         CurrentRow = "|"
         for HeaderInput in self.HeaderInputsList:
-            CurrentRow += " " + HeaderInput.text() + " |"
-        TableString += CurrentRow + "\n"
+            CurrentRow += f" {HeaderInput.text()} |"
+        TableString += f"{CurrentRow}\n"
         CurrentRow = "|"
         for HeaderAlignment in self.HeaderAlignmentsList:
-            CurrentRow += " " + self.HeaderAlignmentSymbols[HeaderAlignment.currentText()] + " |"
-        TableString += CurrentRow + "\n"
+            CurrentRow += f" {self.HeaderAlignmentSymbols[HeaderAlignment.currentText()]} |"
+        TableString += f"{CurrentRow}\n"
         for RowIndex in range(len(self.RowsList)):
             CurrentRow = "|"
             for ColumnIndex in range(self.Columns):
-                CurrentRow += " " + self.RowsList[RowIndex][ColumnIndex].text() + " |"
-            TableString += CurrentRow + "\n"
+                CurrentRow += f" {self.RowsList[RowIndex][ColumnIndex].text()} |"
+            TableString += f"{CurrentRow}\n"
         TableString = TableString.rstrip()
         return TableString
 

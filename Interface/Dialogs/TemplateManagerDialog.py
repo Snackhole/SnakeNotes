@@ -104,7 +104,7 @@ class TemplateManagerDialog(QDialog):
         SelectedItems = self.TemplateList.selectedItems()
         if len(SelectedItems) > 0:
             CurrentTemplateName = SelectedItems[0].TemplateName
-            NewName, OK = QInputDialog.getText(self, "Rename " + CurrentTemplateName, "Enter a name:", text=CurrentTemplateName)
+            NewName, OK = QInputDialog.getText(self, f"Rename \"{CurrentTemplateName}\"", "Enter a name:", text=CurrentTemplateName)
             if OK:
                 if NewName == "":
                     self.MainWindow.DisplayMessageBox("Template names cannot be blank.", Parent=self)
@@ -123,7 +123,7 @@ class TemplateManagerDialog(QDialog):
         if len(SelectedItems) > 0:
             CurrentTemplateName = SelectedItems[0].TemplateName
             CurrentTemplateRow = self.TemplateList.currentRow()
-            if self.MainWindow.DisplayMessageBox("Are you sure you want to delete the template " + CurrentTemplateName + " from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+            if self.MainWindow.DisplayMessageBox(f"Are you sure you want to delete the template \"{CurrentTemplateName}\" from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
                 del self.Notebook.PageTemplates[CurrentTemplateName]
                 self.UnsavedChanges = True
                 self.PopulateTemplateList()

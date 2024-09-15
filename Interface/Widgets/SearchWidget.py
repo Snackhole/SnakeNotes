@@ -93,7 +93,11 @@ class SearchWidget(QFrame):
         for Result in Results["ResultsList"]:
             self.ResultsList.addItem(SearchResult(Result[0], Result[1]))
         if len(Results["ResultsList"]) > 0:
-            ResultsStatsString = str(Results["TotalHits"]) + " hit" + ("" if Results["TotalHits"] == 1 else "s") + " in " + str(Results["TotalPages"]) + " page" + ("" if Results["TotalPages"] == 1 else "s") + "."
+            TotalHits = str(Results["TotalHits"])
+            PluralizeHits = ("" if Results["TotalHits"] == 1 else "s")
+            TotalPages = str(Results["TotalPages"])
+            PluralizePages = ("" if Results["TotalPages"] == 1 else "s")
+            ResultsStatsString = f"{TotalHits} hit{PluralizeHits} in {TotalPages} page{PluralizePages}."
         else:
             ResultsStatsString = "No search results."
         self.MainWindow.SearchResultsStatsLabel.setText(ResultsStatsString)
@@ -202,7 +206,7 @@ class SearchWidget(QFrame):
             ResultsString = ""
             for ResultIndex in range(ResultsCount):
                 Result = self.ResultsList.item(ResultIndex)
-                ResultsString += Result.Title + " | Index Path:  " + str(Result.IndexPath) + "\n"
+                ResultsString += f"{Result.Title} | Index Path:  {str(Result.IndexPath)}\n"
             ResultsString = ResultsString.rstrip()
             QApplication.clipboard().setText(ResultsString)
 

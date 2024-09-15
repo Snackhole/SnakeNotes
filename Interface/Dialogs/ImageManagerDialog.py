@@ -127,7 +127,7 @@ class ImageManagerDialog(QDialog):
             self.ImageDisplay.setPixmap(ImagePixmap)
             self.ImageDisplay.resize(self.ImageDisplay.pixmap().size())
             CurrentFileName = SelectedItems[0].FileName
-            SearchTerm = "](" + CurrentFileName
+            SearchTerm = f"]({CurrentFileName}"
             SearchResults = self.Notebook.GetSearchResults(SearchTerm, MatchCase=True)
             self.LinkingPagesList.clear()
             for Result in SearchResults["ResultsList"]:
@@ -156,7 +156,7 @@ class ImageManagerDialog(QDialog):
         if ImageFilePath != "":
             ImageFileName = os.path.basename(ImageFilePath)
             if self.Notebook.HasImage(ImageFileName):
-                if self.MainWindow.DisplayMessageBox("A file named \"" + ImageFileName + "\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+                if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
                     AttachNewFile = True
             else:
                 AttachNewFile = True
@@ -174,7 +174,7 @@ class ImageManagerDialog(QDialog):
             AttachNewFile = False
             ImageFileName = os.path.basename(ImageFilePath)
             if self.Notebook.HasImage(ImageFileName):
-                if self.MainWindow.DisplayMessageBox("A file named \"" + ImageFileName + "\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+                if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
                     AttachNewFile = True
             else:
                 AttachNewFile = True
@@ -192,21 +192,21 @@ class ImageManagerDialog(QDialog):
             CurrentFileNameParts = os.path.splitext(SelectedItems[0].FileName)
             CurrentFileName = CurrentFileNameParts[0]
             CurrentFileExtension = CurrentFileNameParts[1]
-            NewName, OK = QInputDialog.getText(self, "Rename " + CurrentFileName, "Enter a name:", text=CurrentFileName)
+            NewName, OK = QInputDialog.getText(self, f"Rename \"{CurrentFileName}\"", "Enter a name:", text=CurrentFileName)
             if OK:
                 if NewName == "":
                     self.MainWindow.DisplayMessageBox("Image names cannot be blank.", Parent=self)
                 elif NewName + CurrentFileExtension in self.Notebook.Images:
                     self.MainWindow.DisplayMessageBox("There is already an image by that name.", Parent=self)
                 else:
-                    ImageContent = self.Notebook.Images[CurrentFileName + CurrentFileExtension]
-                    self.Notebook.Images[NewName + CurrentFileExtension] = ImageContent
-                    del self.Notebook.Images[CurrentFileName + CurrentFileExtension]
-                    self.MainWindow.SearchWidgetInst.ReplaceAllInNotebook(SearchText="](" + CurrentFileName + CurrentFileExtension, ReplaceText="](" + NewName + CurrentFileExtension, MatchCase=True)
+                    ImageContent = self.Notebook.Images[f"{CurrentFileName}{CurrentFileExtension}"]
+                    self.Notebook.Images[f"{NewName}{CurrentFileExtension}"] = ImageContent
+                    del self.Notebook.Images[f"{CurrentFileName}{CurrentFileExtension}"]
+                    self.MainWindow.SearchWidgetInst.ReplaceAllInNotebook(SearchText=f"]({CurrentFileName}{CurrentFileExtension}", ReplaceText=f"]({NewName}{CurrentFileExtension}", MatchCase=True)
                     self.UnsavedChanges = True
                     self.SearchLineEdit.clear()
                     self.PopulateImageList()
-                    self.ImageList.setCurrentRow(self.GetImageIndexFromName(NewName + CurrentFileExtension))
+                    self.ImageList.setCurrentRow(self.GetImageIndexFromName(f"{NewName}{CurrentFileExtension}"))
 
     def ExportImage(self):
         SelectedItems = self.ImageList.selectedItems()
@@ -234,7 +234,7 @@ class ImageManagerDialog(QDialog):
         if len(SelectedItems) > 0:
             CurrentFileName = SelectedItems[0].FileName
             CurrentImageRow = self.ImageList.currentRow()
-            if self.MainWindow.DisplayMessageBox("Are you sure you want to delete " + CurrentFileName + " from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+            if self.MainWindow.DisplayMessageBox(f"Are you sure you want to delete \"{CurrentFileName}\" from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
                 del self.Notebook.Images[CurrentFileName]
                 self.UnsavedChanges = True
                 self.PopulateImageList()

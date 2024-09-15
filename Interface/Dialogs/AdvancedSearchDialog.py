@@ -170,7 +170,11 @@ class AdvancedSearchDialog(QDialog):
         for Result in FilteredResults["ResultsList"]:
             self.ResultsList.addItem(SearchResult(Result[0], Result[1]))
         if len(FilteredResults["ResultsList"]) > 0:
-            ResultsStatsString = str(FilteredResults["TotalHits"]) + " hit" + ("" if FilteredResults["TotalHits"] == 1 else "s") + " in " + str(FilteredResults["TotalPages"]) + " page" + ("" if FilteredResults["TotalPages"] == 1 else "s") + "."
+            TotalHits = str(FilteredResults["TotalHits"])
+            PluralizeHits = ("" if FilteredResults["TotalHits"] == 1 else "s")
+            TotalPages = str(FilteredResults["TotalPages"])
+            PluralizePages = ("" if FilteredResults["TotalPages"] == 1 else "s")
+            ResultsStatsString = f"{TotalHits} hit{PluralizeHits} in {TotalPages} page{PluralizePages}."
         else:
             ResultsStatsString = "No search results."
         self.SearchResultsStatsLabel.setText(ResultsStatsString)
@@ -246,7 +250,7 @@ class AdvancedSearchDialog(QDialog):
         if self.WithinPage is None:
             self.WithinPageLineEdit.clear()
         else:
-            self.WithinPageLineEdit.setText(self.WithinPage["Title"] + " | Index Path:  " + str(self.WithinPage["IndexPath"]))
+            self.WithinPageLineEdit.setText(f"{self.WithinPage["Title"]} | Index Path:  {str(self.WithinPage["IndexPath"])}")
         self.RefreshingSearchResults = True
         self.Search()
         self.RefreshingSearchResults = False
@@ -271,7 +275,7 @@ class AdvancedSearchDialog(QDialog):
             ResultsString = ""
             for ResultIndex in range(ResultsCount):
                 Result = self.ResultsList.item(ResultIndex)
-                ResultsString += Result.Title + " | Index Path:  " + str(Result.IndexPath) + "\n"
+                ResultsString += f"{Result.Title} | Index Path:  {str(Result.IndexPath)}\n"
             ResultsString = ResultsString.rstrip()
             QApplication.clipboard().setText(ResultsString)
 

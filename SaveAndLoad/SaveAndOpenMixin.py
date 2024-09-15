@@ -28,12 +28,12 @@ class SaveAndOpenMixin:
         GzipMode = self.GzipMode if not ExportMode else False
         ActionString = "Save " if not ExportMode else "Export "
         ActionDoneString = "saved" if not ExportMode else "exported"
-        Caption = ActionString + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
+        Caption = f"{ActionString}{self.FileDescription if AlternateFileDescription is None else AlternateFileDescription} File"
         ExtensionWithoutGzip = self.FileExtension if AlternateFileExtension is None else AlternateFileExtension
         GzipExtension = ".gz"
-        ModeAndExtensionMatch = (self.CurrentOpenFileName.endswith(ExtensionWithoutGzip) and not GzipMode) or (self.CurrentOpenFileName.endswith(ExtensionWithoutGzip + GzipExtension) and GzipMode)
-        Extension = ExtensionWithoutGzip + ("" if not GzipMode else GzipExtension)
-        Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + Extension + ")"
+        ModeAndExtensionMatch = (self.CurrentOpenFileName.endswith(ExtensionWithoutGzip) and not GzipMode) or (self.CurrentOpenFileName.endswith(f"{ExtensionWithoutGzip}{GzipExtension}") and GzipMode)
+        Extension = f"{ExtensionWithoutGzip}{"" if not GzipMode else GzipExtension}"
+        Filter = f"{self.FileDescription if AlternateFileDescription is None else AlternateFileDescription} files (*{Extension})"
         SaveFileName = self.CurrentOpenFileName if self.CurrentOpenFileName != "" and not SaveAs and ModeAndExtensionMatch else QFileDialog.getSaveFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
         if SaveFileName == self.CurrentOpenFileName and os.path.isfile(SaveFileName) and self.FileLastModified is not None:
             SaveFileModified = datetime.fromtimestamp(os.path.getmtime(SaveFileName))
@@ -52,27 +52,27 @@ class SaveAndOpenMixin:
                     with gzip.open(SaveFileName, "wt") as SaveFile:
                         SaveFile.write(SaveString)
                 except FileNotFoundError as Error:
-                    self.DisplayMessageBox("Failed to " + ActionString.lower() + " with the following error:\n\n" + str(Error) + "\n\nThis is most likely due to the excessive length of the file paths needed.  Try to " + ActionString.lower() + " to a different location.")
-                    self.FlashStatusBar("No file " + ActionDoneString + ".")
+                    self.DisplayMessageBox(f"Failed to {ActionString.lower()} with the following error:\n\n{str(Error)}\n\nThis is most likely due to the excessive length of the file paths needed.  Try to {ActionString.lower()} to a different location.")
+                    self.FlashStatusBar(f"No file {ActionDoneString}.")
                     return False
             else:
                 try:
                     with open(SaveFileName, "w") as SaveFile:
                         SaveFile.write(SaveString)
                 except FileNotFoundError as Error:
-                    self.DisplayMessageBox("Failed to " + ActionString.lower() + " with the following error:\n\n" + str(Error) + "\n\nThis is most likely due to the excessive length of the file paths needed.  Try to " + ActionString.lower() + " to a different location.")
-                    self.FlashStatusBar("No file " + ActionDoneString + ".")
+                    self.DisplayMessageBox(f"Failed to {ActionString.lower()} with the following error:\n\n{str(Error)}\n\nThis is most likely due to the excessive length of the file paths needed.  Try to {ActionString.lower()} to a different location.")
+                    self.FlashStatusBar(f"No file {ActionDoneString}.")
                     return False
             SaveFileNameShort = os.path.basename(SaveFileName)
             self.LastOpenedDirectory = os.path.dirname(SaveFileName)
-            self.FlashStatusBar("File " + ActionDoneString + " as:  " + SaveFileNameShort)
+            self.FlashStatusBar(f"File {ActionDoneString} as:  \"{SaveFileNameShort}\"")
             if not ExportMode:
                 self.CurrentOpenFileName = SaveFileName
                 self.UnsavedChanges = False
                 self.FileLastModified = datetime.fromtimestamp(os.path.getmtime(SaveFileName))
             return True
         else:
-            self.FlashStatusBar("No file " + ActionDoneString + ".")
+            self.FlashStatusBar(f"No file {ActionDoneString}.")
             return False
 
     def Open(self, ObjectToSave, FilePath=None, RespectUnsavedChanges=True, AlternateFileDescription=None, AlternateFileExtension=None, ImportMode=False):
@@ -83,7 +83,7 @@ class SaveAndOpenMixin:
         ActionDoneString = "opened" if not ImportMode else "imported"
         ActionDoneStringCapitalized = "Opened" if not ImportMode else "Imported"
         if self.UnsavedChanges and RespectUnsavedChanges:
-            SavePrompt = self.DisplayMessageBox("Save unsaved work before " + ActionInProgressString + "?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
+            SavePrompt = self.DisplayMessageBox(f"Save unsaved work before {ActionInProgressString}?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
             if SavePrompt == QMessageBox.Yes:
                 if not self.Save(ObjectToSave):
                     return None
@@ -91,8 +91,8 @@ class SaveAndOpenMixin:
                 pass
             elif SavePrompt == QMessageBox.Cancel:
                 return None
-        Caption = ActionString + (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " File"
-        Filter = (self.FileDescription if AlternateFileDescription is None else AlternateFileDescription) + " files (*" + (self.FileExtension if AlternateFileExtension is None else AlternateFileExtension) + ("" if not GzipMode else ".gz") + ")"
+        Caption = f"{ActionString}{self.FileDescription if AlternateFileDescription is None else AlternateFileDescription} File"
+        Filter = f"{self.FileDescription if AlternateFileDescription is None else AlternateFileDescription} files (*{self.FileExtension if AlternateFileExtension is None else AlternateFileExtension}{"" if not GzipMode else ".gz"})"
         OpenFileName = FilePath if FilePath is not None else QFileDialog.getOpenFileName(caption=Caption, filter=Filter, directory=self.LastOpenedDirectory)[0]
         if OpenFileName != "":
             if GzipMode:
@@ -105,17 +105,17 @@ class SaveAndOpenMixin:
             try:
                 Data = self.JSONSerializer.DeserializeDataFromJSONString(JSONString)
             except KeyError:
-                self.DisplayMessageBox("There was an error " + ActionInProgressString + " " + OpenFileNameShort + ".")
+                self.DisplayMessageBox(f"There was an error {ActionInProgressString} \"{OpenFileNameShort}\".")
                 return None
             self.LastOpenedDirectory = os.path.dirname(OpenFileName)
-            self.FlashStatusBar(ActionDoneStringCapitalized + " file:  " + OpenFileNameShort)
+            self.FlashStatusBar(f"{ActionDoneStringCapitalized} file:  \"{OpenFileNameShort}\"")
             if not ImportMode:
                 self.CurrentOpenFileName = OpenFileName
                 self.UnsavedChanges = False
                 self.FileLastModified = datetime.fromtimestamp(os.path.getmtime(OpenFileName))
             return Data
         else:
-            self.FlashStatusBar("No file " + ActionDoneString + ".")
+            self.FlashStatusBar(f"No file {ActionDoneString}.")
             return None
 
     def New(self, ObjectToSave, RespectUnsavedChanges=True):

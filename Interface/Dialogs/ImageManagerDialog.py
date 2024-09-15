@@ -196,7 +196,7 @@ class ImageManagerDialog(QDialog):
             if OK:
                 if NewName == "":
                     self.MainWindow.DisplayMessageBox("Image names cannot be blank.", Parent=self)
-                elif NewName + CurrentFileExtension in self.Notebook.Images:
+                elif f"{NewName}{CurrentFileExtension}" in self.Notebook.Images:
                     self.MainWindow.DisplayMessageBox("There is already an image by that name.", Parent=self)
                 else:
                     ImageContent = self.Notebook.Images[f"{CurrentFileName}{CurrentFileExtension}"]

@@ -181,9 +181,9 @@ class Notebook(SerializableMixin):
         if CurrentPage is None:
             CurrentPage = self.RootPage
         if Prepend:
-            NewContent = Text + CurrentPage["Content"]
+            NewContent = f"{Text}{CurrentPage["Content"]}"
         else:
-            NewContent = CurrentPage["Content"] + Text
+            NewContent = f"{CurrentPage["Content"]}{Text}"
         CurrentPage["Content"] = NewContent
         for Page in CurrentPage["SubPages"]:
             self.AddTextToPageAndSubpages(Text, Page, Prepend=Prepend)

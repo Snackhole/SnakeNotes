@@ -34,7 +34,7 @@ class AddToPageAndSubpagesDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle(self.Mode + " to Page and Sub Pages")
+        self.setWindowTitle(f"{self.Mode} to Page and Sub Pages")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize

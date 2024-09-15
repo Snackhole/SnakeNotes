@@ -80,7 +80,7 @@ class TextWidget(QTextEdit):
         if "\u2029" in TextToWrap:
             return
         Cursor.beginEditBlock()
-        WrappedText = WrapPrefix + TextToWrap + WrapSuffix
+        WrappedText = f"{WrapPrefix}{TextToWrap}{WrapSuffix}"
         self.insertPlainText(WrappedText)
         for Character in range(len(WrapSuffix)):
             self.moveCursor(QTextCursor.Left)

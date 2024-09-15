@@ -17,7 +17,7 @@ class NewPageDialog(QDialog):
         self.TemplateName = ""
 
         # Labels
-        self.PageNamePrompt = QLabel(("Add sibling page before " if self.BeforeSibling else "Add sub page to ") + self.CurrentPageName + "?")
+        self.PageNamePrompt = QLabel(f"{"Add sibling page before" if self.BeforeSibling else "Add sub page to"} \"{self.CurrentPageName}\"?")
         self.PageNameLabel = QLabel("Name:")
         self.TemplateLabel = QLabel("Template:")
 

@@ -14,7 +14,7 @@ class DemotePageDialog(QDialog):
         self.SiblingPageIndex = None
 
         # Label
-        self.DemotePrompt = QLabel("Demote " + self.CurrentPage["Title"] + " to which of its siblings?")
+        self.DemotePrompt = QLabel(f"Demote \"{self.CurrentPage["Title"]}\" to which of its siblings?")
 
         # Sibling Page Titles Combo Box
         self.SiblingPageTitlesComboBox = QComboBox()

@@ -16,7 +16,7 @@ class NavigationBarSubPageDialog(QDialog):
         self.Height = 250
 
         # Prompt
-        self.PromptLabel = QLabel("Go to sub page of " + self.Page["Title"] + "?")
+        self.PromptLabel = QLabel(f"Go to sub page of \"{self.Page["Title"]}\"?")
         self.PromptLabel.setWordWrap(True)
 
         # Sub Page List

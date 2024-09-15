@@ -70,7 +70,7 @@ class MovePageToDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle("Move Page \"" + self.Notebook.GetPageFromIndexPath(self.CurrentPageIndexPath)["Title"] + "\" To...")
+        self.setWindowTitle(f"Move Page \"{self.Notebook.GetPageFromIndexPath(self.CurrentPageIndexPath)["Title"]}\" To...")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize

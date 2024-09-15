@@ -48,7 +48,7 @@ class SetDefaultNotebookDialog(QDialog):
         self.exec_()
 
     def Set(self):
-        NewDefaultNotebookFilePath = QFileDialog.getOpenFileName(parent=self, caption="Set Default Notebook", filter="Notebook files (*.ntbk" + (".gz" if self.GzipMode else "") + ")")[0]
+        NewDefaultNotebookFilePath = QFileDialog.getOpenFileName(parent=self, caption="Set Default Notebook", filter=f"Notebook files (*.ntbk{(".gz" if self.GzipMode else "")})")[0]
         if NewDefaultNotebookFilePath != "":
             if self.GzipMode:
                 self.MainWindow.GzipDefaultNotebook = NewDefaultNotebookFilePath

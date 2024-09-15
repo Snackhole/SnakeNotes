@@ -160,7 +160,7 @@ class NavigationPageLabel(QLabel):
         self.MainWindow = MainWindow
 
         # Initialize
-        super().__init__(" " + self.Page["Title"] + " ")
+        super().__init__(f" {self.Page["Title"]} ")
 
         # Configure
         self.setCursor(Qt.PointingHandCursor)

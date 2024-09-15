@@ -57,7 +57,7 @@ class EditHeaderOrFooterDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle("Edit " + Mode)
+        self.setWindowTitle(f"Edit {Mode}")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Window Resize

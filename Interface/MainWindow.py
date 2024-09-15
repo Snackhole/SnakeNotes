@@ -693,7 +693,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultKeybindings["PopOutPageAction"] = "Ctrl+P"
 
     def GetResourcePath(self, RelativeLocation):
-        return self.AbsoluteDirectoryPath + "/" + RelativeLocation
+        return os.path.join(self.AbsoluteDirectoryPath, RelativeLocation)
 
     def LoadConfigs(self):
         # Tool Bar Area
@@ -997,7 +997,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if not self.TextWidgetInst.ReadMode:
             CurrentPageIndexPath = self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
             CurrentPage = self.Notebook.GetPageFromIndexPath(CurrentPageIndexPath)
-            NewName, OK = QInputDialog.getText(self, "Rename " + CurrentPage["Title"], "Enter a title:", text=CurrentPage["Title"])
+            NewName, OK = QInputDialog.getText(self, f"Rename \"{CurrentPage["Title"]}\"", "Enter a title:", text=CurrentPage["Title"])
             if OK:
                 if NewName == "":
                     self.DisplayMessageBox("Page names cannot be blank.")
@@ -1188,13 +1188,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
     def GetLinkData(self, Page=None):
         LinkData = {}
         Page = Page if Page is not None else self.Notebook.RootPage
-        LinkData[id(Page)] = {"NoToolTip": "](" + json.dumps(Page["IndexPath"]) + ")", "ToolTip": "](" + json.dumps(Page["IndexPath"]) + " \"" + Page["Title"] + "\"" + ")"}
+        LinkData[id(Page)] = {"NoToolTip": f"]({json.dumps(Page["IndexPath"])})", "ToolTip": f"]({json.dumps(Page["IndexPath"])} \"{Page["Title"]}\")"}
         self.AddSubPageLinkData(Page, LinkData)
         return LinkData
 
     def AddSubPageLinkData(self, CurrentPage, LinkData):
         for SubPage in CurrentPage["SubPages"]:
-            LinkData[id(SubPage)] = {"NoToolTip": "](" + json.dumps(SubPage["IndexPath"]) + ")", "ToolTip": "](" + json.dumps(SubPage["IndexPath"]) + " \"" + SubPage["Title"] + "\"" + ")"}
+            LinkData[id(SubPage)] = {"NoToolTip": f"]({json.dumps(SubPage["IndexPath"])})", "ToolTip": f"]({json.dumps(SubPage["IndexPath"])} \"{SubPage["Title"]}\")"}
             self.AddSubPageLinkData(SubPage, LinkData)
 
     def UpdateLinks(self, OldLinkData, NewLinkData, Page=None):
@@ -1202,9 +1202,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         for PageID in NewLinkData:
             if PageID in OldLinkData:
                 if NewLinkData[PageID] != OldLinkData[PageID]:
-                    ReplaceStrings = (OldLinkData[PageID]["NoToolTip"], "<<LINK UPDATE TOKEN WITHOUT TOOL TIP " + str(PageID) + ">>", NewLinkData[PageID]["NoToolTip"])
+                    ReplaceStrings = (OldLinkData[PageID]["NoToolTip"], f"<<LINK UPDATE TOKEN WITHOUT TOOL TIP {str(PageID)}>>", NewLinkData[PageID]["NoToolTip"])
                     ReplaceQueue.append(ReplaceStrings)
-                    ReplaceStrings = (OldLinkData[PageID]["ToolTip"], "<<LINK UPDATE TOKEN WITH TOOL TIP " + str(PageID) + ">>", NewLinkData[PageID]["ToolTip"])
+                    ReplaceStrings = (OldLinkData[PageID]["ToolTip"], f"<<LINK UPDATE TOKEN WITH TOOL TIP {str(PageID)}>>", NewLinkData[PageID]["ToolTip"])
                     ReplaceQueue.append(ReplaceStrings)
         for ReplaceStrings in ReplaceQueue:
             if Page is None:
@@ -1218,9 +1218,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.SearchWidgetInst.ReplaceAllInPageAndSubPages(Page, SearchText=ReplaceStrings[1], ReplaceText=ReplaceStrings[2], MatchCase=True)
 
     def UpdateDeletedPageLinks(self, CurrentPage):
-        CurrentPageLinkString = "](" + json.dumps(CurrentPage["IndexPath"]) + ")"
+        CurrentPageLinkString = f"]({json.dumps(CurrentPage["IndexPath"])})"
         self.SearchWidgetInst.ReplaceAllInNotebook(CurrentPageLinkString, "]([deleted])", MatchCase=True, DelayTextUpdate=True)
-        CurrentPageLinkString = "](" + json.dumps(CurrentPage["IndexPath"]) + " \"" + CurrentPage["Title"] + "\"" + ")"
+        CurrentPageLinkString = f"]({json.dumps(CurrentPage["IndexPath"])} \"{CurrentPage["Title"]}\")"
         self.SearchWidgetInst.ReplaceAllInNotebook(CurrentPageLinkString, "]([deleted])", MatchCase=True, DelayTextUpdate=True)
         for SubPage in CurrentPage["SubPages"]:
             self.UpdateDeletedPageLinks(SubPage)
@@ -1249,7 +1249,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def SearchForLinkingPages(self):
         self.SearchAction.trigger()
-        self.SearchWidgetInst.SearchTextLineEdit.setText("](" + json.dumps(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()))
+        self.SearchWidgetInst.SearchTextLineEdit.setText(f"]({json.dumps(self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath())}")
         self.SearchWidgetInst.SearchButton.click()
 
     def SearchForLinkedPages(self):
@@ -1371,7 +1371,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         QTimer.singleShot(Duration, self.StatusBar.clearMessage)
 
     def UpdateWindowTitle(self):
-        self.setWindowTitle(self.ScriptName + (" - [" + os.path.basename(self.CurrentOpenFileName) + "]" if self.CurrentOpenFileName != "" else "") + " - \"" + self.TextWidgetInst.CurrentPage["Title"] + "\"" + (" *" if self.UnsavedChanges else ""))
+        CurrentOpenFileNameString = f" - [{os.path.basename(self.CurrentOpenFileName)}]" if self.CurrentOpenFileName != "" else ""
+        UnsavedChangesString = " *" if self.UnsavedChanges else ""
+        self.setWindowTitle(f"{self.ScriptName}{CurrentOpenFileNameString} - \"{self.TextWidgetInst.CurrentPage["Title"]}\"{UnsavedChangesString}")
 
     def PopOutPage(self, IndexPath=None):
         Page = self.TextWidgetInst.CurrentPage if IndexPath is None else self.Notebook.GetPageFromIndexPath(IndexPath)
@@ -1501,11 +1503,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             try:
                 self.CreatePDFFileFromPage(self.TextWidgetInst.CurrentPage, self.Notebook, ExportFileName)
             except FileNotFoundError as Error:
-                self.DisplayMessageBox("The page export failed with the following error:\n\n" + str(Error) + "\n\nThis is most likely due to the excessive length of the file paths needed.  Try exporting to a different location.")
+                self.DisplayMessageBox(f"The page export failed with the following error:\n\n{str(Error)}\n\nThis is most likely due to the excessive length of the file paths needed.  Try exporting to a different location.")
                 self.FlashStatusBar("Page not exported.")
                 return
             ExportFileNameShort = os.path.basename(ExportFileName)
-            self.FlashStatusBar("Page exported as:  " + ExportFileNameShort)
+            self.FlashStatusBar(f"Page exported as:  \"{ExportFileNameShort}\"")
         else:
             self.FlashStatusBar("Page not exported.")
 
@@ -1519,20 +1521,20 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             try:
                 self.ExportNotebookPagesAsPDFs(self.Notebook.RootPage, ExportFolderName)
             except FileNotFoundError as Error:
-                self.DisplayMessageBox("The notebook export failed with the following error:\n\n" + str(Error) + "\n\nThis is most likely due to the excessive length of the file paths needed.  Try exporting to a different location.")
+                self.DisplayMessageBox(f"The notebook export failed with the following error:\n\n{str(Error)}\n\nThis is most likely due to the excessive length of the file paths needed.  Try exporting to a different location.")
                 self.FlashStatusBar("Notebook not exported.")
                 return
             ExportFolderNameShort = os.path.basename(ExportFolderName)
-            self.FlashStatusBar("Notebook exported to:  " + ExportFolderNameShort)
+            self.FlashStatusBar(f"Notebook exported to:  \"{ExportFolderNameShort}\"")
         else:
             self.FlashStatusBar("Notebook not exported.")
 
     def ExportNotebookPagesAsPDFs(self, CurrentPage, CurrentFolderName):
         if not os.path.isdir(CurrentFolderName):
             os.mkdir(CurrentFolderName)
-        PageFileName = os.path.join(CurrentFolderName, str(CurrentPage["IndexPath"]) + " " + CurrentPage["Title"] + ".pdf")
+        PageFileName = os.path.join(CurrentFolderName, f"{str(CurrentPage["IndexPath"])} {CurrentPage["Title"]}.pdf")
         self.CreatePDFFileFromPage(CurrentPage, self.Notebook, PageFileName)
-        SubPageFolderName = os.path.join(CurrentFolderName, str(CurrentPage["IndexPath"]) + " " + CurrentPage["Title"])
+        SubPageFolderName = os.path.join(CurrentFolderName, f"{str(CurrentPage["IndexPath"])} {CurrentPage["Title"]}")
         for SubPage in CurrentPage["SubPages"]:
             self.ExportNotebookPagesAsPDFs(SubPage, SubPageFolderName)
 

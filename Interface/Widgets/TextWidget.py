@@ -131,7 +131,7 @@ class TextWidget(QTextEdit):
                     PrefixedText += f"{Block}\u2029"
         else:
             for Block in Blocks:
-                PrefixedText += f"{(Prefix if Block != "" else "")}{Block}\u2029"
+                PrefixedText += f"{Prefix if Block != "" else ""}{Block}\u2029"
 
         Cursor.beginEditBlock()
         Cursor.insertText(PrefixedText[:-1])
@@ -318,7 +318,7 @@ class TextWidget(QTextEdit):
 
     def Header(self, Level):
         if not self.ReadMode and self.hasFocus():
-            self.SingleBlockPrefix(f"{("#" * Level)} ")
+            self.SingleBlockPrefix(f"{"#" * Level} ")
 
     def BulletList(self):
         if not self.ReadMode and self.hasFocus():

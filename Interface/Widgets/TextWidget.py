@@ -125,13 +125,13 @@ class TextWidget(QTextEdit):
             CurrentPrefixInt = 1
             for Block in Blocks:
                 if Block != "":
-                    PrefixedText += str(CurrentPrefixInt) + ". " + Block + "\u2029"
+                    PrefixedText += f"{str(CurrentPrefixInt)}. {Block}\u2029"
                     CurrentPrefixInt += 1
                 else:
-                    PrefixedText += Block + "\u2029"
+                    PrefixedText += f"{Block}\u2029"
         else:
             for Block in Blocks:
-                PrefixedText += (Prefix if Block != "" else "") + Block + "\u2029"
+                PrefixedText += f"{(Prefix if Block != "" else "")}{Block}\u2029"
 
         Cursor.beginEditBlock()
         Cursor.insertText(PrefixedText[:-1])
@@ -142,7 +142,7 @@ class TextWidget(QTextEdit):
         Cursor = self.textCursor()
         self.SelectBlocks(Cursor)
         SelectedBlocksText = Cursor.selectedText()
-        WrappedText = WrapSymbol + "\u2029" + SelectedBlocksText + "\u2029" + WrapSymbol
+        WrappedText = f"{WrapSymbol}\u2029{SelectedBlocksText}\u2029{WrapSymbol}"
 
         Cursor.beginEditBlock()
         Cursor.insertText(WrappedText)
@@ -158,7 +158,7 @@ class TextWidget(QTextEdit):
         StrippedText = ""
 
         for Block in Blocks:
-            StrippedText += (Block[len(Prefix):] + "\u2029") if Block.startswith(Prefix) else (Block + "\u2029")
+            StrippedText += (f"{Block[len(Prefix):]}\u2029") if Block.startswith(Prefix) else (f"{Block}\u2029")
 
         Cursor.beginEditBlock()
         Cursor.insertText(StrippedText[:-1])
@@ -318,7 +318,7 @@ class TextWidget(QTextEdit):
 
     def Header(self, Level):
         if not self.ReadMode and self.hasFocus():
-            self.SingleBlockPrefix(("#" * Level) + " ")
+            self.SingleBlockPrefix(f"{("#" * Level)} ")
 
     def BulletList(self):
         if not self.ReadMode and self.hasFocus():
@@ -355,7 +355,7 @@ class TextWidget(QTextEdit):
                 if FootnoteLabel == "":
                     self.MainWindow.DisplayMessageBox("Footnote labels cannot be blank.")
                 else:
-                    FootnoteSymbol = "[^" + FootnoteLabel + "]"
+                    FootnoteSymbol = f"[^{FootnoteLabel}]"
                     Cursor = self.textCursor()
                     Cursor.beginEditBlock()
                     self.insertPlainText(FootnoteSymbol)
@@ -368,7 +368,7 @@ class TextWidget(QTextEdit):
                             NextLineBlank = self.NextLineBlank(Cursor)
                     else:
                         Cursor.movePosition(QTextCursor.End)
-                    Cursor.insertText(("\u2029" * 2) + FootnoteSymbol + ": ")
+                    Cursor.insertText(f"\u2029\u2029{FootnoteSymbol}: ")
                     self.setTextCursor(Cursor)
                     self.MakeCursorVisible()
                     QTimer.singleShot(0, self.VerticallyCenterCursor)
@@ -389,11 +389,16 @@ class TextWidget(QTextEdit):
                 Cursor = self.textCursor()
                 Cursor.beginEditBlock()
                 if InsertLinksDialogInst.InsertIndexPath is not None:
-                    self.SelectionSpanWrap("[", "](" + json.dumps(InsertLinksDialogInst.InsertIndexPath) + (" \"" + InsertLinksDialogInst.ToolTipText + "\"" if InsertLinksDialogInst.AddToolTip else "") + ")")
+                    IndexPath = json.dumps(InsertLinksDialogInst.InsertIndexPath)
+                    ToolTipText = f" \"{InsertLinksDialogInst.ToolTipText}\"" if InsertLinksDialogInst.AddToolTip else ""
+                    self.SelectionSpanWrap("[", f"]({IndexPath}{ToolTipText})")
                 elif InsertLinksDialogInst.InsertIndexPaths is not None and InsertLinksDialogInst.SubPageLinksSeparator is not None:
                     InsertString = ""
                     for SubPagePath in InsertLinksDialogInst.InsertIndexPaths:
-                        InsertString += "[" + SubPagePath[0] + "](" + json.dumps(SubPagePath[1]) + (" \"" + SubPagePath[0] + "\"" if InsertLinksDialogInst.AddToolTip else "") + ")" + InsertLinksDialogInst.SubPageLinksSeparator
+                        SubPageTitle = SubPagePath[0]
+                        SubPageIndexPath = json.dumps(SubPagePath[1])
+                        SubPageToolTipText = f" \"{SubPageTitle}\"" if InsertLinksDialogInst.AddToolTip else ""
+                        InsertString += f"[{SubPageTitle}]({SubPageIndexPath}{SubPageToolTipText}){InsertLinksDialogInst.SubPageLinksSeparator}"
                     InsertString = InsertString.rstrip()
                     self.InsertOnBlankLine(InsertString)
                     self.MakeCursorVisible()
@@ -403,7 +408,7 @@ class TextWidget(QTextEdit):
         if not self.ReadMode and self.hasFocus():
             LinkString, OK = QInputDialog.getText(self, "Insert External Link", "Enter a link URL:")
             if OK:
-                self.SelectionSpanWrap("[", "](" + LinkString + ")")
+                self.SelectionSpanWrap("[", f"]({LinkString})")
 
     def TextToLink(self):
         if not self.ReadMode and self.hasFocus():
@@ -418,7 +423,7 @@ class TextWidget(QTextEdit):
                     else:
                         TopResultIndexPath = SearchResults["ResultsList"][0][1]
                         TopResultTitle = SearchResults["ResultsList"][0][0]
-                        self.SelectionSpanWrap("[", "](" + json.dumps(TopResultIndexPath) + " \"" + TopResultTitle + "\"" + ")")
+                        self.SelectionSpanWrap("[", f"]({json.dumps(TopResultIndexPath)} \"{TopResultTitle}\")")
                 else:
                     self.MainWindow.DisplayMessageBox("No pages with this title found.")
 
@@ -440,7 +445,7 @@ class TextWidget(QTextEdit):
             else:
                 InsertImageDialogInst = InsertImageDialog(self.Notebook, self.MainWindow)
                 if InsertImageDialogInst.InsertAccepted:
-                    self.insertPlainText("![](" + InsertImageDialogInst.ImageFileName + ")")
+                    self.insertPlainText(f"![]({InsertImageDialogInst.ImageFileName})")
                     self.MakeCursorVisible()
                 else:
                     self.MainWindow.FlashStatusBar("No image inserted.")

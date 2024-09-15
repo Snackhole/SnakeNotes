@@ -361,6 +361,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DeleteLineAction.triggered.connect(self.TextWidgetInst.DeleteLine)
         self.ToggleReadModeActionsList.append(self.DeleteLineAction)
 
+        self.SortLinesAction = QAction("Sort Lines")
+        self.SortLinesAction.triggered.connect(self.TextWidgetInst.SortLines)
+        self.ToggleReadModeActionsList.append(self.SortLinesAction)
+
         # View Actions
         self.BackAction = QAction(self.BackIcon, "Back")
         self.BackAction.triggered.connect(self.Back)
@@ -555,6 +559,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.MoveLineDownAction)
         self.EditMenu.addAction(self.DuplicateLinesAction)
         self.EditMenu.addAction(self.DeleteLineAction)
+        self.EditMenu.addAction(self.SortLinesAction)
 
         self.ViewMenu = self.MenuBar.addMenu("&View")
         self.ViewMenu.addAction(self.BackAction)

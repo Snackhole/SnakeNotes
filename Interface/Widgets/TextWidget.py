@@ -484,6 +484,19 @@ class TextWidget(QTextEdit):
                 self.setTextCursor(Cursor)
                 self.VerticallyCenterCursor()
 
+    def SortLines(self):
+        if not self.ReadMode and self.hasFocus():
+            Cursor = self.textCursor()
+            self.SelectBlocks(Cursor)
+            Blocks = Cursor.selectedText().split("\u2029")
+            if len(Blocks) > 1:
+                Blocks.sort(key=str.casefold)
+                SortedLines = "\u2029".join(Blocks)
+                Cursor.beginEditBlock()
+                Cursor.insertText(SortedLines)
+                self.MakeCursorVisible()
+                Cursor.endEditBlock()
+
 
 class SyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, TextWidget):

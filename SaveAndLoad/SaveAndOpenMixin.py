@@ -38,7 +38,7 @@ class SaveAndOpenMixin:
         if SaveFileName == self.CurrentOpenFileName and os.path.isfile(SaveFileName) and self.FileLastModified is not None:
             SaveFileModified = datetime.fromtimestamp(os.path.getmtime(SaveFileName))
             if SaveFileModified != self.FileLastModified:
-                if self.DisplayMessageBox("Warning!  The current open file has been modified since it was last saved or opened by this instance of SnakeNotes.  Saving could cause data loss!\n\nProceed?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.No:
+                if self.DisplayMessageBox(f"Warning!  The current open file has been modified since it was last saved or opened by this instance of {self.ScriptName}.  Saving could cause data loss!\n\nProceed?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.No:
                     return False
         if SaveFileName != "":
             if not SaveFileName.endswith(Extension):

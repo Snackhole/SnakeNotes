@@ -46,6 +46,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ForwardList = []
         self.BackNavigation = False
         self.AutoScrollQueue = None
+        self.SwapLeftAndMiddleClickForLinks = False
         self.HighlightSyntax = False
         self.PopOutPages = []
         self.DefaultPopOutSize = {"Width": 0, "Height": 0}
@@ -407,6 +408,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SetDefaultPopOutSizeAction = QAction("Set Default Pop-Out Page Size")
         self.SetDefaultPopOutSizeAction.triggered.connect(self.SetDefaultPopOutSize)
 
+        self.SwapLeftAndMiddleClickForLinksAction = QAction("Swap Left and Middle Click for Links")
+        self.SwapLeftAndMiddleClickForLinksAction.setCheckable(True)
+        self.SwapLeftAndMiddleClickForLinksAction.setChecked(False)
+        self.SwapLeftAndMiddleClickForLinksAction.triggered.connect(self.ToggleSwapLeftAndMiddleClickForLinks)
+
         self.ExpandAllAction = QAction(self.ExpandAllIcon, "&Expand All")
         self.ExpandAllAction.triggered.connect(self.NotebookDisplayWidgetInst.expandAll)
 
@@ -575,8 +581,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.ZoomOutAction)
         self.ViewMenu.addAction(self.ZoomInAction)
         self.ViewMenu.addAction(self.DefaultZoomAction)
+        self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.PopOutPageAction)
         self.ViewMenu.addAction(self.SetDefaultPopOutSizeAction)
+        self.ViewMenu.addAction(self.SwapLeftAndMiddleClickForLinksAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.ExpandAllAction)
         self.ViewMenu.addAction(self.ExpandRecursivelyAction)
@@ -764,6 +772,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.InlineFootnoteStyle = True
         self.InlineFootnoteStyleAction.setChecked(self.InlineFootnoteStyle)
 
+        # Swap Left and Middle Click for Links
+        SwapLeftAndMiddleClickForLinksFile = self.GetResourcePath("Configs/SwapLeftAndMiddleClickForLinks.cfg")
+        if os.path.isfile(SwapLeftAndMiddleClickForLinksFile):
+            with open(SwapLeftAndMiddleClickForLinksFile, "r") as ConfigFile:
+                self.SwapLeftAndMiddleClickForLinks = json.loads(ConfigFile.read())
+        else:
+            self.SwapLeftAndMiddleClickForLinks = False
+        self.SwapLeftAndMiddleClickForLinksAction.setChecked(self.SwapLeftAndMiddleClickForLinks)
+
         # Highlight Syntax
         HighlightSyntaxFile = self.GetResourcePath("Configs/HighlightSyntax.cfg")
         if os.path.isfile(HighlightSyntaxFile):
@@ -833,6 +850,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Inline Footnote Style
         with open(self.GetResourcePath("Configs/InlineFootnoteStyle.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.InlineFootnoteStyle))
+
+        # Swap Left and Middle Click for Links
+        with open(self.GetResourcePath("Configs/SwapLeftAndMiddleClickForLinks.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.SwapLeftAndMiddleClickForLinks))
 
         # Highlight Syntax
         with open(self.GetResourcePath("Configs/HighlightSyntax.cfg"), "w") as ConfigFile:
@@ -1318,6 +1339,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def ToggleInlineFootnoteStyle(self):
         self.InlineFootnoteStyle = not self.InlineFootnoteStyle
+
+    def ToggleSwapLeftAndMiddleClickForLinks(self):
+        self.SwapLeftAndMiddleClickForLinks = not self.SwapLeftAndMiddleClickForLinks
+        if self.SwapLeftAndMiddleClickForLinks:
+            self.DisplayMessageBox("Left click and middle click for links have been swapped; double left click to open a pop-up of the linked page, and middle click to navigate to it.")
+        else:
+            self.DisplayMessageBox("Left click and middle click for links have been swapped; double left click to navigate to the linked page, and middle click to open a pop-up of it.")
 
     def ToggleHighlightSyntax(self):
         self.HighlightSyntax = not self.HighlightSyntax

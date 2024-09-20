@@ -255,29 +255,14 @@ class TextWidget(QTextEdit):
     def mouseDoubleClickEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
         if Anchor != "" and QMouseEvent.button() == Qt.LeftButton:
-            if self.Notebook.StringIsValidIndexPath(Anchor):
-                self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(Anchor)
-                QMouseEvent.accept()
-            else:
-                if Anchor.startswith("[0,"):
-                    self.MainWindow.DisplayMessageBox("Linked page not found.")
-                else:
-                    webbrowser.open(Anchor)
+            self.NavigateToLink(Anchor, QMouseEvent) if not self.MainWindow.SwapLeftAndMiddleClickForLinks else self.OpenLinkAsPopup(Anchor, QMouseEvent)
         else:
             super().mouseDoubleClickEvent(QMouseEvent)
 
     def mouseReleaseEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
         if Anchor != "" and QMouseEvent.button() == Qt.MiddleButton:
-            if self.Notebook.StringIsValidIndexPath(Anchor):
-                IndexPath = json.loads(Anchor)
-                self.MainWindow.PopOutPage(IndexPath)
-                QMouseEvent.accept()
-            else:
-                if Anchor.startswith("[0,"):
-                    self.MainWindow.DisplayMessageBox("Linked page not found.")
-                else:
-                    webbrowser.open(Anchor)
+            self.OpenLinkAsPopup(Anchor, QMouseEvent) if not self.MainWindow.SwapLeftAndMiddleClickForLinks else self.NavigateToLink(Anchor, QMouseEvent)
         else:
             super().mouseReleaseEvent(QMouseEvent)
 
@@ -298,6 +283,32 @@ class TextWidget(QTextEdit):
         else:
             self.viewport().setCursor(Qt.IBeamCursor)
         return super().mouseMoveEvent(QMouseEvent)
+
+    # Link Methods
+    def NavigateToLink(self, Anchor, QMouseEvent):
+        if self.Notebook.StringIsValidIndexPath(Anchor):
+            self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(Anchor)
+            QMouseEvent.accept()
+        else:
+            if Anchor.startswith("[0,"):
+                self.MainWindow.DisplayMessageBox("Linked page not found.")
+                QMouseEvent.accept()
+            else:
+                webbrowser.open(Anchor)
+                QMouseEvent.accept()
+
+    def OpenLinkAsPopup(self, Anchor, QMouseEvent):
+        if self.Notebook.StringIsValidIndexPath(Anchor):
+            IndexPath = json.loads(Anchor)
+            self.MainWindow.PopOutPage(IndexPath)
+            QMouseEvent.accept()
+        else:
+            if Anchor.startswith("[0,"):
+                self.MainWindow.DisplayMessageBox("Linked page not found.")
+                QMouseEvent.accept()
+            else:
+                webbrowser.open(Anchor)
+                QMouseEvent.accept()
 
     # Action Methods
     def Italics(self):

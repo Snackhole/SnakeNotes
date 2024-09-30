@@ -779,6 +779,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.InlineFootnoteStyle = True
         self.InlineFootnoteStyleAction.setChecked(self.InlineFootnoteStyle)
 
+        # Show Hit Counts
+        ShowHitCountsFile = self.GetResourcePath("Configs/ShowHitCounts.cfg")
+        if os.path.isfile(ShowHitCountsFile):
+            with open(ShowHitCountsFile, "r") as ConfigFile:
+                self.ShowHitCounts = json.loads(ConfigFile.read())
+        else:
+            self.ShowHitCounts = False
+        self.ShowHitCountsAction.setChecked(self.ShowHitCounts)
+
         # Swap Left and Middle Click for Links
         SwapLeftAndMiddleClickForLinksFile = self.GetResourcePath("Configs/SwapLeftAndMiddleClickForLinks.cfg")
         if os.path.isfile(SwapLeftAndMiddleClickForLinksFile):
@@ -857,6 +866,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Inline Footnote Style
         with open(self.GetResourcePath("Configs/InlineFootnoteStyle.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.InlineFootnoteStyle))
+
+        # Show Hit Counts
+        with open(self.GetResourcePath("Configs/ShowHitCounts.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.ShowHitCounts))
 
         # Swap Left and Middle Click for Links
         with open(self.GetResourcePath("Configs/SwapLeftAndMiddleClickForLinks.cfg"), "w") as ConfigFile:

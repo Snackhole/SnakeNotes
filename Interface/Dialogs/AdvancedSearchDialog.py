@@ -168,7 +168,7 @@ class AdvancedSearchDialog(QDialog):
         Filters = self.GetFilters()
         FilteredResults = self.MainWindow.Notebook.GetFilteredSearchResults(UnfilteredResults, Filters)
         for Result in FilteredResults["ResultsList"]:
-            self.ResultsList.addItem(SearchResult(Result[0], Result[1]))
+            self.ResultsList.addItem(SearchResult(Result[0], Result[1], Result[3], Result[4], self.MainWindow.ShowHitCounts))
         if len(FilteredResults["ResultsList"]) > 0:
             TotalHits = str(FilteredResults["TotalHits"])
             PluralizeHits = ("" if FilteredResults["TotalHits"] == 1 else "s")
@@ -275,7 +275,7 @@ class AdvancedSearchDialog(QDialog):
             ResultsString = ""
             for ResultIndex in range(ResultsCount):
                 Result = self.ResultsList.item(ResultIndex)
-                ResultsString += f"{Result.Title} | Index Path:  {str(Result.IndexPath)}\n"
+                ResultsString += f"{Result.Title} | Index Path:  {str(Result.IndexPath)} | Title Hits:  {str(Result.TitleHits)} | Content Hits:  {str(Result.ContentHits)}\n"
             ResultsString = ResultsString.rstrip()
             QApplication.clipboard().setText(ResultsString)
 
@@ -315,15 +315,23 @@ class AdvancedSearchDialog(QDialog):
 
 
 class SearchResult(QListWidgetItem):
-    def __init__(self, Title, IndexPath):
+    def __init__(self, Title, IndexPath, TitleHits, ContentHits, ShowHitCounts):
         super().__init__()
 
         # Store Parameters
         self.Title = Title
         self.IndexPath = IndexPath
+        self.TitleHits = TitleHits
+        self.ContentHits = ContentHits
+        self.ShowHitCounts = ShowHitCounts
 
         # Set Text
-        self.setText(self.Title)
+        TitleHitsString = str(self.TitleHits)
+        PluralizeTitleHits = ("" if self.TitleHits == 1 else "s")
+        ContentHitsString = str(self.ContentHits)
+        PluralizeContentHits = ("" if self.ContentHits == 1 else "s")
+        HitCountsString = f"\n        [{TitleHitsString} title hit{PluralizeTitleHits}; {ContentHitsString} content hit{PluralizeContentHits}]" if self.ShowHitCounts else ""
+        self.setText(f"{self.Title}{HitCountsString}")
 
 
 class GetWithinPageDialog(QDialog):

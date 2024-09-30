@@ -46,6 +46,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ForwardList = []
         self.BackNavigation = False
         self.AutoScrollQueue = None
+        self.ShowHitCounts = False
         self.SwapLeftAndMiddleClickForLinks = False
         self.HighlightSyntax = False
         self.PopOutPages = []
@@ -393,6 +394,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.AdvancedSearchAction = QAction("Advanced Search")
         self.AdvancedSearchAction.triggered.connect(self.AdvancedSearch)
 
+        self.ShowHitCountsAction = QAction("Show Hit Counts in Search Results")
+        self.ShowHitCountsAction.setCheckable(True)
+        self.ShowHitCountsAction.setChecked(False)
+        self.ShowHitCountsAction.triggered.connect(self.ToggleShowHitCounts)
+
         self.ZoomOutAction = QAction(self.ZoomOutIcon, "Zoom Out")
         self.ZoomOutAction.triggered.connect(self.ZoomOut)
 
@@ -577,6 +583,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.SearchForLinkedPagesAction)
         self.ViewMenu.addAction(self.CopySearchResultsAction)
         self.ViewMenu.addAction(self.AdvancedSearchAction)
+        self.ViewMenu.addAction(self.ShowHitCountsAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.ZoomOutAction)
         self.ViewMenu.addAction(self.ZoomInAction)
@@ -1339,6 +1346,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def ToggleInlineFootnoteStyle(self):
         self.InlineFootnoteStyle = not self.InlineFootnoteStyle
+
+    def ToggleShowHitCounts(self):
+        self.ShowHitCounts = not self.ShowHitCounts
+        self.SearchWidgetInst.RefreshSearch()
+        self.RefreshAdvancedSearch()
 
     def ToggleSwapLeftAndMiddleClickForLinks(self):
         self.SwapLeftAndMiddleClickForLinks = not self.SwapLeftAndMiddleClickForLinks

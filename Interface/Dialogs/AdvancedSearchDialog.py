@@ -326,12 +326,15 @@ class SearchResult(QListWidgetItem):
         self.ShowHitCounts = ShowHitCounts
 
         # Set Text
-        TitleHitsString = str(self.TitleHits)
-        PluralizeTitleHits = ("" if self.TitleHits == 1 else "s")
-        ContentHitsString = str(self.ContentHits)
-        PluralizeContentHits = ("" if self.ContentHits == 1 else "s")
-        HitCountsString = f"\n        [{TitleHitsString} title hit{PluralizeTitleHits}; {ContentHitsString} content hit{PluralizeContentHits}]" if self.ShowHitCounts else ""
-        self.setText(f"{self.Title}{HitCountsString}")
+        if self.ShowHitCounts:
+            TitleHitsString = str(self.TitleHits)
+            PluralizeTitleHits = ("" if self.TitleHits == 1 else "s")
+            ContentHitsString = str(self.ContentHits)
+            PluralizeContentHits = ("" if self.ContentHits == 1 else "s")
+            HitCountsString = f"\n        [{TitleHitsString} title hit{PluralizeTitleHits}; {ContentHitsString} content hit{PluralizeContentHits}]"
+            self.setText(f"{self.Title}{HitCountsString}")
+        else:
+            self.setText(self.Title)
 
 
 class GetWithinPageDialog(QDialog):

@@ -91,7 +91,7 @@ class SearchWidget(QFrame):
             return
         Results = self.Notebook.GetSearchResults(SearchText, MatchCase=MatchCase)
         for Result in Results["ResultsList"]:
-            self.ResultsList.addItem(SearchResult(Result[0], Result[1]))
+            self.ResultsList.addItem(SearchResult(Result[0], Result[1], Result[3], Result[4], self.MainWindow.ShowHitCounts))
         if len(Results["ResultsList"]) > 0:
             TotalHits = str(Results["TotalHits"])
             PluralizeHits = ("" if Results["TotalHits"] == 1 else "s")
@@ -206,7 +206,7 @@ class SearchWidget(QFrame):
             ResultsString = ""
             for ResultIndex in range(ResultsCount):
                 Result = self.ResultsList.item(ResultIndex)
-                ResultsString += f"{Result.Title} | Index Path:  {str(Result.IndexPath)}\n"
+                ResultsString += f"{Result.Title} | Index Path:  {str(Result.IndexPath)} | Title Hits:  {str(Result.TitleHits)} | Content Hits:  {str(Result.ContentHits)}\n"
             ResultsString = ResultsString.rstrip()
             QApplication.clipboard().setText(ResultsString)
 
@@ -243,15 +243,26 @@ class SearchWidget(QFrame):
 
 
 class SearchResult(QListWidgetItem):
-    def __init__(self, Title, IndexPath):
+    def __init__(self, Title, IndexPath, TitleHits, ContentHits, ShowHitCounts):
         super().__init__()
 
         # Store Parameters
         self.Title = Title
         self.IndexPath = IndexPath
+        self.TitleHits = TitleHits
+        self.ContentHits = ContentHits
+        self.ShowHitCounts = ShowHitCounts
 
         # Set Text
-        self.setText(self.Title)
+        if self.ShowHitCounts:
+            TitleHitsString = str(self.TitleHits)
+            PluralizeTitleHits = ("" if self.TitleHits == 1 else "s")
+            ContentHitsString = str(self.ContentHits)
+            PluralizeContentHits = ("" if self.ContentHits == 1 else "s")
+            HitCountsString = f"\n        [{TitleHitsString} title hit{PluralizeTitleHits}; {ContentHitsString} content hit{PluralizeContentHits}]"
+            self.setText(f"{self.Title}{HitCountsString}")
+        else:
+            self.setText(self.Title)
 
 
 class SearchLineEdit(QLineEdit):

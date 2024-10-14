@@ -19,11 +19,20 @@ class AdvancedSearchDialog(QDialog):
         # Advanced Search Text Line Edit
         self.SearchTextLineEdit = QLineEdit()
         self.SearchTextLineEdit.setPlaceholderText("Search")
+        self.SearchTextLineEdit.textChanged.connect(self.RehighlightTextWidget)
+        self.SearchTextLineEdit.setMinimumWidth(250)
         self.SearchTextLineEdit.setSizePolicy(self.InputsSizePolicy)
 
         # Match Case Check Box
         self.MatchCaseCheckBox = QCheckBox("Match Case")
+        self.MatchCaseCheckBox.stateChanged.connect(self.RehighlightTextWidget)
         self.MatchCaseCheckBox.setSizePolicy(self.InputsSizePolicy)
+
+        # Highlight Text Check Box
+        self.HighlightCheckBox = QCheckBox("Highlight Text")
+        self.HighlightCheckBox.setChecked(True)
+        self.HighlightCheckBox.stateChanged.connect(self.RehighlightTextWidget)
+        self.HighlightCheckBox.setSizePolicy(self.InputsSizePolicy)
 
         # Content Filtering Inputs
         self.ContentContainsLabel = QLabel("Content Contains:")
@@ -103,8 +112,12 @@ class AdvancedSearchDialog(QDialog):
         self.Layout = QGridLayout()
 
         self.SearchLayout = QGridLayout()
-        self.SearchLayout.addWidget(self.SearchTextLineEdit, 0, 0, 1, 2)
-        self.SearchLayout.addWidget(self.MatchCaseCheckBox, 0, 2)
+        self.SearchTextLayout = QGridLayout()
+        self.SearchTextLayout.addWidget(self.SearchTextLineEdit, 0, 0)
+        self.SearchTextLayout.addWidget(self.MatchCaseCheckBox, 0, 1)
+        self.SearchTextLayout.addWidget(self.HighlightCheckBox, 0, 2)
+        self.SearchTextLayout.setColumnStretch(0, 1)
+        self.SearchLayout.addLayout(self.SearchTextLayout, 0, 0, 1, 3)
         self.SearchLayout.addWidget(self.ContentContainsLabel, 1, 0)
         self.SearchLayout.addWidget(self.ContentContainsLineEdit, 1, 1)
         self.SearchLayout.addWidget(self.ContentContainsMatchCaseCheckBox, 1, 2)
@@ -131,6 +144,7 @@ class AdvancedSearchDialog(QDialog):
         self.SearchLayout.addWidget(self.TitleEndsWithMatchCaseCheckBox, 8, 2)
         self.SearchLayout.addWidget(self.WithinPageButton, 9, 0)
         self.SearchLayout.addWidget(self.WithinPageLineEdit, 9, 1, 1, 2)
+        self.SearchLayout.setColumnStretch(1, 1)
         self.Layout.addLayout(self.SearchLayout, 0, 0, 2, 1)
 
         self.Layout.addWidget(self.ResultsList, 0, 1)
@@ -287,6 +301,10 @@ class AdvancedSearchDialog(QDialog):
         self.WithinPage = None
         self.SearchResultsStatsLabel.setText("No search results.")
         self.RefreshSearch()
+        self.RehighlightTextWidget()
+
+    def RehighlightTextWidget(self):
+        self.MainWindow.TextWidgetInst.SyntaxHighlighter.rehighlight()
 
     def SetGeometryToMinimum(self):
         FrameGeometryRectangle = self.frameGeometry()

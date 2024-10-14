@@ -622,3 +622,17 @@ class SyntaxHighlighter(QSyntaxHighlighter):
                     TargetIterator = re.finditer(re.escape(SearchText), Text, re.IGNORECASE)
                 for Target in TargetIterator:
                     self.setFormat(Target.start(), Target.end() - Target.start(), self.SearchHighlightFormat)
+
+        # Highlight Advanced Search Text
+        AdvancedSearchDialogInst = self.TextWidget.MainWindow.AdvancedSearchDialogInst
+        if AdvancedSearchDialogInst is not None:
+            if AdvancedSearchDialogInst.HighlightCheckBox.isChecked():
+                SearchText = AdvancedSearchDialogInst.SearchTextLineEdit.text()
+                if SearchText != "":
+                    MatchCase = AdvancedSearchDialogInst.MatchCaseCheckBox.isChecked()
+                    if MatchCase:
+                        TargetIterator = re.finditer(re.escape(SearchText), Text)
+                    else:
+                        TargetIterator = re.finditer(re.escape(SearchText), Text, re.IGNORECASE)
+                    for Target in TargetIterator:
+                        self.setFormat(Target.start(), Target.end() - Target.start(), self.SearchHighlightFormat)

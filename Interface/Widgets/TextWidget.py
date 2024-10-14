@@ -593,6 +593,7 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         return self.FootnotesFormat
 
     def highlightBlock(self, Text):
+        # Highlight Syntax
         if self.TextWidget.MainWindow.HighlightSyntax and not self.TextWidget.ReadMode:
             for HighlightTarget in self.HighlightTargets:
                 TargetIterator = re.finditer(HighlightTarget["RegEx"], Text)
@@ -600,6 +601,8 @@ class SyntaxHighlighter(QSyntaxHighlighter):
                     Format = HighlightTarget["FormatCallable"](Target)
                     if Format is not None:
                         self.setFormat(Target.start(), Target.end() - Target.start(), Format)
+
+        # Highlight Text
         for HighlightText in self.TextWidget.MainWindow.TextToHighlight:
             if self.TextWidget.MainWindow.TextToHighlightMatchCase:
                 TargetIterator = re.finditer(re.escape(HighlightText), Text)
@@ -607,6 +610,8 @@ class SyntaxHighlighter(QSyntaxHighlighter):
                 TargetIterator = re.finditer(re.escape(HighlightText), Text, re.IGNORECASE)
             for Target in TargetIterator:
                 self.setFormat(Target.start(), Target.end() - Target.start(), self.TextHighlightFormat)
+
+        # Highlight Search Text
         if self.TextWidget.MainWindow.SearchWidgetInst.HighlightCheckBox.isChecked():
             SearchText = self.TextWidget.MainWindow.SearchWidgetInst.SearchTextLineEdit.text()
             if SearchText != "":

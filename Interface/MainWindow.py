@@ -49,7 +49,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.AutoScrollQueue = None
         self.ShowHitCounts = False
         self.SwapLeftAndMiddleClickForLinks = False
-        self.HighlightSyntax = False
+        self.HighlightSyntax = True
         self.TextToHighlight = []
         self.TextToHighlightMatchCase = False
         self.PopOutPages = []
@@ -436,7 +436,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         self.HighlightSyntaxAction = QAction("Highlight Syntax")
         self.HighlightSyntaxAction.setCheckable(True)
-        self.HighlightSyntaxAction.setChecked(False)
+        self.HighlightSyntaxAction.setChecked(True)
         self.HighlightSyntaxAction.triggered.connect(self.ToggleHighlightSyntax)
         self.ToggleReadModeActionsList.append(self.HighlightSyntaxAction)
 
@@ -816,7 +816,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             with open(HighlightSyntaxFile, "r") as ConfigFile:
                 self.HighlightSyntax = json.loads(ConfigFile.read())
         else:
-            self.HighlightSyntax = False
+            self.HighlightSyntax = True
         self.HighlightSyntaxAction.setChecked(self.HighlightSyntax)
 
         # Highlight Text

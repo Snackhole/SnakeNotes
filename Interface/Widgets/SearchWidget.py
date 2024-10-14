@@ -31,10 +31,12 @@ class SearchWidget(QFrame):
 
         # Highlight Text Check Box
         self.HighlightCheckBox = QCheckBox("Highlight Text")
+        self.HighlightCheckBox.setChecked(True)
         self.HighlightCheckBox.stateChanged.connect(self.RehighlightTextWidget)
 
         # Highlight Pages Check Box
         self.HighlightPagesCheckBox = QCheckBox("Highlight Pages")
+        self.HighlightPagesCheckBox.setChecked(True)
         self.HighlightPagesCheckBox.stateChanged.connect(lambda: self.HighlightPages(Clear=True))
 
         # Replace Text Line Edit

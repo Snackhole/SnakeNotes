@@ -30,8 +30,8 @@ class AdvancedSearchDialog(QDialog):
 
         # Highlight Text Check Box
         self.HighlightCheckBox = QCheckBox("Highlight Text")
-        self.HighlightCheckBox.setChecked(True)
-        self.HighlightCheckBox.stateChanged.connect(self.RehighlightTextWidget)
+        self.HighlightCheckBox.setChecked(self.MainWindow.AdvancedSearchHighlightText)
+        self.HighlightCheckBox.stateChanged.connect(self.ToggleHighlightText)
         self.HighlightCheckBox.setSizePolicy(self.InputsSizePolicy)
 
         # Content Filtering Inputs
@@ -303,6 +303,10 @@ class AdvancedSearchDialog(QDialog):
         self.RefreshSearch()
         self.RehighlightTextWidget()
 
+    def ToggleHighlightText(self):
+        self.MainWindow.AdvancedSearchHighlightText = not self.MainWindow.AdvancedSearchHighlightText
+        self.RehighlightTextWidget()
+
     def RehighlightTextWidget(self):
         self.MainWindow.TextWidgetInst.SyntaxHighlighter.rehighlight()
 
@@ -320,6 +324,7 @@ class AdvancedSearchDialog(QDialog):
 
     def closeEvent(self, event):
         self.MainWindow.AdvancedSearchDialogInst = None
+        self.RehighlightTextWidget()
         return super().closeEvent(event)
 
     def keyPressEvent(self, QKeyEvent):

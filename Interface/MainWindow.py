@@ -52,6 +52,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.HighlightSyntax = True
         self.TextToHighlight = []
         self.TextToHighlightMatchCase = False
+        self.AdvancedSearchHighlightText = True
         self.PopOutPages = []
         self.DefaultPopOutSize = {"Width": 0, "Height": 0}
         self.AdvancedSearchDialogInst = None
@@ -836,6 +837,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             with open(SearchHighlightFile, "r") as ConfigFile:
                 self.SearchWidgetInst.HighlightCheckBox.setChecked(json.loads(ConfigFile.read()))
 
+        # Advanced Search Highlight
+        AdvancedSearchHighlightFile = self.GetResourcePath("Configs/AdvancedSearchHighlight.cfg")
+        if os.path.isfile(AdvancedSearchHighlightFile):
+            with open(AdvancedSearchHighlightFile, "r") as ConfigFile:
+                self.AdvancedSearchHighlightText = json.loads(ConfigFile.read())
+
         # Highlight Pages
         HighlightPagesFile = self.GetResourcePath("Configs/HighlightPages.cfg")
         if os.path.isfile(HighlightPagesFile):
@@ -913,6 +920,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Search Highlight
         with open(self.GetResourcePath("Configs/SearchHighlight.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.SearchWidgetInst.HighlightCheckBox.isChecked()))
+
+        # Advanced Search Highlight
+        with open(self.GetResourcePath("Configs/AdvancedSearchHighlight.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.AdvancedSearchHighlightText))
 
         # Highlight Pages
         with open(self.GetResourcePath("Configs/HighlightPages.cfg"), "w") as ConfigFile:

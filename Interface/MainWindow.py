@@ -422,7 +422,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SwapLeftAndMiddleClickForLinksAction.setChecked(False)
         self.SwapLeftAndMiddleClickForLinksAction.triggered.connect(self.ToggleSwapLeftAndMiddleClickForLinks)
 
-        self.GoToIndexPathAction = QAction("Go to Index Path")
+        self.GoToIndexPathAction = QAction("Go to Page by Index Path")
         self.GoToIndexPathAction.triggered.connect(self.GoToIndexPath)
 
         self.ExpandAllAction = QAction(self.ExpandAllIcon, "&Expand All")
@@ -1356,7 +1356,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.AdvancedSearchDialogInst.ClearWithinPage()
 
     def GoToIndexPath(self):
-        IndexPathString, OK = QInputDialog.getText(self, "Go to Index Path", "Go to index path:")
+        IndexPathString, OK = QInputDialog.getText(self, "Go to Page by Index Path", "Go to page by index path:")
         if OK:
             if self.Notebook.StringIsValidIndexPath(IndexPathString):
                 self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(IndexPathString)

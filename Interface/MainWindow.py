@@ -14,6 +14,7 @@ from Interface.Dialogs.DefaultPopOutSizeDialog import DefaultPopOutSizeDialog
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
 from Interface.Dialogs.FavoritesDialog import FavoritesDialog
+from Interface.Dialogs.HighlightTextDialog import HighlightTextDialog
 from Interface.Dialogs.ImageManagerDialog import ImageManagerDialog
 from Interface.Dialogs.MovePageToDialog import MovePageToDialog
 from Interface.Dialogs.NewPageDialog import NewPageDialog
@@ -49,6 +50,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ShowHitCounts = False
         self.SwapLeftAndMiddleClickForLinks = False
         self.HighlightSyntax = False
+        self.TextToHighlight = []
+        self.TextToHighlightMatchCase = False
         self.PopOutPages = []
         self.DefaultPopOutSize = {"Width": 0, "Height": 0}
         self.AdvancedSearchDialogInst = None
@@ -434,6 +437,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.HighlightSyntaxAction.triggered.connect(self.ToggleHighlightSyntax)
         self.ToggleReadModeActionsList.append(self.HighlightSyntaxAction)
 
+        self.HighlightTextAction = QAction("Highlight Text")
+        self.HighlightTextAction.triggered.connect(self.HighlightText)
+
         self.SetThemeAction = QAction("Set Theme")
         self.SetThemeAction.triggered.connect(self.SetTheme)
 
@@ -598,6 +604,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.CollapseAllAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.HighlightSyntaxAction)
+        self.ViewMenu.addAction(self.HighlightTextAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.SetThemeAction)
 
@@ -806,6 +813,17 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.HighlightSyntax = False
         self.HighlightSyntaxAction.setChecked(self.HighlightSyntax)
 
+        # Highlight Text
+        HighlightTextFile = self.GetResourcePath("Configs/HighlightText.cfg")
+        if os.path.isfile(HighlightTextFile):
+            with open(HighlightTextFile, "r") as ConfigFile:
+                HighlightTextSettings = json.loads(ConfigFile.read())
+                self.TextToHighlight = HighlightTextSettings["TextToHighlight"]
+                self.TextToHighlightMatchCase = HighlightTextSettings["TextToHighlightMatchCase"]
+        else:
+            self.TextToHighlight = []
+            self.TextToHighlightMatchCase = False
+
         # Search Highlight
         SearchHighlightFile = self.GetResourcePath("Configs/SearchHighlight.cfg")
         if os.path.isfile(SearchHighlightFile):
@@ -878,6 +896,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Highlight Syntax
         with open(self.GetResourcePath("Configs/HighlightSyntax.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.HighlightSyntax))
+
+        # Highlight Text
+        HighlightTextSettings = {}
+        HighlightTextSettings["TextToHighlight"] = self.TextToHighlight
+        HighlightTextSettings["TextToHighlightMatchCase"] = self.TextToHighlightMatchCase
+        with open(self.GetResourcePath("Configs/HighlightText.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(HighlightTextSettings, indent=2))
 
         # Search Highlight
         with open(self.GetResourcePath("Configs/SearchHighlight.cfg"), "w") as ConfigFile:
@@ -1376,6 +1401,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.HighlightSyntax = not self.HighlightSyntax
         if self.HighlightSyntax:
             self.DisplayMessageBox("Syntax highlighting is intended only as a rough guide, and may not capture all valid Markdown syntax perfectly.", Icon=QMessageBox.Warning)
+        self.TextWidgetInst.SyntaxHighlighter.rehighlight()
+
+    def HighlightText(self):
+        HighlightTextDialogInst = HighlightTextDialog(self)
         self.TextWidgetInst.SyntaxHighlighter.rehighlight()
 
     def AddTextToPageAndSubpages(self, Prepend=False):

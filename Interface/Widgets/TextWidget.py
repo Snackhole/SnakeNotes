@@ -553,6 +553,11 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.FootnotesFormat.setBackground(QColor("darkGoldenrod"))
         self.FootnotesFormat.setForeground(QColor("white"))
 
+        # Text Highlight
+        self.TextHighlightFormat = QTextCharFormat()
+        self.TextHighlightFormat.setBackground(QColor("darkOrange"))
+        self.TextHighlightFormat.setForeground(QColor("white"))
+
         # Search Highlight
         self.SearchHighlightFormat = QTextCharFormat()
         self.SearchHighlightFormat.setBackground(QColor("darkMagenta"))
@@ -595,6 +600,13 @@ class SyntaxHighlighter(QSyntaxHighlighter):
                     Format = HighlightTarget["FormatCallable"](Target)
                     if Format is not None:
                         self.setFormat(Target.start(), Target.end() - Target.start(), Format)
+        for HighlightText in self.TextWidget.MainWindow.TextToHighlight:
+            if self.TextWidget.MainWindow.TextToHighlightMatchCase:
+                TargetIterator = re.finditer(re.escape(HighlightText), Text)
+            else:
+                TargetIterator = re.finditer(re.escape(HighlightText), Text, re.IGNORECASE)
+            for Target in TargetIterator:
+                self.setFormat(Target.start(), Target.end() - Target.start(), self.TextHighlightFormat)
         if self.TextWidget.MainWindow.SearchWidgetInst.HighlightCheckBox.isChecked():
             SearchText = self.TextWidget.MainWindow.SearchWidgetInst.SearchTextLineEdit.text()
             if SearchText != "":

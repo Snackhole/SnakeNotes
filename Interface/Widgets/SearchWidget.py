@@ -25,6 +25,10 @@ class SearchWidget(QFrame):
         self.SearchTextLineEdit.returnPressed.connect(self.Search)
         self.SearchTextLineEdit.textChanged.connect(self.RehighlightTextWidget)
 
+        # Match Case Check Box
+        self.MatchCaseCheckBox = QCheckBox("Match Case")
+        self.MatchCaseCheckBox.stateChanged.connect(self.RehighlightTextWidget)
+
         # Highlight Text Check Box
         self.HighlightCheckBox = QCheckBox("Highlight Text")
         self.HighlightCheckBox.stateChanged.connect(self.RehighlightTextWidget)
@@ -32,10 +36,6 @@ class SearchWidget(QFrame):
         # Highlight Pages Check Box
         self.HighlightPagesCheckBox = QCheckBox("Highlight Pages")
         self.HighlightPagesCheckBox.stateChanged.connect(lambda: self.HighlightPages(Clear=True))
-
-        # Match Case Check Box
-        self.MatchCaseCheckBox = QCheckBox("Match Case")
-        self.MatchCaseCheckBox.stateChanged.connect(self.RehighlightTextWidget)
 
         # Replace Text Line Edit
         self.ReplaceTextLineEdit = SearchLineEdit(self)

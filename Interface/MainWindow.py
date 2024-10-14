@@ -422,6 +422,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SwapLeftAndMiddleClickForLinksAction.setChecked(False)
         self.SwapLeftAndMiddleClickForLinksAction.triggered.connect(self.ToggleSwapLeftAndMiddleClickForLinks)
 
+        self.GoToIndexPathAction = QAction("Go to Index Path")
+        self.GoToIndexPathAction.triggered.connect(self.GoToIndexPath)
+
         self.ExpandAllAction = QAction(self.ExpandAllIcon, "&Expand All")
         self.ExpandAllAction.triggered.connect(self.NotebookDisplayWidgetInst.expandAll)
 
@@ -599,6 +602,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.SetDefaultPopOutSizeAction)
         self.ViewMenu.addAction(self.SwapLeftAndMiddleClickForLinksAction)
         self.ViewMenu.addSeparator()
+        self.ViewMenu.addAction(self.GoToIndexPathAction)
+        self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.ExpandAllAction)
         self.ViewMenu.addAction(self.ExpandRecursivelyAction)
         self.ViewMenu.addAction(self.CollapseAllAction)
@@ -713,6 +718,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultKeybindings["ToggleSearchAction"] = "Ctrl+Shift+F"
         self.DefaultKeybindings["AdvancedSearchAction"] = "Ctrl+Alt+F"
         self.DefaultKeybindings["PopOutPageAction"] = "Ctrl+P"
+        self.DefaultKeybindings["GoToIndexPathAction"] = "Ctrl+G"
 
     def GetResourcePath(self, RelativeLocation):
         return os.path.join(self.AbsoluteDirectoryPath, RelativeLocation)
@@ -1348,6 +1354,14 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             return
         if DeletedPage["IndexPath"] == self.AdvancedSearchDialogInst.WithinPage["IndexPath"][:len(DeletedPage["IndexPath"])]:
             self.AdvancedSearchDialogInst.ClearWithinPage()
+
+    def GoToIndexPath(self):
+        IndexPathString, OK = QInputDialog.getText(self, "Go to Index Path", "Go to index path:")
+        if OK:
+            if self.Notebook.StringIsValidIndexPath(IndexPathString):
+                self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(IndexPathString)
+            else:
+                self.DisplayMessageBox("Not a valid index path.")
 
     # Text Methods
     def TextChanged(self):

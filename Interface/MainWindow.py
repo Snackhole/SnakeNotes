@@ -510,7 +510,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CopyIndexPathToCurrentPageAction.triggered.connect(self.CopyIndexPathToCurrentPage)
 
         self.ImageManagerAction = QAction("&Image Manager")
-        self.ImageManagerAction.triggered.connect(self.ImageManager)
+        self.ImageManagerAction.triggered.connect(lambda: self.ImageManager())
 
         self.TemplateManagerAction = QAction("&Template Manager")
         self.TemplateManagerAction.triggered.connect(self.TemplateManager)
@@ -1328,8 +1328,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         for SubPage in CurrentPage["SubPages"]:
             self.UpdateDeletedPageLinks(SubPage)
 
-    def ImageManager(self):
-        ImageManagerDialogInst = ImageManagerDialog(self.Notebook, self)
+    def ImageManager(self, SearchImageName=None):
+        ImageManagerDialogInst = ImageManagerDialog(self.Notebook, self, SearchImageName)
         if ImageManagerDialogInst.UnsavedChanges:
             self.UpdateUnsavedChangesFlag(True)
 

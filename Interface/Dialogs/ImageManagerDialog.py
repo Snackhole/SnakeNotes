@@ -8,7 +8,7 @@ from Core import Base64Converters
 
 
 class ImageManagerDialog(QDialog):
-    def __init__(self, Notebook, MainWindow):
+    def __init__(self, Notebook, MainWindow, SearchImageName=None):
         super().__init__(parent=MainWindow)
 
         # Store Parameters
@@ -119,6 +119,10 @@ class ImageManagerDialog(QDialog):
         if self.MainWindow.TextWidgetInst.ReadMode:
             for Button in EditModeOnlyButtons:
                 Button.setDisabled(True)
+
+        # Search Image Name if Provided
+        if SearchImageName is not None:
+            self.SearchLineEdit.setText(SearchImageName)
 
         # Execute Dialog
         self.exec_()

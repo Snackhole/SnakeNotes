@@ -45,6 +45,7 @@ class Renderer(mistune.Renderer):
 
     def image(self, Source, Title, AltText):
         if self.Notebook.HasImage(Source):
+            AltText = Source
             Source = f"data:image/{os.path.splitext(Source)[1]};base64, {self.Notebook.GetImage(Source)}"
             AltText = mistune.escape(AltText, quote=True)
             if Title is not None:

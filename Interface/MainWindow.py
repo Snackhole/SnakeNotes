@@ -511,7 +511,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         self.ImageManagerAction = QAction("&Image Manager")
         self.ImageManagerAction.triggered.connect(self.ImageManager)
-        self.ToggleReadModeActionsList.append(self.ImageManagerAction)
 
         self.TemplateManagerAction = QAction("&Template Manager")
         self.TemplateManagerAction.triggered.connect(self.TemplateManager)
@@ -1330,10 +1329,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.UpdateDeletedPageLinks(SubPage)
 
     def ImageManager(self):
-        if not self.TextWidgetInst.ReadMode:
-            ImageManagerDialogInst = ImageManagerDialog(self.Notebook, self)
-            if ImageManagerDialogInst.UnsavedChanges:
-                self.UpdateUnsavedChangesFlag(True)
+        ImageManagerDialogInst = ImageManagerDialog(self.Notebook, self)
+        if ImageManagerDialogInst.UnsavedChanges:
+            self.UpdateUnsavedChangesFlag(True)
 
     def TemplateManager(self):
         if not self.TextWidgetInst.ReadMode:

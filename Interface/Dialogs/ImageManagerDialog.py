@@ -114,6 +114,12 @@ class ImageManagerDialog(QDialog):
         # Populate Image List
         self.PopulateImageList()
 
+        # Restrict Buttons if in Read Mode
+        EditModeOnlyButtons = [self.AddImageButton, self.AddMultipleImagesButton, self.RenameImageButton, self.DeleteImageButton, self.DeleteAllImagesButton]
+        if self.MainWindow.TextWidgetInst.ReadMode:
+            for Button in EditModeOnlyButtons:
+                Button.setDisabled(True)
+
         # Execute Dialog
         self.exec_()
 
@@ -221,13 +227,14 @@ class ImageManagerDialog(QDialog):
 
     def ExportAllImages(self):
         ExportDirectory = QFileDialog.getExistingDirectory(parent=self, caption="Export All Image Files")
-        ExportDirectoryContents = os.listdir(ExportDirectory)
-        if len(ExportDirectoryContents) == 0:
-            for Image in self.Notebook.Images.keys():
-                ExportImagePath = os.path.join(ExportDirectory, Image)
-                Base64Converters.WriteFileFromBase64String(self.Notebook.Images[Image], ExportImagePath)
-        else:
-            self.MainWindow.DisplayMessageBox("Choose an empty folder to export all image files.", Parent=self)
+        if ExportDirectory != "":
+            ExportDirectoryContents = os.listdir(ExportDirectory)
+            if len(ExportDirectoryContents) == 0:
+                for Image in self.Notebook.Images.keys():
+                    ExportImagePath = os.path.join(ExportDirectory, Image)
+                    Base64Converters.WriteFileFromBase64String(self.Notebook.Images[Image], ExportImagePath)
+            else:
+                self.MainWindow.DisplayMessageBox("Choose an empty folder to export all image files.", Parent=self)
 
     def DeleteImage(self):
         SelectedItems = self.ImageList.selectedItems()

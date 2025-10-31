@@ -49,6 +49,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.AutoScrollQueue = None
         self.ShowHitCounts = False
         self.SwapLeftAndMiddleClickForLinks = False
+        self.MoveCursorToEndOfLinkText = True
         self.HighlightSyntax = True
         self.TextToHighlight = []
         self.TextToHighlightMatchCase = False
@@ -335,6 +336,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.TextToLinkAction.triggered.connect(self.TextWidgetInst.TextToLink)
         self.ToggleReadModeActionsList.append(self.TextToLinkAction)
 
+        self.MoveCursorToEndOfLinkTextAction = QAction("Move Cursor to End of Link Text")
+        self.MoveCursorToEndOfLinkTextAction.setCheckable(True)
+        self.MoveCursorToEndOfLinkTextAction.setChecked(True)
+        self.MoveCursorToEndOfLinkTextAction.triggered.connect(self.ToggleMoveCursorToEndOfLinkText)
+        self.ToggleReadModeActionsList.append(self.MoveCursorToEndOfLinkTextAction)
+
         self.InsertTableAction = QAction(self.InsertTableIcon, "Insert Table")
         self.InsertTableAction.triggered.connect(self.TextWidgetInst.InsertTable)
         self.ToggleReadModeActionsList.append(self.InsertTableAction)
@@ -571,6 +578,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.AddTitleToolTipsToLinksAction)
         self.EditMenu.addAction(self.InsertExternalLinkAction)
         self.EditMenu.addAction(self.TextToLinkAction)
+        self.EditMenu.addAction(self.MoveCursorToEndOfLinkTextAction)
         self.EditMenu.addAction(self.InsertTableAction)
         self.EditMenu.addAction(self.InsertImageAction)
         self.EditMenu.addSeparator()
@@ -811,6 +819,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.SwapLeftAndMiddleClickForLinks = False
         self.SwapLeftAndMiddleClickForLinksAction.setChecked(self.SwapLeftAndMiddleClickForLinks)
 
+        # Move Cursor to End of Link Text
+        MoveCursorToEndOfLinkTextFile = self.GetResourcePath("Configs/MoveCursorToEndOfLinkText.cfg")
+        if os.path.isfile(MoveCursorToEndOfLinkTextFile):
+            with open(MoveCursorToEndOfLinkTextFile, "r") as ConfigFile:
+                self.MoveCursorToEndOfLinkText = json.loads(ConfigFile.read())
+        else:
+            self.MoveCursorToEndOfLinkText = True
+        self.MoveCursorToEndOfLinkTextAction.setChecked(self.MoveCursorToEndOfLinkText)
+
         # Highlight Syntax
         HighlightSyntaxFile = self.GetResourcePath("Configs/HighlightSyntax.cfg")
         if os.path.isfile(HighlightSyntaxFile):
@@ -905,6 +922,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Swap Left and Middle Click for Links
         with open(self.GetResourcePath("Configs/SwapLeftAndMiddleClickForLinks.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.SwapLeftAndMiddleClickForLinks))
+
+        # Move Cursor to End of Link Text
+        with open(self.GetResourcePath("Configs/MoveCursorToEndOfLinkText.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.MoveCursorToEndOfLinkText))
 
         # Highlight Syntax
         with open(self.GetResourcePath("Configs/HighlightSyntax.cfg"), "w") as ConfigFile:
@@ -1421,6 +1442,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.DisplayMessageBox("Left click and middle click for links have been swapped; double left click to open a pop-up of the linked page, and middle click to navigate to it.")
         else:
             self.DisplayMessageBox("Left click and middle click for links have been swapped; double left click to navigate to the linked page, and middle click to open a pop-up of it.")
+
+    def ToggleMoveCursorToEndOfLinkText(self):
+        self.MoveCursorToEndOfLinkText = not self.MoveCursorToEndOfLinkText
+        if self.MoveCursorToEndOfLinkText:
+            self.DisplayMessageBox("After inserting a link, the cursor will now move to the end of the text wrapped in the link.")
+        else:
+            self.DisplayMessageBox("After inserting a link, the cursor will now move to the end of the link itself.")
 
     def ToggleHighlightSyntax(self):
         self.HighlightSyntax = not self.HighlightSyntax

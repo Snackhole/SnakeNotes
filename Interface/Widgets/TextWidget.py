@@ -74,7 +74,7 @@ class TextWidget(QTextEdit):
                 self.MainWindow.AutoScrollQueue = None
 
     # Internal Text and Cursor Methods
-    def SelectionSpanWrap(self, WrapPrefix, WrapSuffix):
+    def SelectionSpanWrap(self, WrapPrefix, WrapSuffix, MoveCursorToEndOfWrappedText=True):
         Cursor = self.textCursor()
         TextToWrap = Cursor.selectedText()
         if "\u2029" in TextToWrap:
@@ -82,8 +82,9 @@ class TextWidget(QTextEdit):
         Cursor.beginEditBlock()
         WrappedText = f"{WrapPrefix}{TextToWrap}{WrapSuffix}"
         self.insertPlainText(WrappedText)
-        for Character in range(len(WrapSuffix)):
-            self.moveCursor(QTextCursor.Left)
+        if MoveCursorToEndOfWrappedText:
+            for Character in range(len(WrapSuffix)):
+                self.moveCursor(QTextCursor.Left)
         Cursor.endEditBlock()
 
     def SingleBlockPrefix(self, Prefix):
@@ -402,7 +403,7 @@ class TextWidget(QTextEdit):
                 if InsertLinksDialogInst.InsertIndexPath is not None:
                     IndexPath = json.dumps(InsertLinksDialogInst.InsertIndexPath)
                     ToolTipText = f" \"{InsertLinksDialogInst.ToolTipText}\"" if InsertLinksDialogInst.AddToolTip else ""
-                    self.SelectionSpanWrap("[", f"]({IndexPath}{ToolTipText})")
+                    self.SelectionSpanWrap("[", f"]({IndexPath}{ToolTipText})", MoveCursorToEndOfWrappedText=self.MainWindow.MoveCursorToEndOfLinkText)
                 elif InsertLinksDialogInst.InsertIndexPaths is not None and InsertLinksDialogInst.SubPageLinksSeparator is not None:
                     InsertString = ""
                     for SubPagePath in InsertLinksDialogInst.InsertIndexPaths:
@@ -419,7 +420,7 @@ class TextWidget(QTextEdit):
         if not self.ReadMode and self.hasFocus():
             LinkString, OK = QInputDialog.getText(self, "Insert External Link", "Enter a link URL:")
             if OK:
-                self.SelectionSpanWrap("[", f"]({LinkString})")
+                self.SelectionSpanWrap("[", f"]({LinkString})", MoveCursorToEndOfWrappedText=self.MainWindow.MoveCursorToEndOfLinkText)
 
     def TextToLink(self):
         if not self.ReadMode and self.hasFocus():
@@ -434,7 +435,7 @@ class TextWidget(QTextEdit):
                     else:
                         TopResultIndexPath = SearchResults["ResultsList"][0][1]
                         TopResultTitle = SearchResults["ResultsList"][0][0]
-                        self.SelectionSpanWrap("[", f"]({json.dumps(TopResultIndexPath)} \"{TopResultTitle}\")")
+                        self.SelectionSpanWrap("[", f"]({json.dumps(TopResultIndexPath)} \"{TopResultTitle}\")", MoveCursorToEndOfWrappedText=self.MainWindow.MoveCursorToEndOfLinkText)
                 else:
                     self.MainWindow.DisplayMessageBox("No pages with this title found.")
 

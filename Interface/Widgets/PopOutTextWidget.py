@@ -2,6 +2,7 @@ import json
 import webbrowser
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QTextFormat
 from PyQt5.QtWidgets import QTextEdit
 
 from Core import MarkdownRenderers
@@ -50,8 +51,13 @@ class PopOutTextWidget(QTextEdit):
 
     def mouseDoubleClickEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
+        CharFormat = self.cursorForPosition(QMouseEvent.pos()).charFormat()
         if Anchor != "" and QMouseEvent.button() == Qt.LeftButton:
             self.NavigateToLink(Anchor, QMouseEvent) if not self.MainWindow.SwapLeftAndMiddleClickForLinks else self.OpenLinkAsPopup(Anchor, QMouseEvent)
+        elif CharFormat.isImageFormat():
+            ImageFormat = CharFormat.toImageFormat()
+            ImageAltText = ImageFormat.property(QTextFormat.ImageAltText)
+            self.MainWindow.ImageManager(ImageAltText)
         else:
             super().mouseDoubleClickEvent(QMouseEvent)
 
@@ -64,7 +70,8 @@ class PopOutTextWidget(QTextEdit):
 
     def mouseMoveEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
-        if Anchor != "":
+        CharFormat = self.cursorForPosition(QMouseEvent.pos()).charFormat()
+        if Anchor != "" or CharFormat.isImageFormat():
             self.viewport().setCursor(Qt.PointingHandCursor)
         else:
             self.viewport().setCursor(Qt.IBeamCursor)

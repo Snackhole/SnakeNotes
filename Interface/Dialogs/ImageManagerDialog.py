@@ -59,6 +59,8 @@ class ImageManagerDialog(QDialog):
         self.ImageDisplayScrollArea.setAlignment(Qt.AlignCenter)
 
         # Buttons
+        self.GoToLinkingPageButton = QPushButton("Go to Linking Page")
+        self.GoToLinkingPageButton.clicked.connect(self.LinkingPageActivated)
         self.AddImageButton = QPushButton("Add Image")
         self.AddImageButton.clicked.connect(self.AddImage)
         self.AddMultipleImagesButton = QPushButton("Add Multiple Images")
@@ -76,6 +78,7 @@ class ImageManagerDialog(QDialog):
         self.DeleteAllImagesButton.clicked.connect(self.DeleteAllImages)
         self.DoneButton = QPushButton("Done")
         self.DoneButton.clicked.connect(self.Done)
+        self.DoneButton.setDefault(True)
         self.DoneButton.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
         # Create, Populate, and Set Layout
@@ -90,6 +93,7 @@ class ImageManagerDialog(QDialog):
         self.LinkingPagesLayout = QGridLayout()
         self.LinkingPagesLayout.addWidget(self.LinkingPagesLabel, 0, 0)
         self.LinkingPagesLayout.addWidget(self.LinkingPagesList, 1, 0)
+        self.LinkingPagesLayout.addWidget(self.GoToLinkingPageButton, 2, 0)
         self.LinkingPagesFrame.setLayout(self.LinkingPagesLayout)
         self.Splitter.addWidget(self.LinkingPagesFrame)
         self.Splitter.setStretchFactor(1, 1)
@@ -274,6 +278,8 @@ class ImageManagerDialog(QDialog):
         if len(SelectedItems) > 0:
             self.ActivatedLinkingPageIndexPath = SelectedItems[0].LinkingPageIndexPath
             self.Done()
+        else:
+            self.MainWindow.DisplayMessageBox("No linking pages are selected.", Parent=self)
 
     def Done(self):
         self.close()

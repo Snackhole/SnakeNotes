@@ -17,6 +17,7 @@ class ImageManagerDialog(QDialog):
 
         # Variables
         self.UnsavedChanges = False
+        self.ActivatedLinkingPageIndexPath = None
         self.ExportFilters = {}
         self.ExportFilters[".jpeg"] = "JPEG (*.jpeg)"
         self.ExportFilters[".jpg"] = "JPG (*.jpg)"
@@ -49,6 +50,7 @@ class ImageManagerDialog(QDialog):
 
         # Linking Pages List
         self.LinkingPagesList = QListWidget()
+        self.LinkingPagesList.itemActivated.connect(self.LinkingPageActivated)
 
         # Image Display
         self.ImageDisplay = QLabel()
@@ -142,6 +144,7 @@ class ImageManagerDialog(QDialog):
             self.LinkingPagesList.clear()
             for Result in SearchResults["ResultsList"]:
                 LinkingPagesListItem = QListWidgetItem(Result[0])
+                setattr(LinkingPagesListItem, "LinkingPageIndexPath", Result[1])
                 self.LinkingPagesList.addItem(LinkingPagesListItem)
 
     def PopulateImageList(self):
@@ -265,6 +268,12 @@ class ImageManagerDialog(QDialog):
     def GetImageIndexFromName(self, ImageName):
         ImageNames = sorted(self.Notebook.Images.keys(), key=lambda Image: Image.lower())
         return ImageNames.index(ImageName)
+
+    def LinkingPageActivated(self):
+        SelectedItems = self.LinkingPagesList.selectedItems()
+        if len(SelectedItems) > 0:
+            self.ActivatedLinkingPageIndexPath = SelectedItems[0].LinkingPageIndexPath
+            self.Done()
 
     def Done(self):
         self.close()

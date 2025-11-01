@@ -1332,6 +1332,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         ImageManagerDialogInst = ImageManagerDialog(self.Notebook, self, SearchImageName)
         if ImageManagerDialogInst.UnsavedChanges:
             self.UpdateUnsavedChangesFlag(True)
+        if ImageManagerDialogInst.ActivatedLinkingPageIndexPath is not None:
+            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(ImageManagerDialogInst.ActivatedLinkingPageIndexPath)
 
     def TemplateManager(self):
         if not self.TextWidgetInst.ReadMode:

@@ -379,6 +379,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SortLinesAction.triggered.connect(self.TextWidgetInst.SortLines)
         self.ToggleReadModeActionsList.append(self.SortLinesAction)
 
+        self.SortIgnoresBlankLinesAction = QAction("Sort Ignores Blank Lines")
+        self.SortIgnoresBlankLinesAction.setCheckable(True)
+        self.SortIgnoresBlankLinesAction.setChecked(True)
+        self.SortIgnoresBlankLinesAction.triggered.connect(self.ToggleSortIgnoresBlankLines)
+        self.ToggleReadModeActionsList.append(self.SortIgnoresBlankLinesAction)
+
         # View Actions
         self.BackAction = QAction(self.BackIcon, "Back")
         self.BackAction.triggered.connect(self.Back)
@@ -590,6 +596,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.DuplicateLinesAction)
         self.EditMenu.addAction(self.DeleteLineAction)
         self.EditMenu.addAction(self.SortLinesAction)
+        self.EditMenu.addAction(self.SortIgnoresBlankLinesAction)
 
         self.ViewMenu = self.MenuBar.addMenu("&View")
         self.ViewMenu.addAction(self.BackAction)
@@ -828,6 +835,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.MoveCursorToEndOfLinkText = True
         self.MoveCursorToEndOfLinkTextAction.setChecked(self.MoveCursorToEndOfLinkText)
 
+        # Sort Ignores Blank Lines
+        SortIgnoresBlankLinesFile = self.GetResourcePath("Configs/SortIgnoresBlankLines.cfg")
+        if os.path.isfile(SortIgnoresBlankLinesFile):
+            with open(SortIgnoresBlankLinesFile, "r") as ConfigFile:
+                self.SortIgnoresBlankLines = json.loads(ConfigFile.read())
+        else:
+            self.SortIgnoresBlankLines = True
+        self.SortIgnoresBlankLinesAction.setChecked(self.SortIgnoresBlankLines)
+
         # Highlight Syntax
         HighlightSyntaxFile = self.GetResourcePath("Configs/HighlightSyntax.cfg")
         if os.path.isfile(HighlightSyntaxFile):
@@ -926,6 +942,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Move Cursor to End of Link Text
         with open(self.GetResourcePath("Configs/MoveCursorToEndOfLinkText.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.MoveCursorToEndOfLinkText))
+
+        # Sort Ignores Blank Lines
+        with open(self.GetResourcePath("Configs/SortIgnoresBlankLines.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.SortIgnoresBlankLines))
 
         # Highlight Syntax
         with open(self.GetResourcePath("Configs/HighlightSyntax.cfg"), "w") as ConfigFile:
@@ -1450,6 +1470,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.DisplayMessageBox("After inserting a link, the cursor will now move to the end of the text wrapped in the link.")
         else:
             self.DisplayMessageBox("After inserting a link, the cursor will now move to the end of the link itself.")
+
+    def ToggleSortIgnoresBlankLines(self):
+        self.SortIgnoresBlankLines = not self.SortIgnoresBlankLines
 
     def ToggleHighlightSyntax(self):
         self.HighlightSyntax = not self.HighlightSyntax

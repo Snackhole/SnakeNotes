@@ -57,6 +57,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.PopOutPages = []
         self.DefaultPopOutSize = {"Width": 0, "Height": 0}
         self.AdvancedSearchDialogInst = None
+        self.SortIgnoresBlankLines = True
 
         # Set Up Save and Open
         self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))

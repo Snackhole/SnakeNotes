@@ -513,7 +513,16 @@ class TextWidget(QTextEdit):
             self.SelectBlocks(Cursor)
             Blocks = Cursor.selectedText().split("\u2029")
             if len(Blocks) > 1:
-                Blocks.sort(key=str.casefold)
+                if self.MainWindow.SortIgnoresBlankLines:
+                    NonBlankBlocks = [Block for Block in Blocks if Block.strip() != ""]
+                    NonBlankBlocks.sort(key=str.casefold)
+                    NonBlankBlocksCurrentIndex = 0
+                    for Index in range(len(Blocks)):
+                        if Blocks[Index].strip() != "":
+                            Blocks[Index] = NonBlankBlocks[NonBlankBlocksCurrentIndex]
+                            NonBlankBlocksCurrentIndex += 1
+                else:
+                    Blocks.sort(key=str.casefold)
                 SortedLines = "\u2029".join(Blocks)
                 Cursor.beginEditBlock()
                 Cursor.insertText(SortedLines)

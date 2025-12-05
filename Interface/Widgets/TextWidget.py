@@ -378,12 +378,7 @@ class TextWidget(QTextEdit):
                     Cursor.beginEditBlock()
                     self.insertPlainText(FootnoteSymbol)
                     if self.MainWindow.InlineFootnoteStyle:
-                        Cursor.movePosition(QTextCursor.EndOfBlock)
-                        NextLineBlank = self.NextLineBlank(Cursor)
-                        while not NextLineBlank and not NextLineBlank is None:
-                            Cursor.movePosition(QTextCursor.NextCharacter)
-                            Cursor.movePosition(QTextCursor.EndOfBlock)
-                            NextLineBlank = self.NextLineBlank(Cursor)
+                        self.MoveCursorToValidFootnoteLocation(Cursor)
                     else:
                         Cursor.movePosition(QTextCursor.End)
                     Cursor.insertText(f"\u2029\u2029{FootnoteSymbol}: ")
@@ -392,13 +387,47 @@ class TextWidget(QTextEdit):
                     QTimer.singleShot(0, self.VerticallyCenterCursor)
                     Cursor.endEditBlock()
 
-    def NextLineBlank(self, Cursor):
-        LineData = self.GetLineData(CursorToCopy=Cursor)
-        CurrentLineIndex = LineData[1]
-        if CurrentLineIndex == len(LineData[0]) - 1:
-            return None
-        NextLine = LineData[0][CurrentLineIndex + 1]
-        return NextLine == ""
+    def MoveCursorToValidFootnoteLocation(self, Cursor):
+        CursorAtValidFootnoteLocation = False
+        while not CursorAtValidFootnoteLocation:
+            LineData = self.GetLineData(CursorToCopy=Cursor)
+            CurrentLineIndex = LineData[1]
+            CurrentLineLast = CurrentLineIndex == len(LineData[0]) - 1
+            NextLineBlank = None
+            if not CurrentLineLast:
+                NextLineBlank = LineData[0][CurrentLineIndex + 1] == ""
+            TwoLinesFollowCurrentLine = len(LineData[0]) - 2 > CurrentLineIndex
+
+            if CurrentLineLast:
+                Cursor.movePosition(QTextCursor.EndOfBlock)
+                CursorAtValidFootnoteLocation = True
+            elif TwoLinesFollowCurrentLine and NextLineBlank:
+                CurrentLine = LineData[0][CurrentLineIndex]
+                LineAfterNext = LineData[0][CurrentLineIndex + 2]
+                LineAfterNextStartsFootnote = self.LineStartsFootnote(LineAfterNext)
+                LineAfterNextContinuesFootnote = self.LineContinuesFootnote(LineAfterNext, CurrentLine)
+                if LineAfterNextStartsFootnote or LineAfterNextContinuesFootnote:
+                    Cursor.movePosition(QTextCursor.EndOfBlock)
+                    Cursor.movePosition(QTextCursor.NextCharacter)
+                    Cursor.movePosition(QTextCursor.EndOfBlock)
+                    Cursor.movePosition(QTextCursor.NextCharacter)
+                    Cursor.movePosition(QTextCursor.EndOfBlock)
+                else:
+                    Cursor.movePosition(QTextCursor.EndOfBlock)
+                    CursorAtValidFootnoteLocation = True
+            elif not NextLineBlank and not NextLineBlank is None:
+                Cursor.movePosition(QTextCursor.EndOfBlock)
+                Cursor.movePosition(QTextCursor.NextCharacter)
+                Cursor.movePosition(QTextCursor.EndOfBlock)
+            else:
+                Cursor.movePosition(QTextCursor.EndOfBlock)
+                CursorAtValidFootnoteLocation = True
+
+    def LineStartsFootnote(self, Line):
+        return Line.startswith("[^") and "]:" in Line
+
+    def LineContinuesFootnote(self, Line, PreviousLine):
+        return (self.LineStartsFootnote(PreviousLine) or (PreviousLine.startswith("  ") and PreviousLine.strip() != "")) and (Line.startswith("  ") and Line.strip() != "")
 
     def InsertLinks(self):
         if not self.ReadMode and self.hasFocus():

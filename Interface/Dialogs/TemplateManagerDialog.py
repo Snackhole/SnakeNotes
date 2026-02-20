@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QListWidget, QTextEdit, QListWidgetItem, QPushButton, QGridLayout, QMessageBox, QLabel, QLineEdit, QSplitter, QInputDialog
+from PyQt6.QtWidgets import QDialog, QListWidget, QTextEdit, QListWidgetItem, QPushButton, QGridLayout, QMessageBox, QLabel, QLineEdit, QSplitter, QInputDialog
 
 
 class TemplateManagerDialog(QDialog):
@@ -64,7 +64,7 @@ class TemplateManagerDialog(QDialog):
         self.PopulateTemplateList()
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def TemplateSelected(self):
         SelectedItems = self.TemplateList.selectedItems()
@@ -123,7 +123,7 @@ class TemplateManagerDialog(QDialog):
         if len(SelectedItems) > 0:
             CurrentTemplateName = SelectedItems[0].TemplateName
             CurrentTemplateRow = self.TemplateList.currentRow()
-            if self.MainWindow.DisplayMessageBox(f"Are you sure you want to delete the template \"{CurrentTemplateName}\" from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+            if self.MainWindow.DisplayMessageBox(f"Are you sure you want to delete the template \"{CurrentTemplateName}\" from the notebook?  This cannot be undone.", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
                 del self.Notebook.PageTemplates[CurrentTemplateName]
                 self.UnsavedChanges = True
                 self.PopulateTemplateList()
@@ -212,7 +212,7 @@ class AddTemplateDialog(QDialog):
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def Done(self):
         TemplateNameString = self.TemplateName.text()
@@ -220,7 +220,7 @@ class AddTemplateDialog(QDialog):
             self.MainWindow.DisplayMessageBox("Template names cannot be blank.", Parent=self)
             return
         if TemplateNameString in self.Notebook.PageTemplates and not self.EditMode:
-            if self.MainWindow.DisplayMessageBox("A template by this name already exists in the notebook.\n\nOverwrite existing template?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.No:
+            if self.MainWindow.DisplayMessageBox("A template by this name already exists in the notebook.\n\nOverwrite existing template?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.No:
                 return
         self.TemplateAdded = True
         self.TemplateNameString = TemplateNameString

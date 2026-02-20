@@ -7,7 +7,7 @@ if AbsoluteDirectoryPath.endswith(".pyz") or AbsoluteDirectoryPath.endswith(".py
 if sys.path[0] != AbsoluteDirectoryPath:
     sys.path.insert(0, AbsoluteDirectoryPath)
 
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 
 from Interface.MainWindow import MainWindow
 from Build import BuildVariables
@@ -21,7 +21,7 @@ def StartApp():
     MainWindowInst = MainWindow(ScriptName, AbsoluteDirectoryPath, AppInst)
 
     # Enter Main Loop
-    sys.exit(AppInst.exec_())
+    sys.exit(AppInst.exec())
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton, QApplication, QLineEdit, QCheckBox, QListWidget, QLabel, QSizePolicy, QListWidgetItem, QTreeWidget, QTreeWidgetItem, QHeaderView
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QDialog, QGridLayout, QPushButton, QApplication, QLineEdit, QCheckBox, QListWidget, QLabel, QSizePolicy, QListWidgetItem, QTreeWidget, QTreeWidgetItem, QHeaderView
 
 
 class AdvancedSearchDialog(QDialog):
@@ -14,7 +14,7 @@ class AdvancedSearchDialog(QDialog):
         self.WithinPage = None
 
         # Inputs Size Policy
-        self.InputsSizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.InputsSizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         # Advanced Search Text Line Edit
         self.SearchTextLineEdit = QLineEdit()
@@ -93,7 +93,7 @@ class AdvancedSearchDialog(QDialog):
 
         # Search Results Stats Label
         self.SearchResultsStatsLabel = QLabel("No search results.")
-        self.SearchResultsStatsLabel.setAlignment(Qt.AlignCenter)
+        self.SearchResultsStatsLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Buttons
         self.SearchButton = QPushButton("Search")
@@ -329,9 +329,9 @@ class AdvancedSearchDialog(QDialog):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == Qt.Key_Escape:
+        if KeyPressed == Qt.Key.Key_Escape:
             self.close()
-        elif KeyPressed == Qt.Key_Return and self.ResultsList.hasFocus():
+        elif KeyPressed == Qt.Key.Key_Return and self.ResultsList.hasFocus():
             return
         else:
             super().keyPressEvent(QKeyEvent)
@@ -375,7 +375,7 @@ class GetWithinPageDialog(QDialog):
         self.NotebookDisplay = QTreeWidget()
         self.NotebookDisplay.setHeaderHidden(True)
         self.NotebookDisplay.header().setStretchLastSection(False)
-        self.NotebookDisplay.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.NotebookDisplay.header().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.NotebookDisplay.itemActivated.connect(self.Done)
 
         # Buttons
@@ -399,7 +399,7 @@ class GetWithinPageDialog(QDialog):
         self.PopulateNotebookDisplay()
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def PopulateNotebookDisplay(self):
         self.NotebookDisplay.clear()

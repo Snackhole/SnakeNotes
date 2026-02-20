@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QListWidget, QListWidgetItem, QGridLayout, QPushButton, QLabel
+from PyQt6.QtWidgets import QDialog, QListWidget, QListWidgetItem, QGridLayout, QPushButton, QLabel
 
 
 class NavigationBarSubPageDialog(QDialog):
@@ -48,7 +48,7 @@ class NavigationBarSubPageDialog(QDialog):
         self.PopulateSubPageList()
 
         # Execute Menu
-        self.exec_()
+        self.exec()
 
     def Go(self):
         SelectedItems = self.SubPageList.selectedItems()

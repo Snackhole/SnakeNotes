@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QLabel, QTextEdit, QPushButton, QGridLayout, QApplication
+from PyQt6.QtWidgets import QDialog, QLabel, QTextEdit, QPushButton, QGridLayout, QApplication
 
 
 class ExportErrorDialog(QDialog):
@@ -36,7 +36,7 @@ class ExportErrorDialog(QDialog):
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def Copy(self):
         QApplication.clipboard().setText(self.ErrorString)

@@ -3,10 +3,10 @@ import re
 import webbrowser
 
 import mistune
-from PyQt5.QtCore import Qt
-from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QColor, QSyntaxHighlighter, QTextCursor, QTextCharFormat, QTextFormat
-from PyQt5.QtWidgets import QTextEdit, QInputDialog, QMessageBox
+from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QTimer
+from PyQt6.QtGui import QColor, QSyntaxHighlighter, QTextCursor, QTextCharFormat, QTextFormat
+from PyQt6.QtWidgets import QTextEdit, QInputDialog, QMessageBox
 
 from Core import MarkdownRenderers
 from Interface.Dialogs.InsertLinksDialog import InsertLinksDialog
@@ -242,7 +242,7 @@ class TextWidget(QTextEdit):
             if self.Notebook.StringIsValidIndexPath(Anchor):
                 IndexPath = json.loads(Anchor)
                 ContextMenu.addAction(self.MainWindow.PopOutPageIcon, "Pop Out Linked Page", lambda: self.MainWindow.PopOutPage(IndexPath))
-        ContextMenu.exec_(self.mapToGlobal(QContextMenuEvent.pos()))
+        ContextMenu.exec(self.mapToGlobal(QContextMenuEvent.pos()))
 
     def insertFromMimeData(self, QMimeData):
         self.insertPlainText(QMimeData.text())
@@ -466,7 +466,7 @@ class TextWidget(QTextEdit):
                 SearchResultsLength = len(SearchResults["ResultsList"])
                 if SearchResultsLength > 0:
                     if SearchResultsLength > 1:
-                        self.MainWindow.DisplayMessageBox("Multiple pages found.  Use the full link dialog to insert a link.", Icon=QMessageBox.Warning)
+                        self.MainWindow.DisplayMessageBox("Multiple pages found.  Use the full link dialog to insert a link.", Icon=QMessageBox.Icon.Warning)
                     else:
                         TopResultIndexPath = SearchResults["ResultsList"][0][1]
                         TopResultTitle = SearchResults["ResultsList"][0][0]

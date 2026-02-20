@@ -1,5 +1,5 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QLineEdit, QGridLayout, QComboBox, QLabel, QPushButton, QSpinBox, QScrollArea, QFrame
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QDialog, QLineEdit, QGridLayout, QComboBox, QLabel, QPushButton, QSpinBox, QScrollArea, QFrame
 
 
 class InsertTableDialog(QDialog):
@@ -86,7 +86,7 @@ class InsertTableDialog(QDialog):
         self.Resize()
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def ConstructTableString(self):
         TableString = ""
@@ -165,7 +165,7 @@ class TableDimensionsDialog(QDialog):
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def UpdateRows(self, NewValue):
         self.Rows = NewValue
@@ -193,13 +193,13 @@ class TableLineEdit(QLineEdit):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == Qt.Key_Up or KeyPressed == Qt.Key_Down:
+        if KeyPressed == Qt.Key.Key_Up or KeyPressed == Qt.Key.Key_Down:
             if self.Row > 0:
                 AdjustedRow = self.Row + 1
             else:
                 AdjustedRow = self.Row
             AdjustedColumn = self.Column + 1
-            if KeyPressed == Qt.Key_Up:
+            if KeyPressed == Qt.Key.Key_Up:
                 if AdjustedRow == 2:
                     NextItemRow = 0
                 else:

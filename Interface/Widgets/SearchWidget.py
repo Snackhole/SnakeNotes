@@ -1,8 +1,8 @@
 import re
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QTextCursor, QTextDocument
-from PyQt5.QtWidgets import QFrame, QLineEdit, QListWidget, QGridLayout, QListWidgetItem, QPushButton, QCheckBox, QSizePolicy, QApplication
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QTextCursor, QTextDocument
+from PyQt6.QtWidgets import QFrame, QLineEdit, QListWidget, QGridLayout, QListWidgetItem, QPushButton, QCheckBox, QSizePolicy, QApplication
 
 
 class SearchWidget(QFrame):
@@ -17,7 +17,7 @@ class SearchWidget(QFrame):
         self.RefreshingSearchResults = False
 
         # Inputs Size Policy
-        self.InputsSizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.InputsSizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         # Search Text Line Edit
         self.SearchTextLineEdit = SearchLineEdit(self)
@@ -276,7 +276,7 @@ class SearchLineEdit(QLineEdit):
         self.SearchWidget = SearchWidget
 
     def keyPressEvent(self, QKeyEvent):
-        if QKeyEvent.key() == Qt.Key_Escape:
+        if QKeyEvent.key() == Qt.Key.Key_Escape:
             self.SearchWidget.ClearSearch()
         else:
             super().keyPressEvent(QKeyEvent)

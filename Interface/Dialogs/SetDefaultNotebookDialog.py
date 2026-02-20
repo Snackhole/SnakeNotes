@@ -1,6 +1,6 @@
 import os
 
-from PyQt5.QtWidgets import QDialog, QLineEdit, QPushButton, QGridLayout, QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QDialog, QLineEdit, QPushButton, QGridLayout, QFileDialog, QMessageBox
 
 
 class SetDefaultNotebookDialog(QDialog):
@@ -42,10 +42,10 @@ class SetDefaultNotebookDialog(QDialog):
             self.DefaultNotebookPathLineEdit.setText(DefaultNotebookPath)
             self.DefaultNotebookPathLineEdit.setCursorPosition(len(DefaultNotebookPath))
             if not os.path.isfile(DefaultNotebookPath):
-                self.MainWindow.DisplayMessageBox("The current default notebook could not be found.  Clear the default notebook or select a new one.", Icon=QMessageBox.Warning, Buttons=QMessageBox.Ok, Parent=self)
+                self.MainWindow.DisplayMessageBox("The current default notebook could not be found.  Clear the default notebook or select a new one.", Icon=QMessageBox.Icon.Warning, Parent=self)
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def Set(self):
         NewDefaultNotebookFilePath = QFileDialog.getOpenFileName(parent=self, caption="Set Default Notebook", filter=f"Notebook files (*.ntbk{".gz" if self.GzipMode else ""})")[0]

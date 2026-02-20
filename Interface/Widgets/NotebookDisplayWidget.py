@@ -1,8 +1,8 @@
 import json
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator, QHeaderView, QMenu
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QTreeWidgetItemIterator, QHeaderView, QMenu
 
 
 class NotebookDisplayWidget(QTreeWidget):
@@ -16,7 +16,7 @@ class NotebookDisplayWidget(QTreeWidget):
         # Header Setup
         self.setHeaderHidden(True)
         self.header().setStretchLastSection(False)
-        self.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.header().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
 
         # Fill From Root Page
         self.FillFromRootPage()
@@ -57,8 +57,8 @@ class NotebookDisplayWidget(QTreeWidget):
         Iterator = QTreeWidgetItemIterator(self)
         while Iterator.value():
             Page = Iterator.value()
-            Page.setData(0, Qt.ForegroundRole, None)
-            Page.setData(0, Qt.BackgroundRole, None)
+            Page.setData(0, Qt.ItemDataRole.ForegroundRole, None)
+            Page.setData(0, Qt.ItemDataRole.BackgroundRole, None)
             Iterator += 1
 
     def SelectTreeItemFromIndexPath(self, IndexPath, SelectParent=False, ScrollToLastChild=False, SelectDelta=0):
@@ -70,7 +70,7 @@ class NotebookDisplayWidget(QTreeWidget):
             DestinationIndex = DestinationIndex.child(Element, 0)
         self.setCurrentIndex(DestinationIndex)
         self.currentItem().setExpanded(True)
-        self.scrollToItem(self.currentItem() if not ScrollToLastChild else self.currentItem().child(self.currentItem().childCount() - 1), self.PositionAtCenter)
+        self.scrollToItem(self.currentItem() if not ScrollToLastChild else self.currentItem().child(self.currentItem().childCount() - 1), self.ScrollHint.PositionAtCenter)
 
     def SelectTreeItemFromIndexPathString(self, IndexPathString, SelectParent=False, ScrollToLastChild=False, SelectDelta=0):
         IndexPath = json.loads(IndexPathString)
@@ -102,7 +102,7 @@ class NotebookDisplayWidget(QTreeWidget):
         ContextMenu.addAction(self.MainWindow.ExpandAllAction)
         ContextMenu.addAction(self.MainWindow.ExpandRecursivelyAction)
         ContextMenu.addAction(self.MainWindow.CollapseAllAction)
-        ContextMenu.exec_(self.mapToGlobal(QContextMenuEvent.pos()))
+        ContextMenu.exec(self.mapToGlobal(QContextMenuEvent.pos()))
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.ForwardButton:

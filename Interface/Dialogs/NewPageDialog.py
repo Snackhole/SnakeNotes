@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QGridLayout, QComboBox
+from PyQt6.QtWidgets import QDialog, QLabel, QLineEdit, QPushButton, QGridLayout, QComboBox
 
 
 class NewPageDialog(QDialog):
@@ -54,7 +54,7 @@ class NewPageDialog(QDialog):
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def Done(self):
         NewPageName = self.PageNameLineEdit.text()

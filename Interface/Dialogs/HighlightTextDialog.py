@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QPushButton, QListWidget, QListWidgetItem, QGridLayout, QInputDialog, QMessageBox, QCheckBox
+from PyQt6.QtWidgets import QDialog, QPushButton, QListWidget, QListWidgetItem, QGridLayout, QInputDialog, QMessageBox, QCheckBox
 
 
 class HighlightTextDialog(QDialog):
@@ -44,7 +44,7 @@ class HighlightTextDialog(QDialog):
         self.PopulateTextToHighlightList()
 
         # Execute Menu
-        self.exec_()
+        self.exec()
 
     def PopulateTextToHighlightList(self):
         self.TextToHighlightListWidget.clear()
@@ -71,7 +71,7 @@ class HighlightTextDialog(QDialog):
             self.PopulateTextToHighlightList()
 
     def Clear(self):
-        if self.MainWindow.DisplayMessageBox("Are you sure you want to clear the list of text to highlight?  This cannot be undone.", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+        if self.MainWindow.DisplayMessageBox("Are you sure you want to clear the list of text to highlight?  This cannot be undone.", Icon=QMessageBox.Icon.Warning, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
             self.MainWindow.TextToHighlight.clear()
             self.MatchCaseCheckBox.setChecked(False)
             self.PopulateTextToHighlightList()

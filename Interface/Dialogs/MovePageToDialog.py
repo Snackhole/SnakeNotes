@@ -1,7 +1,7 @@
 import mistune
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QDialog, QHeaderView, QTextEdit, QPushButton, QCheckBox, QGridLayout, QLineEdit, QTreeWidget, QTreeWidgetItem
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import QDialog, QHeaderView, QTextEdit, QPushButton, QCheckBox, QGridLayout, QLineEdit, QTreeWidget, QTreeWidgetItem
 
 from Core import MarkdownRenderers
 
@@ -39,7 +39,7 @@ class MovePageToDialog(QDialog):
         self.NotebookDisplay = NotebookDisplay(self)
         self.NotebookDisplay.setHeaderHidden(True)
         self.NotebookDisplay.header().setStretchLastSection(False)
-        self.NotebookDisplay.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.NotebookDisplay.header().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.NotebookDisplay.itemSelectionChanged.connect(self.UpdatePreview)
 
         # Preview Text Edit
@@ -80,7 +80,7 @@ class MovePageToDialog(QDialog):
         self.PopulateNotebookDisplay()
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def Move(self):
         SelectedItems = self.NotebookDisplay.selectedItems()
@@ -172,7 +172,7 @@ class SearchLineEdit(QLineEdit):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == Qt.Key_Down:
+        if KeyPressed == Qt.Key.Key_Down:
             self.Dialog.NotebookDisplay.setFocus()
         else:
             super().keyPressEvent(QKeyEvent)
@@ -191,5 +191,5 @@ class NotebookDisplay(QTreeWidget):
         ItemBefore = self.currentItem()
         super().keyPressEvent(QKeyEvent)
         ItemAfter = self.currentItem()
-        if ItemBefore == ItemAfter and KeyPressed == Qt.Key_Up:
+        if ItemBefore == ItemAfter and KeyPressed == Qt.Key.Key_Up:
             self.Dialog.SearchLineEdit.setFocus()

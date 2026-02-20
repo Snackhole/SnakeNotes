@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QLabel, QComboBox, QPushButton, QGridLayout
+from PyQt6.QtWidgets import QDialog, QLabel, QComboBox, QPushButton, QGridLayout
 
 
 class DemotePageDialog(QDialog):
@@ -40,7 +40,7 @@ class DemotePageDialog(QDialog):
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def Done(self):
         SiblingPageIndex = self.SiblingPageTitlesComboBox.currentIndex()

@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton, QTextEdit
+from PyQt6.QtWidgets import QDialog, QGridLayout, QPushButton, QTextEdit
 
 
 class AddToPageAndSubpagesDialog(QDialog):
@@ -44,7 +44,7 @@ class AddToPageAndSubpagesDialog(QDialog):
         self.TextToAddTextEdit.setFocus()
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def Add(self):
         self.TextToAdd = self.TextToAddTextEdit.toPlainText()

@@ -1,9 +1,9 @@
 import json
 import webbrowser
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QTextFormat
-from PyQt5.QtWidgets import QTextEdit
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QTextFormat
+from PyQt6.QtWidgets import QTextEdit
 
 from Core import MarkdownRenderers
 
@@ -41,7 +41,7 @@ class PopOutTextWidget(QTextEdit):
                 ContextMenu.addSeparator()
                 IndexPath = json.loads(Anchor)
                 ContextMenu.addAction(self.MainWindow.PopOutPageIcon, "Pop Out Linked Page", lambda: self.MainWindow.PopOutPage(IndexPath))
-        ContextMenu.exec_(self.mapToGlobal(QContextMenuEvent.pos()))
+        ContextMenu.exec(self.mapToGlobal(QContextMenuEvent.pos()))
 
     def wheelEvent(self, QWheelEvent):
         if QWheelEvent.modifiers() == Qt.ControlModifier:

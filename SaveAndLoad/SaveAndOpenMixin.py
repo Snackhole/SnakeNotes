@@ -3,7 +3,7 @@ import gzip
 import json
 from datetime import datetime
 
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt6.QtWidgets import QFileDialog, QMessageBox
 
 from SaveAndLoad.JSONSerializer import JSONSerializer
 
@@ -38,7 +38,7 @@ class SaveAndOpenMixin:
         if SaveFileName == self.CurrentOpenFileName and os.path.isfile(SaveFileName) and self.FileLastModified is not None:
             SaveFileModified = datetime.fromtimestamp(os.path.getmtime(SaveFileName))
             if SaveFileModified != self.FileLastModified:
-                if self.DisplayMessageBox(f"Warning!  The current open file has been modified since it was last saved or opened by this instance of {self.ScriptName}.  Saving could cause data loss!\n\nProceed?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No)) == QMessageBox.No:
+                if self.DisplayMessageBox(f"Warning!  The current open file has been modified since it was last saved or opened by this instance of {self.ScriptName}.  Saving could cause data loss!\n\nProceed?", Icon=QMessageBox.Icon.Warning, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)) == QMessageBox.StandardButton.No:
                     return False
         if SaveFileName != "":
             if not SaveFileName.endswith(Extension):
@@ -83,13 +83,13 @@ class SaveAndOpenMixin:
         ActionDoneString = "opened" if not ImportMode else "imported"
         ActionDoneStringCapitalized = "Opened" if not ImportMode else "Imported"
         if self.UnsavedChanges and RespectUnsavedChanges:
-            SavePrompt = self.DisplayMessageBox(f"Save unsaved work before {ActionInProgressString}?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
-            if SavePrompt == QMessageBox.Yes:
+            SavePrompt = self.DisplayMessageBox(f"Save unsaved work before {ActionInProgressString}?", Icon=QMessageBox.Icon.Warning, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel))
+            if SavePrompt == QMessageBox.StandardButton.Yes:
                 if not self.Save(ObjectToSave):
                     return None
-            elif SavePrompt == QMessageBox.No:
+            elif SavePrompt == QMessageBox.StandardButton.No:
                 pass
-            elif SavePrompt == QMessageBox.Cancel:
+            elif SavePrompt == QMessageBox.StandardButton.Cancel:
                 return None
         Caption = f"{ActionString}{self.FileDescription if AlternateFileDescription is None else AlternateFileDescription} File"
         Filter = f"{self.FileDescription if AlternateFileDescription is None else AlternateFileDescription} files (*{self.FileExtension if AlternateFileExtension is None else AlternateFileExtension}{"" if not GzipMode else ".gz"})"
@@ -121,13 +121,13 @@ class SaveAndOpenMixin:
     def New(self, ObjectToSave, RespectUnsavedChanges=True):
         assert isinstance(self, self.MainWindowClass)
         if self.UnsavedChanges and RespectUnsavedChanges:
-            SavePrompt = self.DisplayMessageBox("Save unsaved work before starting a new file?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel))
-            if SavePrompt == QMessageBox.Yes:
+            SavePrompt = self.DisplayMessageBox("Save unsaved work before starting a new file?", Icon=QMessageBox.Icon.Warning, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel))
+            if SavePrompt == QMessageBox.StandardButton.Yes:
                 if not self.Save(ObjectToSave):
                     return False
-            elif SavePrompt == QMessageBox.No:
+            elif SavePrompt == QMessageBox.StandardButton.No:
                 pass
-            elif SavePrompt == QMessageBox.Cancel:
+            elif SavePrompt == QMessageBox.StandardButton.Cancel:
                 return False
         self.CurrentOpenFileName = ""
         self.FlashStatusBar("New file opened.")
@@ -138,12 +138,12 @@ class SaveAndOpenMixin:
     def closeEvent(self, event):
         assert isinstance(self, self.MainWindowClass)
         if self.UnsavedChanges:
-            SavePrompt = self.DisplayMessageBox("There are unsaved changes.  Close anyway?", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No))
-            if SavePrompt == QMessageBox.Yes:
+            SavePrompt = self.DisplayMessageBox("There are unsaved changes.  Close anyway?", Icon=QMessageBox.Icon.Warning, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No))
+            if SavePrompt == QMessageBox.StandardButton.Yes:
                 self.SaveLastOpenedDirectory()
                 self.SaveGzipMode()
                 event.accept()
-            elif SavePrompt == QMessageBox.No:
+            elif SavePrompt == QMessageBox.StandardButton.No:
                 event.ignore()
         else:
             self.SaveLastOpenedDirectory()

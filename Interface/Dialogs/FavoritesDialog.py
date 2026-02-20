@@ -1,7 +1,7 @@
 import os
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QInputDialog, QListWidget, QPushButton, QGridLayout, QListWidgetItem, QMessageBox, QLineEdit, QCheckBox
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QDialog, QInputDialog, QListWidget, QPushButton, QGridLayout, QListWidgetItem, QMessageBox, QLineEdit, QCheckBox
 
 
 class FavoritesDialog(QDialog):
@@ -66,7 +66,7 @@ class FavoritesDialog(QDialog):
         self.PopulateFavoritesList()
 
         # Execute Menu
-        self.exec_()
+        self.exec()
 
     def OpenFavorite(self):
         SelectedItems = self.FavoritesList.selectedItems()
@@ -93,7 +93,7 @@ class FavoritesDialog(QDialog):
                 self.MainWindow.DisplayMessageBox("Favorite names cannot be blank.", Parent=self)
                 return
             if FavoriteName in self.FavoritesData:
-                if self.MainWindow.DisplayMessageBox(f"There is already a notebook called \"{FavoriteName}\" in your favorites.\n\nOverwrite?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.No:
+                if self.MainWindow.DisplayMessageBox(f"There is already a notebook called \"{FavoriteName}\" in your favorites.\n\nOverwrite?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.No:
                     return
             self.FavoritesData[FavoriteName] = CurrentOpenFileName
             self.PopulateFavoritesList()
@@ -101,7 +101,7 @@ class FavoritesDialog(QDialog):
     def DeleteFavorite(self):
         SelectedItems = self.FavoritesList.selectedItems()
         if len(SelectedItems) > 0:
-            if self.MainWindow.DisplayMessageBox(f"Delete \"{SelectedItems[0].FavoriteName}\" from your favorites?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+            if self.MainWindow.DisplayMessageBox(f"Delete \"{SelectedItems[0].FavoriteName}\" from your favorites?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
                 del self.FavoritesData[SelectedItems[0].FavoriteName]
                 self.PopulateFavoritesList()
 
@@ -136,7 +136,7 @@ class SearchLineEdit(QLineEdit):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == Qt.Key_Down:
+        if KeyPressed == Qt.Key.Key_Down:
             self.Dialog.FavoritesList.setFocus()
         else:
             super().keyPressEvent(QKeyEvent)
@@ -155,7 +155,7 @@ class FavoritesList(QListWidget):
         ItemBefore = self.currentItem()
         super().keyPressEvent(QKeyEvent)
         ItemAfter = self.currentItem()
-        if ItemBefore == ItemAfter and KeyPressed == Qt.Key_Up:
+        if ItemBefore == ItemAfter and KeyPressed == Qt.Key.Key_Up:
             self.Dialog.SearchLineEdit.setFocus()
 
 

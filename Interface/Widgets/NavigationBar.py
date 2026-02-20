@@ -1,5 +1,5 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFrame, QGridLayout, QPushButton, QScrollArea, QSizePolicy, QLabel
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QFrame, QGridLayout, QPushButton, QScrollArea, QSizePolicy, QLabel
 
 from Interface.Dialogs.NavigationBarSubPageDialog import NavigationBarSubPageDialog
 
@@ -17,13 +17,13 @@ class NavigationBar(QFrame):
 
         # Scroll Area
         self.NavigationScrollArea = NavigationScrollArea()
-        self.NavigationScrollArea.setFocusPolicy(Qt.NoFocus)
+        self.NavigationScrollArea.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         # Scroll Buttons
         self.ScrollLeftButton = ScrollButton("Left", self.NavigationScrollArea)
-        self.ScrollLeftButton.setFocusPolicy(Qt.NoFocus)
+        self.ScrollLeftButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.ScrollRightButton = ScrollButton("Right", self.NavigationScrollArea)
-        self.ScrollRightButton.setFocusPolicy(Qt.NoFocus)
+        self.ScrollRightButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         # Create and Set Layout
         self.Layout = QGridLayout()
@@ -115,7 +115,7 @@ class ScrollButton(QPushButton):
         super().__init__(self.Label)
 
         # Configure
-        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         self.setMaximumWidth(30)
         self.setAutoRepeat(True)
         self.clicked.connect(self.Scroll)

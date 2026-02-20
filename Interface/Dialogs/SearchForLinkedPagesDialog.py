@@ -1,8 +1,8 @@
 import json
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QDialog, QGridLayout, QLabel, QTreeWidget, QHeaderView, QPushButton, QTreeWidgetItem
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import QDialog, QGridLayout, QLabel, QTreeWidget, QHeaderView, QPushButton, QTreeWidgetItem
 
 
 class SearchForLinkedPagesDialog(QDialog):
@@ -25,7 +25,7 @@ class SearchForLinkedPagesDialog(QDialog):
         self.NotebookDisplay = QTreeWidget()
         self.NotebookDisplay.setHeaderHidden(True)
         self.NotebookDisplay.header().setStretchLastSection(False)
-        self.NotebookDisplay.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.NotebookDisplay.header().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         self.NotebookDisplay.itemActivated.connect(self.GoTo)
 
         # Buttons
@@ -50,7 +50,7 @@ class SearchForLinkedPagesDialog(QDialog):
         self.PopulateNotebookDisplay()
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def PopulateNotebookDisplay(self):
         self.NotebookDisplay.setRootIsDecorated(True)
@@ -82,7 +82,7 @@ class SearchForLinkedPagesDialog(QDialog):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == Qt.Key_Return and self.NotebookDisplay.hasFocus():
+        if KeyPressed == Qt.Key.Key_Return and self.NotebookDisplay.hasFocus():
             return
         else:
             super().keyPressEvent(QKeyEvent)

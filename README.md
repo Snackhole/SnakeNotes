@@ -1,5 +1,5 @@
 # SnakeNotes
-SnakeNotes is a searchable notes application with hierarchical pages and markdown formatting, written in Python 3.12 with PyQT5.
+SnakeNotes is a searchable notes application with hierarchical pages and markdown formatting, written in Python 3.12 with PyQT6.
 
 ## Installation
 Because SnakeNotes is written in 64-bit Python and packaged as an executable zip, a 64-bit Python 3 installation is required to run it.  It was written and tested in Python 3.12, though it may or may not run in other versions of Python 3.
@@ -30,7 +30,7 @@ However, for convenience, consider running `python3 CreateLinuxDesktopFile.py` o
 
 If you prefer not to use the included interpreter, consider deleting the `Python Interpreter - Linux` folder to save space.
 
-If SnakeNotes does not run at first, you probably need to resolve some dependencies.  First, try `sudo apt install libxcb-xinerama0`.  If that doesn't resolve the issue, try installing PyQT5 with `sudo apt install python3-pyqt5`; if this does resolve the issue, you might even be able to (partially) uninstall it with `sudo apt remove python3-pyqt5` and still run SnakeNotes, as long as you don't autoremove the additional packages that were installed with it.  If installing PyQT5 through APT doesn't work, try installing it through pip; if you don't have pip already, use `sudo apt install python3-pip`, then run `pip3 install pyqt5`.  Other issues have not yet been encountered and will require you to do some research and troubleshooting to resolve on your system.
+If SnakeNotes does not run at first, you probably need to resolve some dependencies.  First, try `sudo apt install libxcb-xinerama0`.  If that doesn't resolve the issue, try installing PyQT6 with `sudo apt install python3-pyqt6`; if this does resolve the issue, you might even be able to (partially) uninstall it with `sudo apt remove python3-pyqt6` and still run SnakeNotes, as long as you don't autoremove the additional packages that were installed with it.  If installing PyQT6 through APT doesn't work, try installing it through pip; if you don't have pip already, use `sudo apt install python3-pip`, then run `pip3 install pyqt6`.  Other issues have not yet been encountered and will require you to do some research and troubleshooting to resolve on your system.
 
 ## Keybindings
 Note that, after the first startup, there will be a `Keybindings.cfg` file in the `Configs` folder of the installation directory.  This file can be used to alter the keybindings for various actions in the app.  This is not intended as a feature for regular users, but rather as a workaround in case of conflicts with the user's operating system, so it is not documented thoroughly and there is no user interface provided.  If you want to alter your keybindings, you'll need to know how to format the shortcut string properly in the config file, which you can work out by looking at the existing shortcut strings.  If you format the shortcut improperly, the app will still run but the action will have no keybinding assigned.
@@ -50,4 +50,4 @@ The `Configs` folder should be left in place as it stores settings and contexts 
 ## Uninstallation
 Uninstalling SnakeNotes itself only requires deleting the directory you extracted it to, along with any shortcuts you created.
 
-If you need to uninstall Python 3.12 or, on Linux, PyQT5, consult their documentation.
+If you need to uninstall Python 3.12 or, on Linux, PyQT6, consult their documentation.

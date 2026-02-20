@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QLabel, QSpinBox, QPushButton, QGridLayout
+from PyQt6.QtWidgets import QDialog, QLabel, QSpinBox, QPushButton, QGridLayout
 
 
 class DefaultPopOutSizeDialog(QDialog):
@@ -58,7 +58,7 @@ class DefaultPopOutSizeDialog(QDialog):
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def Done(self):
         self.Width = self.WidthSpinBox.value()

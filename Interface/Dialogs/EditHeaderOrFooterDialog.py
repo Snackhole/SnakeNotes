@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QGridLayout, QTextEdit, QPushButton
+from PyQt6.QtWidgets import QDialog, QGridLayout, QTextEdit, QPushButton
 
 
 class EditHeaderOrFooterDialog(QDialog):
@@ -67,7 +67,7 @@ class EditHeaderOrFooterDialog(QDialog):
         self.HeaderOrFooterText.setFocus()
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def Done(self):
         self.HeaderOrFooterString = self.HeaderOrFooterText.toPlainText()

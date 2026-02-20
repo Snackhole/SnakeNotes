@@ -1,8 +1,8 @@
 import os
 
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QCheckBox, QDialog, QFrame, QGridLayout, QLineEdit, QListWidget, QPushButton, QListWidgetItem, QLabel, QFileDialog, QMessageBox, QScrollArea, QSizePolicy, QSplitter, QInputDialog
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import QCheckBox, QDialog, QFrame, QGridLayout, QLineEdit, QListWidget, QPushButton, QListWidgetItem, QLabel, QFileDialog, QMessageBox, QScrollArea, QSizePolicy, QSplitter, QInputDialog
 
 from Core import Base64Converters
 
@@ -46,7 +46,7 @@ class ImageManagerDialog(QDialog):
 
         # Linking Pages Label
         self.LinkingPagesLabel = QLabel("Linking Pages")
-        self.LinkingPagesLabel.setAlignment(Qt.AlignHCenter)
+        self.LinkingPagesLabel.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         # Linking Pages List
         self.LinkingPagesList = QListWidget()
@@ -56,7 +56,7 @@ class ImageManagerDialog(QDialog):
         self.ImageDisplay = QLabel()
         self.ImageDisplayScrollArea = QScrollArea()
         self.ImageDisplayScrollArea.setWidget(self.ImageDisplay)
-        self.ImageDisplayScrollArea.setAlignment(Qt.AlignCenter)
+        self.ImageDisplayScrollArea.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Buttons
         self.GoToLinkingPageButton = QPushButton("Go to Linking Page")
@@ -67,7 +67,7 @@ class ImageManagerDialog(QDialog):
         self.AddMultipleImagesButton.clicked.connect(self.AddMultipleImages)
         self.RenameImageButton = QPushButton("Rename Image")
         self.RenameImageButton.clicked.connect(self.RenameImage)
-        self.RenameImageButton.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.RenameImageButton.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         self.ExportImageButton = QPushButton("Export Image")
         self.ExportImageButton.clicked.connect(self.ExportImage)
         self.ExportAllImagesButton = QPushButton("Export All Images")
@@ -79,7 +79,7 @@ class ImageManagerDialog(QDialog):
         self.DoneButton = QPushButton("Done")
         self.DoneButton.clicked.connect(self.Done)
         self.DoneButton.setDefault(True)
-        self.DoneButton.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.DoneButton.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
 
         # Create, Populate, and Set Layout
         self.Layout = QGridLayout()
@@ -131,7 +131,7 @@ class ImageManagerDialog(QDialog):
             self.SearchLineEdit.setText(SearchImageName)
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def ItemSelected(self):
         SelectedItems = self.ImageList.selectedItems()
@@ -173,7 +173,7 @@ class ImageManagerDialog(QDialog):
         if ImageFilePath != "":
             ImageFileName = os.path.basename(ImageFilePath)
             if self.Notebook.HasImage(ImageFileName):
-                if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+                if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
                     AttachNewFile = True
             else:
                 AttachNewFile = True
@@ -191,7 +191,7 @@ class ImageManagerDialog(QDialog):
             AttachNewFile = False
             ImageFileName = os.path.basename(ImageFilePath)
             if self.Notebook.HasImage(ImageFileName):
-                if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+                if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
                     AttachNewFile = True
             else:
                 AttachNewFile = True
@@ -252,7 +252,7 @@ class ImageManagerDialog(QDialog):
         if len(SelectedItems) > 0:
             CurrentFileName = SelectedItems[0].FileName
             CurrentImageRow = self.ImageList.currentRow()
-            if self.MainWindow.DisplayMessageBox(f"Are you sure you want to delete \"{CurrentFileName}\" from the notebook?  This cannot be undone.", Icon=QMessageBox.Question, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+            if self.MainWindow.DisplayMessageBox(f"Are you sure you want to delete \"{CurrentFileName}\" from the notebook?  This cannot be undone.", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
                 del self.Notebook.Images[CurrentFileName]
                 self.UnsavedChanges = True
                 self.PopulateImageList()
@@ -264,7 +264,7 @@ class ImageManagerDialog(QDialog):
                     self.ImageList.setCurrentRow(CurrentImageRow)
 
     def DeleteAllImages(self):
-        if self.MainWindow.DisplayMessageBox("Are you sure you want to delete all images from the notebook?  This cannot be undone.", Icon=QMessageBox.Warning, Buttons=(QMessageBox.Yes | QMessageBox.No), Parent=self) == QMessageBox.Yes:
+        if self.MainWindow.DisplayMessageBox("Are you sure you want to delete all images from the notebook?  This cannot be undone.", Icon=QMessageBox.Icon.Warning, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
             self.Notebook.Images.clear()
             self.UnsavedChanges = True
             self.PopulateImageList()
@@ -308,7 +308,7 @@ class SearchLineEdit(QLineEdit):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == Qt.Key_Down:
+        if KeyPressed == Qt.Key.Key_Down:
             self.Dialog.ImageList.setFocus()
         else:
             super().keyPressEvent(QKeyEvent)
@@ -325,7 +325,7 @@ class ImageList(QListWidget):
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
         Row = self.currentRow()
-        if KeyPressed == Qt.Key_Up and Row == 0:
+        if KeyPressed == Qt.Key.Key_Up and Row == 0:
             self.Dialog.SearchLineEdit.setFocus()
         else:
             super().keyPressEvent(QKeyEvent)

@@ -1,6 +1,6 @@
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QCheckBox, QDialog, QGridLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton, QScrollArea, QSplitter
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import QCheckBox, QDialog, QGridLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QPushButton, QScrollArea, QSplitter
 
 from Core import Base64Converters
 
@@ -37,7 +37,7 @@ class InsertImageDialog(QDialog):
         self.ImageDisplay = QLabel()
         self.ImageDisplayScrollArea = QScrollArea()
         self.ImageDisplayScrollArea.setWidget(self.ImageDisplay)
-        self.ImageDisplayScrollArea.setAlignment(Qt.AlignCenter)
+        self.ImageDisplayScrollArea.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Buttons
         self.InsertImageButton = QPushButton("Insert")
@@ -73,7 +73,7 @@ class InsertImageDialog(QDialog):
         self.PopulateImageList()
 
         # Execute Dialog
-        self.exec_()
+        self.exec()
 
     def ItemSelected(self):
         SelectedItems = self.ImageList.selectedItems()
@@ -135,7 +135,7 @@ class SearchLineEdit(QLineEdit):
 
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
-        if KeyPressed == Qt.Key_Down:
+        if KeyPressed == Qt.Key.Key_Down:
             self.Dialog.ImageList.setFocus()
         else:
             super().keyPressEvent(QKeyEvent)
@@ -152,7 +152,7 @@ class ImageList(QListWidget):
     def keyPressEvent(self, QKeyEvent):
         KeyPressed = QKeyEvent.key()
         Row = self.currentRow()
-        if KeyPressed == Qt.Key_Up and Row == 0:
+        if KeyPressed == Qt.Key.Key_Up and Row == 0:
             self.Dialog.SearchLineEdit.setFocus()
         else:
             super().keyPressEvent(QKeyEvent)

@@ -72,9 +72,9 @@ class PopOutTextWidget(QTextEdit):
         Anchor = self.anchorAt(QMouseEvent.pos())
         CharFormat = self.cursorForPosition(QMouseEvent.pos()).charFormat()
         if Anchor != "" or CharFormat.isImageFormat():
-            self.viewport().setCursor(Qt.PointingHandCursor)
+            self.viewport().setCursor(Qt.CursorShape.PointingHandCursor)
         else:
-            self.viewport().setCursor(Qt.IBeamCursor)
+            self.viewport().setCursor(Qt.CursorShape.IBeamCursor)
         return super().mouseMoveEvent(QMouseEvent)
 
     # Link Methods

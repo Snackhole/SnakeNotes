@@ -70,8 +70,8 @@ class NavigationScrollArea(QScrollArea):
         self.setWidget(self.Frame)
 
         # Configure
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setWidgetResizable(True)
         self.horizontalScrollBar().rangeChanged.connect(self.ScrollToEnd)
 
@@ -139,7 +139,7 @@ class Separator(QLabel):
         super().__init__(" \u203a ")
 
         # Configure
-        self.setCursor(Qt.PointingHandCursor)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setStyleSheet("QLabel::hover {background-color: darkCyan; color: white;}")
 
     def mouseDoubleClickEvent(self, QMouseEvent):
@@ -163,7 +163,7 @@ class NavigationPageLabel(QLabel):
         super().__init__(f" {self.Page["Title"]} ")
 
         # Configure
-        self.setCursor(Qt.PointingHandCursor)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setStyleSheet("QLabel::hover {background-color: darkCyan; color: white;}")
 
     def mouseDoubleClickEvent(self, QMouseEvent):

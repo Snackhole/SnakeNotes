@@ -111,12 +111,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         # Create and Populate Layout
         self.FrameLayout = QGridLayout()
-        self.NotebookAndTextSplitter = QSplitter(Qt.Horizontal)
+        self.NotebookAndTextSplitter = QSplitter(Qt.Orientation.Horizontal)
         self.NotebookAndTextSplitter.addWidget(self.NotebookDisplayWidgetInst)
         self.NotebookAndTextSplitter.addWidget(self.TextWidgetInst)
         self.NotebookAndTextSplitter.setStretchFactor(1, 1)
         self.NotebookAndTextSplitter.setChildrenCollapsible(False)
-        self.NotebookAndSearchSplitter = QSplitter(Qt.Vertical)
+        self.NotebookAndSearchSplitter = QSplitter(Qt.Orientation.Vertical)
         self.NotebookAndSearchSplitter.addWidget(self.NotebookAndTextSplitter)
         self.NotebookAndSearchSplitter.addWidget(self.SearchWidgetInst)
         self.NotebookAndSearchSplitter.setStretchFactor(0, 1)
@@ -741,14 +741,19 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def LoadConfigs(self):
         # Tool Bar Area
+        ToolBarAreas = {}
+        ToolBarAreas["LeftToolBarArea"] = Qt.ToolBarArea.LeftToolBarArea
+        ToolBarAreas["RightToolBarArea"] = Qt.ToolBarArea.RightToolBarArea
+        ToolBarAreas["TopToolBarArea"] = Qt.ToolBarArea.TopToolBarArea
+        ToolBarAreas["BottomToolBarArea"] = Qt.ToolBarArea.BottomToolBarArea
         ToolBarAreaFile = self.GetResourcePath("Configs/ToolBarArea.cfg")
         if os.path.isfile(ToolBarAreaFile):
             with open(ToolBarAreaFile, "r") as ConfigFile:
                 ToolBarArea = json.loads(ConfigFile.read())
         else:
-            ToolBarArea = 4
+            ToolBarArea = "TopToolBarArea"
         self.removeToolBar(self.ToolBar)
-        self.addToolBar(ToolBarArea, self.ToolBar)
+        self.addToolBar(ToolBarAreas[ToolBarArea], self.ToolBar)
         self.ToolBar.show()
 
         # Favorites
@@ -908,7 +913,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         # Tool Bar Area
         with open(self.GetResourcePath("Configs/ToolBarArea.cfg"), "w") as ConfigFile:
-            ConfigFile.write(json.dumps(self.toolBarArea(self.ToolBar)))
+            ConfigFile.write(json.dumps(self.toolBarArea(self.ToolBar).name))
 
         # Favorites
         with open(self.GetResourcePath("Configs/Favorites.cfg"), "w") as ConfigFile:

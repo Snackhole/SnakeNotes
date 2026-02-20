@@ -273,10 +273,10 @@ class TextWidget(QTextEdit):
             super().mouseReleaseEvent(QMouseEvent)
 
     def mousePressEvent(self, QMouseEvent):
-        if QMouseEvent.button() == Qt.ForwardButton:
+        if QMouseEvent.button() == Qt.MouseButton.ForwardButton:
             self.MainWindow.ForwardAction.trigger()
             QMouseEvent.accept()
-        elif QMouseEvent.button() == Qt.BackButton:
+        elif QMouseEvent.button() == Qt.MouseButton.BackButton:
             self.MainWindow.BackAction.trigger()
             QMouseEvent.accept()
         else:
@@ -286,9 +286,9 @@ class TextWidget(QTextEdit):
         Anchor = self.anchorAt(QMouseEvent.pos())
         CharFormat = self.cursorForPosition(QMouseEvent.pos()).charFormat()
         if Anchor != "" or CharFormat.isImageFormat():
-            self.viewport().setCursor(Qt.PointingHandCursor)
+            self.viewport().setCursor(Qt.CursorShape.PointingHandCursor)
         else:
-            self.viewport().setCursor(Qt.IBeamCursor)
+            self.viewport().setCursor(Qt.CursorShape.IBeamCursor)
         return super().mouseMoveEvent(QMouseEvent)
 
     # Link Methods

@@ -84,7 +84,7 @@ class TextWidget(QTextEdit):
         self.insertPlainText(WrappedText)
         if MoveCursorToEndOfWrappedText:
             for Character in range(len(WrapSuffix)):
-                self.moveCursor(QTextCursor.Left)
+                self.moveCursor(QTextCursor.MoveOperation.Left)
         Cursor.endEditBlock()
 
     def SingleBlockPrefix(self, Prefix):
@@ -93,7 +93,7 @@ class TextWidget(QTextEdit):
         if "\u2029" in SelectedText:
             return
         Cursor.beginEditBlock()
-        Cursor.movePosition(QTextCursor.StartOfBlock)
+        Cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock)
         Cursor.insertText(Prefix)
         self.MakeCursorVisible()
         Cursor.endEditBlock()
@@ -106,15 +106,15 @@ class TextWidget(QTextEdit):
             AnchorPosition, CursorPosition = CursorPosition, AnchorPosition
 
         Cursor.setPosition(AnchorPosition)
-        Cursor.movePosition(QTextCursor.StartOfBlock)
+        Cursor.movePosition(QTextCursor.MoveOperation.StartOfBlock)
         BlockStartPosition = Cursor.position()
 
         Cursor.setPosition(CursorPosition)
-        Cursor.movePosition(QTextCursor.EndOfBlock)
+        Cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
         BlockEndPosition = Cursor.position()
 
         Cursor.setPosition(BlockStartPosition)
-        Cursor.setPosition(BlockEndPosition, QTextCursor.KeepAnchor)
+        Cursor.setPosition(BlockEndPosition, QTextCursor.MoveMode.KeepAnchor)
 
     def MultipleBlockPrefix(self, Prefix):
         Cursor = self.textCursor()
@@ -148,7 +148,7 @@ class TextWidget(QTextEdit):
         Cursor.beginEditBlock()
         Cursor.insertText(WrappedText)
         for Character in range(len(WrapSymbol) + 1):
-            self.moveCursor(QTextCursor.Left)
+            self.moveCursor(QTextCursor.MoveOperation.Left)
         self.MakeCursorVisible()
         Cursor.endEditBlock()
 
@@ -216,7 +216,7 @@ class TextWidget(QTextEdit):
         return Text
 
     def CursorOnBlankLine(self, Cursor):
-        Cursor.select(QTextCursor.LineUnderCursor)
+        Cursor.select(QTextCursor.SelectionType.LineUnderCursor)
         LineText = Cursor.selectedText()
         return LineText == ""
 
@@ -380,7 +380,7 @@ class TextWidget(QTextEdit):
                     if self.MainWindow.InlineFootnoteStyle:
                         self.MoveCursorToValidFootnoteLocation(Cursor)
                     else:
-                        Cursor.movePosition(QTextCursor.End)
+                        Cursor.movePosition(QTextCursor.MoveOperation.End)
                     Cursor.insertText(f"\u2029\u2029{FootnoteSymbol}: ")
                     self.setTextCursor(Cursor)
                     self.MakeCursorVisible()
@@ -399,7 +399,7 @@ class TextWidget(QTextEdit):
             TwoLinesFollowCurrentLine = len(LineData[0]) - 2 > CurrentLineIndex
 
             if CurrentLineLast:
-                Cursor.movePosition(QTextCursor.EndOfBlock)
+                Cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
                 CursorAtValidFootnoteLocation = True
             elif TwoLinesFollowCurrentLine and NextLineBlank:
                 CurrentLine = LineData[0][CurrentLineIndex]
@@ -407,20 +407,20 @@ class TextWidget(QTextEdit):
                 LineAfterNextStartsFootnote = self.LineStartsFootnote(LineAfterNext)
                 LineAfterNextContinuesFootnote = self.LineContinuesFootnote(LineAfterNext, CurrentLine)
                 if LineAfterNextStartsFootnote or LineAfterNextContinuesFootnote:
-                    Cursor.movePosition(QTextCursor.EndOfBlock)
-                    Cursor.movePosition(QTextCursor.NextCharacter)
-                    Cursor.movePosition(QTextCursor.EndOfBlock)
-                    Cursor.movePosition(QTextCursor.NextCharacter)
-                    Cursor.movePosition(QTextCursor.EndOfBlock)
+                    Cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
+                    Cursor.movePosition(QTextCursor.MoveOperation.NextCharacter)
+                    Cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
+                    Cursor.movePosition(QTextCursor.MoveOperation.NextCharacter)
+                    Cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
                 else:
-                    Cursor.movePosition(QTextCursor.EndOfBlock)
+                    Cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
                     CursorAtValidFootnoteLocation = True
             elif not NextLineBlank and not NextLineBlank is None:
-                Cursor.movePosition(QTextCursor.EndOfBlock)
-                Cursor.movePosition(QTextCursor.NextCharacter)
-                Cursor.movePosition(QTextCursor.EndOfBlock)
+                Cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
+                Cursor.movePosition(QTextCursor.MoveOperation.NextCharacter)
+                Cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
             else:
-                Cursor.movePosition(QTextCursor.EndOfBlock)
+                Cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
                 CursorAtValidFootnoteLocation = True
 
     def LineStartsFootnote(self, Line):

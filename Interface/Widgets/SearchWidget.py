@@ -123,12 +123,12 @@ class SearchWidget(QFrame):
         SearchText = self.SearchTextLineEdit.text()
         MatchCase = self.MatchCaseCheckBox.isChecked()
         if MatchCase:
-            if not self.MainWindow.TextWidgetInst.find(SearchText, QTextDocument.FindCaseSensitively):
-                self.MainWindow.TextWidgetInst.moveCursor(QTextCursor.Start)
-                self.MainWindow.TextWidgetInst.find(SearchText, QTextDocument.FindCaseSensitively)
+            if not self.MainWindow.TextWidgetInst.find(SearchText, QTextDocument.FindFlag.FindCaseSensitively):
+                self.MainWindow.TextWidgetInst.moveCursor(QTextCursor.MoveOperation.Start)
+                self.MainWindow.TextWidgetInst.find(SearchText, QTextDocument.FindFlag.FindCaseSensitively)
         else:
             if not self.MainWindow.TextWidgetInst.find(SearchText):
-                self.MainWindow.TextWidgetInst.moveCursor(QTextCursor.Start)
+                self.MainWindow.TextWidgetInst.moveCursor(QTextCursor.MoveOperation.Start)
                 self.MainWindow.TextWidgetInst.find(SearchText)
 
     def RehighlightTextWidget(self):

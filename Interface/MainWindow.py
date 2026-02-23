@@ -367,7 +367,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.MoveLineDownAction.triggered.connect(self.TextWidgetInst.MoveLineDown)
         self.ToggleReadModeActionsList.append(self.MoveLineDownAction)
 
-        self.DuplicateLinesAction = QAction("Duplicate Lines")
+        self.DuplicateLinesAction = QAction("Duplicate Line")
         self.DuplicateLinesAction.triggered.connect(self.TextWidgetInst.DuplicateLines)
         self.ToggleReadModeActionsList.append(self.DuplicateLinesAction)
 
@@ -1506,7 +1506,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.UpdateUnsavedChangesFlag(True)
                 self.TextWidgetInst.setFocus()
                 if not Prepend:
-                    self.TextWidgetInst.moveCursor(QTextCursor.End)
+                    self.TextWidgetInst.moveCursor(QTextCursor.MoveOperation.End)
 
     def AddTitleToolTipsToLinks(self):
         if not self.TextWidgetInst.ReadMode:

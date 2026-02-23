@@ -752,6 +752,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 ToolBarArea = json.loads(ConfigFile.read())
         else:
             ToolBarArea = "TopToolBarArea"
+        if ToolBarArea not in ToolBarAreas:
+            ToolBarArea = "TopToolBarArea"
         self.removeToolBar(self.ToolBar)
         self.addToolBar(ToolBarAreas[ToolBarArea], self.ToolBar)
         self.ToolBar.show()

@@ -461,6 +461,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SetThemeAction = QAction("Set Theme")
         self.SetThemeAction.triggered.connect(self.SetTheme)
 
+        self.SetStartupSizeAndPositionAction = QAction("Set Startup Size and Position")
+        self.SetStartupSizeAndPositionAction.triggered.connect(self.SetStartupSizeAndPosition)
+
         # Notebook Actions
         self.NewPageAction = QAction(self.NewPageIcon, "New Page")
         self.NewPageAction.triggered.connect(self.NewPage)
@@ -628,6 +631,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.HighlightTextAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.SetThemeAction)
+        self.ViewMenu.addAction(self.SetStartupSizeAndPositionAction)
 
         self.NotebookMenu = self.MenuBar.addMenu("&Notebook")
         self.NotebookMenu.addAction(self.NewPageAction)
@@ -909,6 +913,20 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         else:
             self.GzipDefaultNotebook = None
 
+        # Size and Position
+        SizeAndPositionFile = self.GetResourcePath("Configs/SizeAndPosition.cfg")
+        if os.path.isfile(SizeAndPositionFile):
+            with open(SizeAndPositionFile, "r") as ConfigFile:
+                self.SizeAndPosition = json.loads(ConfigFile.read())
+        else:
+            self.SizeAndPosition = {}
+            self.SizeAndPosition["Size"] = None
+            self.SizeAndPosition["Position"] = None
+            self.SizeAndPosition["SavedSizeAndPosition"] = False
+        if self.SizeAndPosition["SavedSizeAndPosition"] and self.SizeAndPosition["Size"] is not None and self.SizeAndPosition["Position"] is not None:
+            self.resize(self.SizeAndPosition["Size"][0], self.SizeAndPosition["Size"][1])
+            self.move(self.SizeAndPosition["Position"][0], self.SizeAndPosition["Position"][1])
+
     def SaveConfigs(self):
         if not os.path.isdir(self.GetResourcePath("Configs")):
             os.mkdir(self.GetResourcePath("Configs"))
@@ -984,6 +1002,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Theme
         with open(self.GetResourcePath("Configs/Theme.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.Theme))
+
+        # Size and Position
+        with open(self.GetResourcePath("Configs/SizeAndPosition.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.SizeAndPosition))
 
         # Last Opened Directory
         self.SaveLastOpenedDirectory()
@@ -1739,6 +1761,19 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         DesktopCenterPoint = QApplication.primaryScreen().availableGeometry().center()
         FrameGeometryRectangle.moveCenter(DesktopCenterPoint)
         self.move(FrameGeometryRectangle.topLeft())
+
+    def SetStartupSizeAndPosition(self):
+        SetStartupSizeAndPosition = self.DisplayMessageBox(Message="Save current size and position for startup?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Reset))
+        if SetStartupSizeAndPosition == QMessageBox.StandardButton.Yes:
+            self.SizeAndPosition = {}
+            self.SizeAndPosition["Size"] = (self.width(), self.height())
+            self.SizeAndPosition["Position"] = (self.pos().x(), self.pos().y())
+            self.SizeAndPosition["SavedSizeAndPosition"] = True
+        elif SetStartupSizeAndPosition == QMessageBox.StandardButton.Reset:
+            self.SizeAndPosition = {}
+            self.SizeAndPosition["Size"] = None
+            self.SizeAndPosition["Position"] = None
+            self.SizeAndPosition["SavedSizeAndPosition"] = False
 
     def CreateThemes(self):
         self.Themes = {}

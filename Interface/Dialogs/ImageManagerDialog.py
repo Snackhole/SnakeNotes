@@ -46,7 +46,7 @@ class ImageManagerDialog(QDialog):
 
         # Linking Pages Label
         self.LinkingPagesLabel = QLabel("Linking Pages")
-        self.LinkingPagesLabel.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.LinkingPagesLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Linking Pages List
         self.LinkingPagesList = QListWidget()

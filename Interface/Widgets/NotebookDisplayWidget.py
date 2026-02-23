@@ -67,7 +67,7 @@ class NotebookDisplayWidget(QTreeWidget):
         IndexPath[-1] += SelectDelta
         DestinationIndex = self.model().index(0, 0)
         for Element in IndexPath[1:]:
-            DestinationIndex = DestinationIndex.child(Element, 0)
+            DestinationIndex = self.model().index(Element, 0, DestinationIndex)
         self.setCurrentIndex(DestinationIndex)
         self.currentItem().setExpanded(True)
         self.scrollToItem(self.currentItem() if not ScrollToLastChild else self.currentItem().child(self.currentItem().childCount() - 1), self.ScrollHint.PositionAtCenter)
@@ -105,10 +105,10 @@ class NotebookDisplayWidget(QTreeWidget):
         ContextMenu.exec(self.mapToGlobal(QContextMenuEvent.pos()))
 
     def mousePressEvent(self, QMouseEvent):
-        if QMouseEvent.button() == Qt.ForwardButton:
+        if QMouseEvent.button() == Qt.MouseButton.ForwardButton:
             self.MainWindow.ForwardAction.trigger()
             QMouseEvent.accept()
-        elif QMouseEvent.button() == Qt.BackButton:
+        elif QMouseEvent.button() == Qt.MouseButton.BackButton:
             self.MainWindow.BackAction.trigger()
             QMouseEvent.accept()
         else:

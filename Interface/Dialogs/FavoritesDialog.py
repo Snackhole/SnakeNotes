@@ -119,6 +119,8 @@ class FavoritesDialog(QDialog):
                 self.FavoritesList.addItem(FavoritesItem(FavoriteName, FavoritePath))
         else:
             MatchCase = self.MatchCaseCheckBox.isChecked()
+            if not MatchCase:
+                SearchTerm = SearchTerm.lower()
             SearchResults = {FavoriteName: FavoritePath for FavoriteName, FavoritePath in sorted(self.FavoritesData.items()) if SearchTerm in (FavoriteName.lower() if not MatchCase else FavoriteName)}
             for FavoriteName, FavoritePath in sorted(SearchResults.items()):
                 self.FavoritesList.addItem(FavoritesItem(FavoriteName, FavoritePath))

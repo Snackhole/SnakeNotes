@@ -256,18 +256,18 @@ class TextWidget(QTextEdit):
     def mouseDoubleClickEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
         CharFormat = self.cursorForPosition(QMouseEvent.pos()).charFormat()
-        if Anchor != "" and QMouseEvent.button() == Qt.LeftButton:
+        if Anchor != "" and QMouseEvent.button() == Qt.MouseButton.LeftButton:
             self.NavigateToLink(Anchor, QMouseEvent) if not self.MainWindow.SwapLeftAndMiddleClickForLinks else self.OpenLinkAsPopup(Anchor, QMouseEvent)
         elif CharFormat.isImageFormat():
             ImageFormat = CharFormat.toImageFormat()
-            ImageAltText = ImageFormat.property(QTextFormat.ImageAltText)
+            ImageAltText = ImageFormat.property(QTextFormat.Property.ImageAltText)
             self.MainWindow.ImageManager(ImageAltText)
         else:
             super().mouseDoubleClickEvent(QMouseEvent)
 
     def mouseReleaseEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
-        if Anchor != "" and QMouseEvent.button() == Qt.MiddleButton:
+        if Anchor != "" and QMouseEvent.button() == Qt.MouseButton.MiddleButton:
             self.OpenLinkAsPopup(Anchor, QMouseEvent) if not self.MainWindow.SwapLeftAndMiddleClickForLinks else self.NavigateToLink(Anchor, QMouseEvent)
         else:
             super().mouseReleaseEvent(QMouseEvent)

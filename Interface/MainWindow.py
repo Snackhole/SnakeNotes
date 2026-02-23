@@ -4,7 +4,7 @@ import os
 
 import mistune
 from PyQt6.QtCore import QTimer, Qt
-from PyQt6.QtGui import QColor, QIcon, QPalette, QPdfWriter, QTextCursor, QAction
+from PyQt6.QtGui import QColor, QIcon, QPalette, QPdfWriter, QTextCursor, QAction, QPageSize
 from PyQt6.QtWidgets import QFileDialog, QLabel, QMainWindow, QInputDialog, QMessageBox, QSplitter, QApplication, QTextEdit, QFrame, QGridLayout
 
 from Core.MarkdownRenderers import ConstructHTMLExportString, ConstructPDFExportHTMLString, Renderer
@@ -1655,7 +1655,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     def CreatePDFFileFromPage(self, Page, Notebook, ExportFileName):
         PDFWriter = QPdfWriter(ExportFileName)
-        PDFWriter.setPageSize(QPdfWriter.Letter)
+        PDFWriter.setPageSize(QPageSize(QPageSize.PageSizeId.Letter))
         PDFTextWidget = QTextEdit()
         PDFTextWidget.setHtml(ConstructPDFExportHTMLString(Page, Notebook))
         PDFTextWidget.print(PDFWriter)

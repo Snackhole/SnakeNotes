@@ -248,7 +248,7 @@ class TextWidget(QTextEdit):
         self.insertPlainText(QMimeData.text())
 
     def wheelEvent(self, QWheelEvent):
-        if QWheelEvent.modifiers() == Qt.ControlModifier:
+        if QWheelEvent.modifiers() == Qt.KeyboardModifier.ControlModifier:
             QWheelEvent.accept()
         else:
             super().wheelEvent(QWheelEvent)

@@ -143,7 +143,8 @@ class Separator(QLabel):
         self.setStyleSheet("QLabel::hover {background-color: darkCyan; color: white;}")
 
     def mouseDoubleClickEvent(self, QMouseEvent):
-        self.GoToSubPage()
+        if QMouseEvent.button() == Qt.MouseButton.LeftButton:
+            self.GoToSubPage()
 
     def GoToSubPage(self):
         ValidSubPages = [SubPage for SubPage in self.Page["SubPages"] if self.MainWindow.NotebookDisplayWidgetInst.GetCurrentPageIndexPath() != SubPage["IndexPath"]]
@@ -167,8 +168,18 @@ class NavigationPageLabel(QLabel):
         self.setStyleSheet("QLabel::hover {background-color: darkCyan; color: white;}")
 
     def mouseDoubleClickEvent(self, QMouseEvent):
-        self.GoToPage()
+        if QMouseEvent.button() == Qt.MouseButton.LeftButton:
+            self.GoToPage()
+
+    def mouseReleaseEvent(self, QMouseEvent):
+        if QMouseEvent.button() == Qt.MouseButton.MiddleButton:
+            self.OpenPageAsPopup()
+        else:
+            super().mouseReleaseEvent(QMouseEvent)
 
     def GoToPage(self):
         if self.MainWindow.NotebookDisplayWidgetInst.GetCurrentPageIndexPath() != self.Page["IndexPath"]:
             self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(self.Page["IndexPath"])
+
+    def OpenPageAsPopup(self):
+        self.MainWindow.PopOutPage(self.Page["IndexPath"])

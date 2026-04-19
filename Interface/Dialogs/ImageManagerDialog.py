@@ -230,7 +230,7 @@ class ImageManagerDialog(QDialog):
         if len(SelectedItems) > 0:
             CurrentFileName = SelectedItems[0].FileName
             CurrentFileExtension = os.path.splitext(CurrentFileName)[1]
-            ExportImagePath = QFileDialog.getSaveFileName(parent=self, caption="Export Image File", filter=self.ExportFilters[CurrentFileExtension])[0]
+            ExportImagePath = QFileDialog.getSaveFileName(parent=self, caption="Export Image File", directory=CurrentFileName, filter=self.ExportFilters[CurrentFileExtension])[0]
             if ExportImagePath != "":
                 if not ExportImagePath.endswith(CurrentFileExtension):
                     ExportImagePath += CurrentFileExtension

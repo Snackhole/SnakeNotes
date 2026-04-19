@@ -296,9 +296,15 @@ class TextWidget(QTextEdit):
         if self.Notebook.StringIsValidIndexPath(Anchor):
             self.MainWindow.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(Anchor)
             QMouseEvent.accept()
+        elif Anchor.startswith("[file:") and self.Notebook.HasFile(Anchor[6:-1]):
+            self.MainWindow.ExportLinkedFile(Anchor[6:-1])
+            QMouseEvent.accept()
         else:
             if Anchor.startswith("[0,"):
                 self.MainWindow.DisplayMessageBox("Linked page not found.")
+                QMouseEvent.accept()
+            elif Anchor.startswith("[file:"):
+                self.MainWindow.DisplayMessageBox("Linked file not found.")
                 QMouseEvent.accept()
             else:
                 webbrowser.open(Anchor)
@@ -309,9 +315,15 @@ class TextWidget(QTextEdit):
             IndexPath = json.loads(Anchor)
             self.MainWindow.PopOutPage(IndexPath)
             QMouseEvent.accept()
+        elif Anchor.startswith("[file:") and self.Notebook.HasFile(Anchor[6:-1]):
+            self.MainWindow.ExportLinkedFile(Anchor[6:-1])
+            QMouseEvent.accept()
         else:
             if Anchor.startswith("[0,"):
                 self.MainWindow.DisplayMessageBox("Linked page not found.")
+                QMouseEvent.accept()
+            elif Anchor.startswith("[file:"):
+                self.MainWindow.DisplayMessageBox("Linked file not found.")
                 QMouseEvent.accept()
             else:
                 webbrowser.open(Anchor)
@@ -496,6 +508,9 @@ class TextWidget(QTextEdit):
                     self.MakeCursorVisible()
                 else:
                     self.MainWindow.FlashStatusBar("No image inserted.")
+
+    def LinkFile(self):
+        pass
 
     def MoveLineUp(self):
         if not self.ReadMode and self.hasFocus():

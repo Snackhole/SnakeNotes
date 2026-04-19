@@ -7,6 +7,7 @@ from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QColor, QIcon, QPalette, QPdfWriter, QTextCursor, QAction, QPageSize
 from PyQt6.QtWidgets import QFileDialog, QLabel, QMainWindow, QInputDialog, QMessageBox, QSplitter, QApplication, QTextEdit, QFrame, QGridLayout
 
+from Core import Base64Converters
 from Core.MarkdownRenderers import ConstructHTMLExportString, ConstructPDFExportHTMLString, Renderer
 from Core.Notebook import Notebook
 from Interface.Dialogs.AdvancedSearchDialog import AdvancedSearchDialog
@@ -351,6 +352,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.InsertImageAction.triggered.connect(self.TextWidgetInst.InsertImage)
         self.ToggleReadModeActionsList.append(self.InsertImageAction)
 
+        self.LinkFileAction = QAction("Link File")
+        self.LinkFileAction.triggered.connect(self.TextWidgetInst.LinkFile)
+        self.ToggleReadModeActionsList.append(self.LinkFileAction)
+
         self.PrependAction = QAction("Prepend Text to Page and Sub Pages")
         self.PrependAction.triggered.connect(lambda: self.AddTextToPageAndSubpages(Prepend=True))
         self.ToggleReadModeActionsList.append(self.PrependAction)
@@ -522,6 +527,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ImageManagerAction = QAction("&Image Manager")
         self.ImageManagerAction.triggered.connect(lambda: self.ImageManager())
 
+        self.FileManagerAction = QAction("Fi&le Manager")
+        self.FileManagerAction.triggered.connect(lambda: self.FileManager())
+
         self.TemplateManagerAction = QAction("&Template Manager")
         self.TemplateManagerAction.triggered.connect(self.TemplateManager)
         self.ToggleReadModeActionsList.append(self.TemplateManagerAction)
@@ -590,6 +598,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.MoveCursorToEndOfLinkTextAction)
         self.EditMenu.addAction(self.InsertTableAction)
         self.EditMenu.addAction(self.InsertImageAction)
+        self.EditMenu.addAction(self.LinkFileAction)
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.PrependAction)
         self.EditMenu.addAction(self.AppendAction)
@@ -652,6 +661,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookMenu.addAction(self.CopyIndexPathToCurrentPageAction)
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.ImageManagerAction)
+        self.NotebookMenu.addAction(self.FileManagerAction)
         self.NotebookMenu.addAction(self.TemplateManagerAction)
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.EditHeaderAction)
@@ -727,6 +737,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultKeybindings["TextToLinkAction"] = "Ctrl+Alt+L"
         self.DefaultKeybindings["InsertTableAction"] = "Ctrl+Shift+T"
         self.DefaultKeybindings["InsertImageAction"] = "Ctrl+Shift+I"
+        self.DefaultKeybindings["LinkFileAction"] = "Ctrl+Alt+Shift+L"
         self.DefaultKeybindings["MoveLineUpAction"] = "Ctrl+Up"
         self.DefaultKeybindings["MoveLineDownAction"] = "Ctrl+Down"
         self.DefaultKeybindings["DuplicateLinesAction"] = "Ctrl+Shift+D"
@@ -1385,6 +1396,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if ImageManagerDialogInst.ActivatedLinkingPageIndexPath is not None:
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(ImageManagerDialogInst.ActivatedLinkingPageIndexPath)
 
+    def FileManager(self):
+        pass
+
     def TemplateManager(self):
         if not self.TextWidgetInst.ReadMode:
             TemplateManagerDialogInst = TemplateManagerDialog(self.Notebook, self)
@@ -1744,6 +1758,17 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.RefreshAdvancedSearch()
             self.UpdateUnsavedChangesFlag(True)
             self.DisplayMessageBox("Check page links in imported pages carefully!  Some may point to unexpected pages.")
+
+    def ExportLinkedFile(self, FileName):
+        if not self.Notebook.HasFile(FileName):
+            self.DisplayMessageBox("Linked file not found.")
+            return
+        FileExtension = os.path.splitext(FileName)[1]
+        ExportFilePath = QFileDialog.getSaveFileName(parent=self, caption="Export File", directory=FileName, filter=(f"{FileExtension[1:].upper()} (*{FileExtension})" if FileExtension is not "" else None))[0]
+        if ExportFilePath != "":
+            if not ExportFilePath.endswith(FileExtension):
+                ExportFilePath += FileExtension
+            Base64Converters.WriteFileFromBase64String(self.Notebook.Files[FileName], ExportFilePath)
 
     # Window Management Methods
     def WindowSetup(self):

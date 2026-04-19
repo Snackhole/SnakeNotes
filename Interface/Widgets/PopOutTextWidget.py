@@ -85,9 +85,15 @@ class PopOutTextWidget(QTextEdit):
             self.MainWindow.raise_()
             self.MainWindow.setFocus()
             QMouseEvent.accept()
+        elif Anchor.startswith("[file:") and self.Notebook.HasFile(Anchor[6:-1]):
+            self.MainWindow.ExportLinkedFile(Anchor[6:-1])
+            QMouseEvent.accept()
         else:
             if Anchor.startswith("[0,"):
                 self.MainWindow.DisplayMessageBox("Linked page not found.  Pop-out page may need to be refreshed.", Parent=self)
+                QMouseEvent.accept()
+            elif Anchor.startswith("[file:"):
+                self.MainWindow.DisplayMessageBox("Linked file not found.")
                 QMouseEvent.accept()
             else:
                 webbrowser.open(Anchor)
@@ -98,9 +104,15 @@ class PopOutTextWidget(QTextEdit):
             IndexPath = json.loads(Anchor)
             self.MainWindow.PopOutPage(IndexPath)
             QMouseEvent.accept()
+        elif Anchor.startswith("[file:") and self.Notebook.HasFile(Anchor[6:-1]):
+            self.MainWindow.ExportLinkedFile(Anchor[6:-1])
+            QMouseEvent.accept()
         else:
             if Anchor.startswith("[0,"):
                 self.MainWindow.DisplayMessageBox("Linked page not found.  Pop-out page may need to be refreshed.", Parent=self)
+                QMouseEvent.accept()
+            elif Anchor.startswith("[file:"):
+                self.MainWindow.DisplayMessageBox("Linked file not found.")
                 QMouseEvent.accept()
             else:
                 webbrowser.open(Anchor)

@@ -17,6 +17,10 @@ class Renderer(mistune.Renderer):
             return f"{Text} (LINKED PAGE NOT FOUND)"
         if Link == "[deleted]":
             return f"{Text} (LINKED PAGE DELETED)"
+        if Link.startswith("[file:") and not self.Notebook.HasFile(Link[6:-1]):
+            return f"{Text} (LINKED FILE NOT FOUND)"
+        if Link == "[filedeleted]":
+            return f"{Text} (LINKED FILE DELETED)"
         if not Title:
             return f"<a href=\"{Link}\">{Text}</a>"
         Title = mistune.escape(Title, quote=True)
@@ -69,14 +73,25 @@ class HTMLExportRenderer(Renderer):
     def link(self, Link, Title, Text):
         Link = mistune.escape_link(Link)
         ValidIndexPath = self.Notebook.StringIsValidIndexPath(Link)
+        FileInNotebook = self.Notebook.HasFile(Link[6:-1])
         if Link.startswith("[0,") and not ValidIndexPath:
             return f"{Text} (LINKED PAGE NOT FOUND)"
+        if Link == "[deleted]":
+            return f"{Text} (LINKED PAGE DELETED)"
+        if Link.startswith("[file:") and not FileInNotebook:
+            return f"{Text} (LINKED FILE NOT FOUND)"
+        if Link == "[filedeleted]":
+            return f"{Text} (LINKED FILE DELETED)"
         if Title:
             Title = mistune.escape(Title, quote=True)
         if ValidIndexPath:
             if not Title:
                 return f"<a href=\"\" onclick=\"return SelectPage(&quot;{Link}&quot;);\">{Text}</a>"
             return f"<a href=\"\" onclick=\"return SelectPage(&quot;{Link}&quot;);\" title=\"{Title}\">{Text}</a>"
+        elif FileInNotebook:
+            if not Title:
+                return f"<a download=\"{Link[6:-1]}\" href=\"Files/{Link[6:-1]}\" target=\"_blank\">{Text}</a>"
+            return f"<a download=\"{Link[6:-1]}\" href=\"Files/{Link[6:-1]}\" title=\"{Title}\" target=\"_blank\">{Text}</a>"
         else:
             if not Title:
                 return f"<a href=\"{Link}\" target=\"_blank\">{Text}</a>"

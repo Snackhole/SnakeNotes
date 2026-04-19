@@ -1666,6 +1666,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
     # Import and Export Methods
     def ExportHTML(self):
+        if len(self.Notebook.Files.keys()) > 0:
+            self.DisplayMessageBox("There are files attached to this notebook.  For full functionality, make sure to export all attached files into a \"Files\" directory next to the exported HTML file, and do not change their names or extensions.")
         AssetPaths = {}
         AssetPaths["TemplatePath"] = self.GetResourcePath("Assets/HTMLExportTemplate.template")
         AssetPaths["BackButtonPath"] = self.GetResourcePath("Assets/SnakeNotes Back Icon.png")

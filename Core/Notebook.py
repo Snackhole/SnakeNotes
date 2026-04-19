@@ -14,6 +14,7 @@ class Notebook(SerializableMixin):
         self.Footer = self.DefaultFooter
         self.RootPage = self.CreatePage("New Notebook")
         self.Images = {}
+        self.Files = {}
         self.PageTemplates = {}
         self.SearchIndexUpToDate = False
         self.SearchIndex = []
@@ -206,6 +207,24 @@ class Notebook(SerializableMixin):
     def GetImageNames(self):
         return sorted(self.Images.keys(), key=lambda ImageName: ImageName.casefold())
 
+    # File Methods
+    def HasFile(self, FileName):
+        return FileName in self.Files
+
+    def AddFile(self, FilePath, FileName=None):
+        if FileName is None:
+            FileName = os.path.basename(FilePath)
+        Base64String = Base64Converters.GetBase64StringFromFilePath(FilePath)
+        self.Files[FileName] = Base64String
+
+    def GetFile(self, FileName):
+        if not self.HasFile(FileName):
+            return None
+        return self.Files[FileName]
+
+    def GetFileNames(self):
+        return sorted(self.Files.keys(), key=lambda FileName: FileName.casefold())
+
     # Template Methods
     def HasTemplate(self, TemplateName):
         return TemplateName in self.PageTemplates
@@ -350,11 +369,12 @@ class Notebook(SerializableMixin):
 
     # Serialization Methods
     def SetState(self, NewState):
-        self.Header = NewState["Header"]
-        self.Footer = NewState["Footer"]
-        self.RootPage = NewState["RootPage"]
-        self.Images = NewState["Images"]
-        self.PageTemplates = NewState["PageTemplates"]
+        self.Header = NewState["Header"] if "Header" in NewState else self.DefaultHeader
+        self.Footer = NewState["Footer"] if "Footer" in NewState else self.DefaultFooter
+        self.RootPage = NewState["RootPage"] if "RootPage" in NewState else self.CreatePage("New Notebook")
+        self.Images = NewState["Images"] if "Images" in NewState else {}
+        self.Files = NewState["Files"] if "Files" in NewState else {}
+        self.PageTemplates = NewState["PageTemplates"] if "PageTemplates" in NewState else {}
 
     def GetState(self):
         State = {}
@@ -362,6 +382,7 @@ class Notebook(SerializableMixin):
         State["Footer"] = self.Footer
         State["RootPage"] = self.RootPage
         State["Images"] = self.Images
+        State["Files"] = self.Files
         State["PageTemplates"] = self.PageTemplates
         return State
 

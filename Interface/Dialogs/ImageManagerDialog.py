@@ -175,6 +175,8 @@ class ImageManagerDialog(QDialog):
             if self.Notebook.HasImage(ImageFileName):
                 if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
                     AttachNewFile = True
+            elif "\"" in ImageFileName:
+                self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\").")
             else:
                 AttachNewFile = True
         if AttachNewFile:
@@ -193,6 +195,8 @@ class ImageManagerDialog(QDialog):
             if self.Notebook.HasImage(ImageFileName):
                 if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
                     AttachNewFile = True
+            elif "\"" in ImageFileName:
+                self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\").")
             else:
                 AttachNewFile = True
             if AttachNewFile:

@@ -12,6 +12,7 @@ from Core import MarkdownRenderers
 from Interface.Dialogs.InsertLinksDialog import InsertLinksDialog
 from Interface.Dialogs.InsertTableDialog import InsertTableDialog, TableDimensionsDialog
 from Interface.Dialogs.InsertImageDialog import InsertImageDialog
+from Interface.Dialogs.LinkFileDialog import LinkFileDialog
 
 
 class TextWidget(QTextEdit):
@@ -510,7 +511,16 @@ class TextWidget(QTextEdit):
                     self.MainWindow.FlashStatusBar("No image inserted.")
 
     def LinkFile(self):
-        pass
+        if not self.ReadMode and self.hasFocus():
+            if len(self.Notebook.Files) < 1:
+                self.MainWindow.DisplayMessageBox("No files are attached to the notebook.\n\nUse the File Manager in the Notebook menu to add files to the notebook.")
+            else:
+                LinkFileDialogInst = LinkFileDialog(self.Notebook, self.MainWindow)
+                if LinkFileDialogInst.InsertAccepted:
+                    self.SelectionSpanWrap("[", f"]([file:{LinkFileDialogInst.FileName}] \"{LinkFileDialogInst.FileName}\")", MoveCursorToEndOfWrappedText=self.MainWindow.MoveCursorToEndOfLinkText)
+                    self.MakeCursorVisible()
+                else:
+                    self.MainWindow.FlashStatusBar("No file linked.")
 
     def MoveLineUp(self):
         if not self.ReadMode and self.hasFocus():

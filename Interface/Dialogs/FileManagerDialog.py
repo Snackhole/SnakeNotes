@@ -148,8 +148,8 @@ class FileManagerDialog(QDialog):
             FileName = os.path.basename(FilePath)
             if not os.path.isfile(FilePath):
                 self.MainWindow.DisplayMessageBox(f"This filepath is not valid, and has not been attached:\n\n{FilePath}")
-            elif "\"" in FileName:
-                self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\").")
+            elif "\"" in FileName or "\'" in FileName:
+                self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\" or \').")
             elif self.Notebook.HasFile(FileName):
                 if self.MainWindow.DisplayMessageBox(f"A file named \"{FileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
                     AttachNewFile = True
@@ -170,8 +170,8 @@ class FileManagerDialog(QDialog):
             FileName = os.path.basename(FilePath)
             if not os.path.isfile(FilePath):
                 self.MainWindow.DisplayMessageBox(f"This filepath is not valid, and has not been attached:\n\n{FilePath}")
-            elif "\"" in FileName:
-                self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\").")
+            elif "\"" in FileName or "\'" in FileName:
+                self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\" or \').")
             elif self.Notebook.HasFile(FileName):
                 if self.MainWindow.DisplayMessageBox(f"A file named \"{FileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
                     AttachNewFile = True
@@ -193,7 +193,7 @@ class FileManagerDialog(QDialog):
             CurrentFileExtension = CurrentFileNameParts[1]
             NewName, OK = QInputDialog.getText(self, f"Rename \"{CurrentFileName}\"", "Enter a name:", text=CurrentFileName)
             if OK:
-                ForbiddenCharacters = ["/", "\\", "\"", "?", "%", "*", ":", "|", "<", ">"]
+                ForbiddenCharacters = ["/", "\\", "\"", "\'", "?", "%", "*", ":", "|", "<", ">"]
                 if NewName == "":
                     self.MainWindow.DisplayMessageBox("File names cannot be blank.", Parent=self)
                 elif f"{NewName}{CurrentFileExtension}" in self.Notebook.Files:

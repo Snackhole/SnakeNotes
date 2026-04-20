@@ -174,8 +174,8 @@ class ImageManagerDialog(QDialog):
             ImageFileName = os.path.basename(ImageFilePath)
             if not os.path.isfile(ImageFilePath):
                 self.MainWindow.DisplayMessageBox(f"This filepath is not valid, and has not been attached:\n\n{ImageFilePath}")
-            elif "\"" in ImageFileName:
-                self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\").")
+            elif "\"" in ImageFileName or "\'" in ImageFileName:
+                self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\" or \').")
             elif self.Notebook.HasImage(ImageFileName):
                 if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
                     AttachNewFile = True
@@ -196,8 +196,8 @@ class ImageManagerDialog(QDialog):
             ImageFileName = os.path.basename(ImageFilePath)
             if not os.path.isfile(ImageFilePath):
                 self.MainWindow.DisplayMessageBox(f"This filepath is not valid, and has not been attached:\n\n{ImageFilePath}")
-            elif "\"" in ImageFileName:
-                self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\").")
+            elif "\"" in ImageFileName or "\'" in ImageFileName:
+                self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\" or \').")
             elif self.Notebook.HasImage(ImageFileName):
                 if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
                     AttachNewFile = True
@@ -219,7 +219,7 @@ class ImageManagerDialog(QDialog):
             CurrentFileExtension = CurrentFileNameParts[1]
             NewName, OK = QInputDialog.getText(self, f"Rename \"{CurrentFileName}\"", "Enter a name:", text=CurrentFileName)
             if OK:
-                ForbiddenCharacters = ["/", "\\", "\"", "?", "%", "*", ":", "|", "<", ">"]
+                ForbiddenCharacters = ["/", "\\", "\"", "\'", "?", "%", "*", ":", "|", "<", ">"]
                 if NewName == "":
                     self.MainWindow.DisplayMessageBox("Image names cannot be blank.", Parent=self)
                 elif f"{NewName}{CurrentFileExtension}" in self.Notebook.Images:

@@ -613,6 +613,11 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.InternalLinksFormat.setBackground(QColor("darkCyan"))
         self.InternalLinksFormat.setForeground(QColor("white"))
 
+        # File Links
+        self.FileLinksFormat = QTextCharFormat()
+        self.FileLinksFormat.setBackground(QColor("dimGray"))
+        self.FileLinksFormat.setForeground(QColor("white"))
+
         # Images
         self.ImagesFormat = QTextCharFormat()
         self.ImagesFormat.setBackground(QColor("darkRed"))
@@ -652,6 +657,8 @@ class SyntaxHighlighter(QSyntaxHighlighter):
     def GetLinksFormat(self, Match):
         if Match.group(1) == "!":
             return self.ImagesFormat
+        elif Match.group(2) != "" and Match.group(3).startswith("[file:") and Match.group(3).endswith("]"):
+            return self.FileLinksFormat
         elif Match.group(2) != "" and Match.group(3).startswith("[") and Match.group(3).endswith("]"):
             return self.InternalLinksFormat
         elif Match.group(2) != "" and not (Match.group(3).startswith("[") and Match.group(3).endswith("]")):

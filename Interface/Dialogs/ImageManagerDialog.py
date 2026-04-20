@@ -215,10 +215,13 @@ class ImageManagerDialog(QDialog):
             CurrentFileExtension = CurrentFileNameParts[1]
             NewName, OK = QInputDialog.getText(self, f"Rename \"{CurrentFileName}\"", "Enter a name:", text=CurrentFileName)
             if OK:
+                ForbiddenCharacters = ["/", "\\", "\"", "?", "%", "*", ":", "|", "<", ">"]
                 if NewName == "":
                     self.MainWindow.DisplayMessageBox("Image names cannot be blank.", Parent=self)
                 elif f"{NewName}{CurrentFileExtension}" in self.Notebook.Images:
                     self.MainWindow.DisplayMessageBox("There is already an image by that name.", Parent=self)
+                elif any(Character in NewName for Character in ForbiddenCharacters):
+                    self.MainWindow.DisplayMessageBox(f"Image names cannot contain the following characters:  {" ".join(ForbiddenCharacters)}", Parent=self)
                 else:
                     ImageContent = self.Notebook.Images[f"{CurrentFileName}{CurrentFileExtension}"]
                     self.Notebook.Images[f"{NewName}{CurrentFileExtension}"] = ImageContent

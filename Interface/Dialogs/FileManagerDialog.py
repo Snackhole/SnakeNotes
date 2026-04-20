@@ -189,10 +189,13 @@ class FileManagerDialog(QDialog):
             CurrentFileExtension = CurrentFileNameParts[1]
             NewName, OK = QInputDialog.getText(self, f"Rename \"{CurrentFileName}\"", "Enter a name:", text=CurrentFileName)
             if OK:
+                ForbiddenCharacters = ["/", "\\", "\"", "?", "%", "*", ":", "|", "<", ">"]
                 if NewName == "":
                     self.MainWindow.DisplayMessageBox("File names cannot be blank.", Parent=self)
                 elif f"{NewName}{CurrentFileExtension}" in self.Notebook.Files:
                     self.MainWindow.DisplayMessageBox("There is already a file by that name.", Parent=self)
+                elif any(Character in NewName for Character in ForbiddenCharacters):
+                    self.MainWindow.DisplayMessageBox(f"File names cannot contain the following characters:  {" ".join(ForbiddenCharacters)}", Parent=self)
                 else:
                     FileContent = self.Notebook.Files[f"{CurrentFileName}{CurrentFileExtension}"]
                     self.Notebook.Files[f"{NewName}{CurrentFileExtension}"] = FileContent

@@ -172,11 +172,13 @@ class ImageManagerDialog(QDialog):
         ImageFilePath = QFileDialog.getOpenFileName(parent=self, caption="Attach Image File", filter="Images (*.jpg *.jpeg *.png *.gif *.bmp)")[0]
         if ImageFilePath != "":
             ImageFileName = os.path.basename(ImageFilePath)
-            if self.Notebook.HasImage(ImageFileName):
-                if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
-                    AttachNewFile = True
+            if not os.path.isfile(ImageFilePath):
+                self.MainWindow.DisplayMessageBox(f"This filepath is not valid, and has not been attached:\n\n{ImageFilePath}")
             elif "\"" in ImageFileName:
                 self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\").")
+            elif self.Notebook.HasImage(ImageFileName):
+                if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
+                    AttachNewFile = True
             else:
                 AttachNewFile = True
         if AttachNewFile:
@@ -192,11 +194,13 @@ class ImageManagerDialog(QDialog):
         for ImageFilePath in ImageFilePaths:
             AttachNewFile = False
             ImageFileName = os.path.basename(ImageFilePath)
-            if self.Notebook.HasImage(ImageFileName):
-                if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
-                    AttachNewFile = True
+            if not os.path.isfile(ImageFilePath):
+                self.MainWindow.DisplayMessageBox(f"This filepath is not valid, and has not been attached:\n\n{ImageFilePath}")
             elif "\"" in ImageFileName:
                 self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\").")
+            elif self.Notebook.HasImage(ImageFileName):
+                if self.MainWindow.DisplayMessageBox(f"A file named \"{ImageFileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
+                    AttachNewFile = True
             else:
                 AttachNewFile = True
             if AttachNewFile:

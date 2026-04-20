@@ -146,11 +146,13 @@ class FileManagerDialog(QDialog):
         FilePath = QFileDialog.getOpenFileName(parent=self, caption="Attach File")[0]
         if FilePath != "":
             FileName = os.path.basename(FilePath)
-            if self.Notebook.HasFile(FileName):
-                if self.MainWindow.DisplayMessageBox(f"A file named \"{FileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
-                    AttachNewFile = True
+            if not os.path.isfile(FilePath):
+                self.MainWindow.DisplayMessageBox(f"This filepath is not valid, and has not been attached:\n\n{FilePath}")
             elif "\"" in FileName:
                 self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\").")
+            elif self.Notebook.HasFile(FileName):
+                if self.MainWindow.DisplayMessageBox(f"A file named \"{FileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
+                    AttachNewFile = True
             else:
                 AttachNewFile = True
         if AttachNewFile:
@@ -166,11 +168,13 @@ class FileManagerDialog(QDialog):
         for FilePath in FilePaths:
             AttachNewFile = False
             FileName = os.path.basename(FilePath)
-            if self.Notebook.HasFile(FileName):
-                if self.MainWindow.DisplayMessageBox(f"A file named \"{FileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
-                    AttachNewFile = True
+            if not os.path.isfile(FilePath):
+                self.MainWindow.DisplayMessageBox(f"This filepath is not valid, and has not been attached:\n\n{FilePath}")
             elif "\"" in FileName:
                 self.MainWindow.DisplayMessageBox("Attached file names cannot contain quotation marks (\").")
+            elif self.Notebook.HasFile(FileName):
+                if self.MainWindow.DisplayMessageBox(f"A file named \"{FileName}\" is already attached to the notebook.\n\nOverwrite existing file?", Icon=QMessageBox.Icon.Question, Buttons=(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No), Parent=self) == QMessageBox.StandardButton.Yes:
+                    AttachNewFile = True
             else:
                 AttachNewFile = True
             if AttachNewFile:
@@ -211,7 +215,7 @@ class FileManagerDialog(QDialog):
         if len(SelectedItems) > 0:
             CurrentFileName = SelectedItems[0].FileName
             CurrentFileExtension = os.path.splitext(CurrentFileName)[1]
-            ExportFilePath = QFileDialog.getSaveFileName(parent=self, caption="Export File", directory=CurrentFileName, filter=(f"{CurrentFileExtension[1:].upper()} (*{CurrentFileExtension})" if CurrentFileExtension is not "" else None))[0]
+            ExportFilePath = QFileDialog.getSaveFileName(parent=self, caption="Export File", directory=CurrentFileName, filter=(f"{CurrentFileExtension[1:].upper()} (*{CurrentFileExtension})" if CurrentFileExtension != "" else None))[0]
             if ExportFilePath != "":
                 if not ExportFilePath.endswith(CurrentFileExtension):
                     ExportFilePath += CurrentFileExtension

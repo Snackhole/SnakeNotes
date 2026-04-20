@@ -1769,7 +1769,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.DisplayMessageBox("Linked file not found.")
             return
         FileExtension = os.path.splitext(FileName)[1]
-        ExportFilePath = QFileDialog.getSaveFileName(parent=self, caption="Export File", directory=FileName, filter=(f"{FileExtension[1:].upper()} (*{FileExtension})" if FileExtension is not "" else None))[0]
+        ExportFilePath = QFileDialog.getSaveFileName(parent=self, caption="Export File", directory=FileName, filter=(f"{FileExtension[1:].upper()} (*{FileExtension})" if FileExtension != "" else None))[0]
         if ExportFilePath != "":
             if not ExportFilePath.endswith(FileExtension):
                 ExportFilePath += FileExtension

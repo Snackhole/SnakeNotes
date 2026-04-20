@@ -15,6 +15,7 @@ from Interface.Dialogs.DefaultPopOutSizeDialog import DefaultPopOutSizeDialog
 from Interface.Dialogs.DemotePageDialog import DemotePageDialog
 from Interface.Dialogs.EditHeaderOrFooterDialog import EditHeaderOrFooterDialog
 from Interface.Dialogs.FavoritesDialog import FavoritesDialog
+from Interface.Dialogs.FileManagerDialog import FileManagerDialog
 from Interface.Dialogs.HighlightTextDialog import HighlightTextDialog
 from Interface.Dialogs.ImageManagerDialog import ImageManagerDialog
 from Interface.Dialogs.MovePageToDialog import MovePageToDialog
@@ -1397,7 +1398,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(ImageManagerDialogInst.ActivatedLinkingPageIndexPath)
 
     def FileManager(self):
-        pass
+        FileManagerDialogInst = FileManagerDialog(self.Notebook, self)
+        if FileManagerDialogInst.UnsavedChanges:
+            self.UpdateUnsavedChangesFlag(True)
+        if FileManagerDialogInst.ActivatedLinkingPageIndexPath is not None:
+            self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPath(FileManagerDialogInst.ActivatedLinkingPageIndexPath)
 
     def TemplateManager(self):
         if not self.TextWidgetInst.ReadMode:

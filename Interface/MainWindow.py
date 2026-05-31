@@ -565,7 +565,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         # About Actions
         self.CheckForUpdatesAction = QAction("Check for Updates")
-        self.CheckForUpdatesAction.triggered.connect(self.UpdateCheck)
+        self.CheckForUpdatesAction.triggered.connect(lambda: self.UpdateCheck(ManualCheck=True))
 
         self.CheckForUpdatesOnStartAction = QAction("Check for Updates on Start")
         self.CheckForUpdatesOnStartAction.setCheckable(True)
@@ -2049,7 +2049,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.DisplayMessageBox(f"The new theme will be active after {self.ScriptName} is restarted.")
 
     # Update Checking Methods
-    def UpdateCheck(self):
+    def UpdateCheck(self, ManualCheck=False):
         try:
             Contents = urllib.request.urlopen(f"https://api.github.com/repos/Snackhole/{BuildVariables["AppName"]}/releases").read()
             Contents = Contents.decode("utf-8")
@@ -2057,6 +2057,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             LatestVersion = Contents[0]["tag_name"]
             if LatestVersion != BuildVariables["Version"]:
                 UpdateDialogInst = UpdateDialog(LatestVersion, self)
+            elif ManualCheck and LatestVersion == BuildVariables["Version"]:
+                self.DisplayMessageBox("You are using the latest version.")
         except Exception as Error:
             self.DisplayMessageBox(f"Checking for updates caused the following error:\n\n{str(Error)}.")
 

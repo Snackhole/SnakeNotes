@@ -2,19 +2,20 @@ from PyQt6.QtWidgets import QDialog, QLabel, QSpinBox, QPushButton, QGridLayout
 
 
 class DefaultPopOutSizeDialog(QDialog):
-    def __init__(self, MainWindow):
+    def __init__(self, MainWindow, ImageMode=False):
         super().__init__(parent=MainWindow)
 
         # Store Parameters
         self.MainWindow = MainWindow
+        self.ImageMode = ImageMode
 
         # Variables
         self.SizeChanged = False
-        self.Width = self.MainWindow.DefaultPopOutSize["Width"]
-        self.Height = self.MainWindow.DefaultPopOutSize["Height"]
+        self.Width = self.MainWindow.DefaultPopOutSize["Width"] if not self.ImageMode else self.MainWindow.DefaultPopOutImageSize["Width"]
+        self.Height = self.MainWindow.DefaultPopOutSize["Height"] if not self.ImageMode else self.MainWindow.DefaultPopOutImageSize["Height"]
 
         # Labels
-        self.Prompt = QLabel("Default size of pop-out pages:")
+        self.Prompt = QLabel(f"Default size of pop-out {"pages" if not self.ImageMode else "images"}:")
         self.WidthLabel = QLabel("Width:")
         self.HeightLabel = QLabel("Height:")
 
@@ -54,7 +55,7 @@ class DefaultPopOutSizeDialog(QDialog):
         self.setLayout(self.Layout)
 
         # Set Window Title and Icon
-        self.setWindowTitle("Default Pop-Out Page Size")
+        self.setWindowTitle(f"Default Pop-Out {"Page" if not self.ImageMode else "Image"} Size")
         self.setWindowIcon(self.MainWindow.WindowIcon)
 
         # Execute Dialog

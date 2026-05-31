@@ -442,6 +442,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SetDefaultPopOutSizeAction = QAction("Set Default Pop-Out Page Size")
         self.SetDefaultPopOutSizeAction.triggered.connect(self.SetDefaultPopOutSize)
 
+        self.SetDefaultPopOutImageSizeAction = QAction("Set Default Pop-Out Image Size")
+        self.SetDefaultPopOutImageSizeAction.triggered.connect(self.SetDefaultPopOutImageSize)
+
         self.SwapLeftAndMiddleClickForLinksAction = QAction("Swap Left and Middle Click for Links")
         self.SwapLeftAndMiddleClickForLinksAction.setCheckable(True)
         self.SwapLeftAndMiddleClickForLinksAction.setChecked(False)
@@ -633,6 +636,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.PopOutPageAction)
         self.ViewMenu.addAction(self.SetDefaultPopOutSizeAction)
+        self.ViewMenu.addAction(self.SetDefaultPopOutImageSizeAction)
         self.ViewMenu.addAction(self.SwapLeftAndMiddleClickForLinksAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.GoToIndexPathAction)
@@ -915,6 +919,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             with open(DefaultPopOutSizeFile, "r") as ConfigFile:
                 self.DefaultPopOutSize = json.loads(ConfigFile.read())
 
+        # Default Pop-Out Image Size
+        DefaultPopOutImageSizeFile = self.GetResourcePath("Configs/DefaultPopOutImageSize.cfg")
+        if os.path.isfile(DefaultPopOutImageSizeFile):
+            with open(DefaultPopOutImageSizeFile, "r") as ConfigFile:
+                self.DefaultPopOutImageSize = json.loads(ConfigFile.read())
+
         # Default Notebook
         DefaultNotebookFile = self.GetResourcePath("Configs/DefaultNotebook.cfg")
         if os.path.isfile(DefaultNotebookFile):
@@ -1014,6 +1024,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Default Pop-Out Size
         with open(self.GetResourcePath("Configs/DefaultPopOutSize.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.DefaultPopOutSize))
+
+        # Default Pop-Out Image Size
+        with open(self.GetResourcePath("Configs/DefaultPopOutImageSize.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.DefaultPopOutImageSize))
 
         # Theme
         with open(self.GetResourcePath("Configs/Theme.cfg"), "w") as ConfigFile:
@@ -1622,6 +1636,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.PopOutImages.append(NewPopOut)
         else:
             self.DisplayMessageBox("The image appears to have been renamed or deleted.")
+
+    def SetDefaultPopOutImageSize(self):
+        DefaultPopOutSizeDialogInst = DefaultPopOutSizeDialog(self, ImageMode=True)
+        if DefaultPopOutSizeDialogInst.SizeChanged:
+            self.DefaultPopOutImageSize["Width"] = DefaultPopOutSizeDialogInst.Width
+            self.DefaultPopOutImageSize["Height"] = DefaultPopOutSizeDialogInst.Height
 
     def CloseAllPopOutImages(self):
         CloseQueue = [PopOut for PopOut in self.PopOutImages]

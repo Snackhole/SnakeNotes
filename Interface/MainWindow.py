@@ -1,12 +1,14 @@
 import copy
 import json
 import os
+import urllib.request
 
 import mistune
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QColor, QIcon, QPalette, QPdfWriter, QTextCursor, QAction, QPageSize
 from PyQt6.QtWidgets import QFileDialog, QLabel, QMainWindow, QInputDialog, QMessageBox, QSplitter, QApplication, QTextEdit, QFrame, QGridLayout
 
+from Build import BuildVariables
 from Core import Base64Converters
 from Core.MarkdownRenderers import ConstructHTMLExportString, ConstructPDFExportHTMLString, Renderer
 from Core.Notebook import Notebook
@@ -26,6 +28,7 @@ from Interface.Dialogs.TemplateManagerDialog import TemplateManagerDialog
 from Interface.Dialogs.AddToPageAndSubpagesDialog import AddToPageAndSubpagesDialog
 from Interface.Dialogs.PopOutTextDialog import PopOutTextDialog
 from Interface.Dialogs.PopOutImageDialog import PopOutImageDialog
+from Interface.Dialogs.UpdateDialog import UpdateDialog
 from Interface.Widgets.NavigationBar import NavigationBar
 from Interface.Widgets.NotebookDisplayWidget import NotebookDisplayWidget
 from Interface.Widgets.SearchWidget import SearchWidget
@@ -64,6 +67,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultPopOutImageSize = {"Width": 0, "Height": 0}
         self.AdvancedSearchDialogInst = None
         self.SortIgnoresBlankLines = True
+        self.CheckForUpdatesOnStart = True
 
         # Set Up Save and Open
         self.SetUpSaveAndOpen(".ntbk", "Notebook", (Notebook,))
@@ -87,6 +91,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if DefaultNotebookPath is not None:
             if os.path.isfile(DefaultNotebookPath):
                 self.OpenActionTriggered(DefaultNotebookPath)
+
+        # Check for Updates
+        if self.CheckForUpdatesOnStart:
+            self.UpdateCheck()
 
     def CreateInterface(self):
         # Load Theme
@@ -555,6 +563,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditFooterAction.triggered.connect(lambda: self.EditHeaderOrFooter("Footer"))
         self.ToggleReadModeActionsList.append(self.EditFooterAction)
 
+        # About Actions
+        self.CheckForUpdatesAction = QAction("Check for Updates")
+        self.CheckForUpdatesAction.triggered.connect(self.UpdateCheck)
+
+        self.CheckForUpdatesOnStartAction = QAction("Check for Updates on Start")
+        self.CheckForUpdatesOnStartAction.setCheckable(True)
+        self.CheckForUpdatesOnStartAction.setChecked(True)
+        self.CheckForUpdatesOnStartAction.triggered.connect(self.ToggleCheckForUpdatesOnStart)
+
     def CreateMenuBar(self):
         self.MenuBar = self.menuBar()
 
@@ -681,6 +698,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.EditHeaderAction)
         self.NotebookMenu.addAction(self.EditFooterAction)
+
+        self.AboutMenu = self.MenuBar.addMenu("&About")
+        self.AboutMenu.addAction(self.CheckForUpdatesAction)
+        self.AboutMenu.addAction(self.CheckForUpdatesOnStartAction)
 
     def CreateToolBar(self):
         self.ToolBar = self.addToolBar("Actions")
@@ -968,6 +989,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.resize(self.SizeAndPosition["Size"][0], self.SizeAndPosition["Size"][1])
             self.move(self.SizeAndPosition["Position"][0], self.SizeAndPosition["Position"][1])
 
+        # Check for Updates on Start
+        CheckForUpdatesOnStartFile = self.GetResourcePath("Configs/CheckForUpdatesOnStart.cfg")
+        if os.path.isfile(CheckForUpdatesOnStartFile):
+            with open(CheckForUpdatesOnStartFile, "r") as ConfigFile:
+                self.CheckForUpdatesOnStart = json.loads(ConfigFile.read())
+        else:
+            self.CheckForUpdatesOnStart = True
+        self.CheckForUpdatesOnStartAction.setChecked(self.CheckForUpdatesOnStart)
+
     def SaveConfigs(self):
         if not os.path.isdir(self.GetResourcePath("Configs")):
             os.mkdir(self.GetResourcePath("Configs"))
@@ -1067,6 +1097,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             ConfigFile.write(json.dumps(self.DefaultNotebook))
         with open(self.GetResourcePath("Configs/GzipDefaultNotebook.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.GzipDefaultNotebook))
+
+        # Check for Updates on Start
+        with open(self.GetResourcePath("Configs/CheckForUpdatesOnStart.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.CheckForUpdatesOnStart))
 
     # Notebook Methods
     def UpdateNotebook(self, Notebook):
@@ -2013,3 +2047,18 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if OK:
             self.Theme = Theme
             self.DisplayMessageBox(f"The new theme will be active after {self.ScriptName} is restarted.")
+
+    # Update Checking Methods
+    def UpdateCheck(self):
+        try:
+            Contents = urllib.request.urlopen(f"https://api.github.com/repos/Snackhole/{BuildVariables["AppName"]}/releases").read()
+            Contents = Contents.decode("utf-8")
+            Contents = json.loads(Contents)
+            LatestVersion = Contents[0]["tag_name"]
+            if LatestVersion != BuildVariables["Version"]:
+                UpdateDialogInst = UpdateDialog(LatestVersion, self)
+        except Exception as Error:
+            self.DisplayMessageBox(f"Checking for updates caused the following error:\n\n{str(Error)}.")
+
+    def ToggleCheckForUpdatesOnStart(self):
+        self.CheckForUpdatesOnStart = not self.CheckForUpdatesOnStart

@@ -54,17 +54,22 @@ class PopOutTextWidget(QTextEdit):
         CharFormat = self.cursorForPosition(QMouseEvent.pos()).charFormat()
         if Anchor != "" and QMouseEvent.button() == Qt.MouseButton.LeftButton:
             self.NavigateToLink(Anchor, QMouseEvent) if not self.MainWindow.SwapLeftAndMiddleClickForLinks else self.OpenLinkAsPopup(Anchor, QMouseEvent)
-        elif CharFormat.isImageFormat():
+        elif CharFormat.isImageFormat() and QMouseEvent.button() == Qt.MouseButton.LeftButton:
             ImageFormat = CharFormat.toImageFormat()
             ImageAltText = ImageFormat.property(QTextFormat.Property.ImageAltText)
-            self.MainWindow.ImageManager(ImageAltText)
+            self.MainWindow.PopOutImage(ImageAltText) if not self.MainWindow.SwapLeftAndMiddleClickForImages else self.MainWindow.ImageManager(ImageAltText)
         else:
             super().mouseDoubleClickEvent(QMouseEvent)
 
     def mouseReleaseEvent(self, QMouseEvent):
         Anchor = self.anchorAt(QMouseEvent.pos())
+        CharFormat = self.cursorForPosition(QMouseEvent.pos()).charFormat()
         if Anchor != "" and QMouseEvent.button() == Qt.MouseButton.MiddleButton:
             self.OpenLinkAsPopup(Anchor, QMouseEvent) if not self.MainWindow.SwapLeftAndMiddleClickForLinks else self.NavigateToLink(Anchor, QMouseEvent)
+        elif CharFormat.isImageFormat() and QMouseEvent.button() == Qt.MouseButton.MiddleButton:
+            ImageFormat = CharFormat.toImageFormat()
+            ImageAltText = ImageFormat.property(QTextFormat.Property.ImageAltText)
+            self.MainWindow.ImageManager(ImageAltText) if not self.MainWindow.SwapLeftAndMiddleClickForImages else self.MainWindow.PopOutImage(ImageAltText)
         else:
             super().mouseReleaseEvent(QMouseEvent)
 

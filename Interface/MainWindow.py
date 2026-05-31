@@ -25,6 +25,7 @@ from Interface.Dialogs.SetDefaultNotebookDialog import SetDefaultNotebookDialog
 from Interface.Dialogs.TemplateManagerDialog import TemplateManagerDialog
 from Interface.Dialogs.AddToPageAndSubpagesDialog import AddToPageAndSubpagesDialog
 from Interface.Dialogs.PopOutTextDialog import PopOutTextDialog
+from Interface.Dialogs.PopOutImageDialog import PopOutImageDialog
 from Interface.Widgets.NavigationBar import NavigationBar
 from Interface.Widgets.NotebookDisplayWidget import NotebookDisplayWidget
 from Interface.Widgets.SearchWidget import SearchWidget
@@ -51,13 +52,16 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.AutoScrollQueue = None
         self.ShowHitCounts = False
         self.SwapLeftAndMiddleClickForLinks = False
+        self.SwapLeftAndMiddleClickForImages = False
         self.MoveCursorToEndOfLinkText = True
         self.HighlightSyntax = True
         self.TextToHighlight = []
         self.TextToHighlightMatchCase = False
         self.AdvancedSearchHighlightText = True
         self.PopOutPages = []
+        self.PopOutImages = []
         self.DefaultPopOutSize = {"Width": 0, "Height": 0}
+        self.DefaultPopOutImageSize = {"Width": 0, "Height": 0}
         self.AdvancedSearchDialogInst = None
         self.SortIgnoresBlankLines = True
 
@@ -1040,6 +1044,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SearchWidgetInst.Notebook = self.Notebook
         self.PopOutMarkdownRenderer.Notebook = self.Notebook
         self.CloseAllPopOutPages()
+        self.CloseAllPopOutImages()
 
     def PageSelected(self, IndexPath=None, SkipUpdatingBackAndForward=False):
         IndexPath = IndexPath if IndexPath is not None else self.NotebookDisplayWidgetInst.GetCurrentPageIndexPath()
@@ -1600,21 +1605,28 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.DefaultPopOutSize["Height"] = DefaultPopOutSizeDialogInst.Height
 
     def CloseDeletedPopOutPages(self, Page):
-        CloseQueue = []
-        for PopOut in self.PopOutPages:
-            if Page is PopOut[0]:
-                CloseQueue.append(PopOut)
+        CloseQueue = [PopOut for PopOut in self.PopOutPages if Page is PopOut[0]]
         for PopOut in CloseQueue:
             PopOut[1].close()
         for SubPage in Page["SubPages"]:
             self.CloseDeletedPopOutPages(SubPage)
 
     def CloseAllPopOutPages(self):
-        CloseQueue = []
-        for PopOut in self.PopOutPages:
-            CloseQueue.append(PopOut)
+        CloseQueue = [PopOut for PopOut in self.PopOutPages]
         for PopOut in CloseQueue:
             PopOut[1].close()
+
+    def PopOutImage(self, ImageName):
+        if self.Notebook.HasImage(ImageName):
+            NewPopOut = PopOutImageDialog(ImageName, self.Notebook.Images[ImageName], self)
+            self.PopOutImages.append(NewPopOut)
+        else:
+            self.DisplayMessageBox("The image appears to have been renamed or deleted.")
+
+    def CloseAllPopOutImages(self):
+        CloseQueue = [PopOut for PopOut in self.PopOutImages]
+        for PopOut in CloseQueue:
+            PopOut.close()
 
     # Save and Open Methods
     def SaveActionTriggered(self, SaveAs=False):

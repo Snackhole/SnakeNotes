@@ -262,7 +262,7 @@ class TextWidget(QTextEdit):
         elif CharFormat.isImageFormat() and QMouseEvent.button() == Qt.MouseButton.LeftButton:
             ImageFormat = CharFormat.toImageFormat()
             ImageAltText = ImageFormat.property(QTextFormat.Property.ImageAltText)
-            self.MainWindow.PopOutImage(ImageAltText) if not self.MainWindow.SwapLeftAndMiddleClickForImages else self.MainWindow.ImageManager(ImageAltText)
+            self.MainWindow.ImageManager(ImageAltText) if not self.MainWindow.SwapLeftAndMiddleClickForImages else self.MainWindow.PopOutImage(ImageAltText)
         else:
             super().mouseDoubleClickEvent(QMouseEvent)
 
@@ -274,7 +274,7 @@ class TextWidget(QTextEdit):
         elif CharFormat.isImageFormat() and QMouseEvent.button() == Qt.MouseButton.MiddleButton:
             ImageFormat = CharFormat.toImageFormat()
             ImageAltText = ImageFormat.property(QTextFormat.Property.ImageAltText)
-            self.MainWindow.ImageManager(ImageAltText) if not self.MainWindow.SwapLeftAndMiddleClickForImages else self.MainWindow.PopOutImage(ImageAltText)
+            self.MainWindow.PopOutImage(ImageAltText) if not self.MainWindow.SwapLeftAndMiddleClickForImages else self.MainWindow.ImageManager(ImageAltText)
         else:
             super().mouseReleaseEvent(QMouseEvent)
 

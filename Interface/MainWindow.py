@@ -450,6 +450,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SwapLeftAndMiddleClickForLinksAction.setChecked(False)
         self.SwapLeftAndMiddleClickForLinksAction.triggered.connect(self.ToggleSwapLeftAndMiddleClickForLinks)
 
+        self.SwapLeftAndMiddleClickForImagesAction = QAction("Swap Left and Middle Click for Images")
+        self.SwapLeftAndMiddleClickForImagesAction.setCheckable(True)
+        self.SwapLeftAndMiddleClickForImagesAction.setChecked(False)
+        self.SwapLeftAndMiddleClickForImagesAction.triggered.connect(self.ToggleSwapLeftAndMiddleClickForImages)
+
         self.GoToIndexPathAction = QAction("Go to Page by Index Path")
         self.GoToIndexPathAction.triggered.connect(self.GoToIndexPath)
 
@@ -638,6 +643,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.SetDefaultPopOutSizeAction)
         self.ViewMenu.addAction(self.SetDefaultPopOutImageSizeAction)
         self.ViewMenu.addAction(self.SwapLeftAndMiddleClickForLinksAction)
+        self.ViewMenu.addAction(self.SwapLeftAndMiddleClickForImagesAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.GoToIndexPathAction)
         self.ViewMenu.addSeparator()
@@ -857,6 +863,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.SwapLeftAndMiddleClickForLinks = False
         self.SwapLeftAndMiddleClickForLinksAction.setChecked(self.SwapLeftAndMiddleClickForLinks)
 
+        # Swap Left and Middle Click for Images
+        SwapLeftAndMiddleClickForImagesFile = self.GetResourcePath("Configs/SwapLeftAndMiddleClickForImages.cfg")
+        if os.path.isfile(SwapLeftAndMiddleClickForImagesFile):
+            with open(SwapLeftAndMiddleClickForImagesFile, "r") as ConfigFile:
+                self.SwapLeftAndMiddleClickForImages = json.loads(ConfigFile.read())
+        else:
+            self.SwapLeftAndMiddleClickForImages = False
+        self.SwapLeftAndMiddleClickForImagesAction.setChecked(self.SwapLeftAndMiddleClickForImages)
+
         # Move Cursor to End of Link Text
         MoveCursorToEndOfLinkTextFile = self.GetResourcePath("Configs/MoveCursorToEndOfLinkText.cfg")
         if os.path.isfile(MoveCursorToEndOfLinkTextFile):
@@ -989,6 +1004,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         # Swap Left and Middle Click for Links
         with open(self.GetResourcePath("Configs/SwapLeftAndMiddleClickForLinks.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(self.SwapLeftAndMiddleClickForLinks))
+
+        # Swap Left and Middle Click for Images
+        with open(self.GetResourcePath("Configs/SwapLeftAndMiddleClickForImages.cfg"), "w") as ConfigFile:
+            ConfigFile.write(json.dumps(self.SwapLeftAndMiddleClickForImages))
 
         # Move Cursor to End of Link Text
         with open(self.GetResourcePath("Configs/MoveCursorToEndOfLinkText.cfg"), "w") as ConfigFile:
@@ -1530,6 +1549,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.DisplayMessageBox("Left click and middle click for links have been swapped; double left click to open a pop-up of the linked page, and middle click to navigate to it.")
         else:
             self.DisplayMessageBox("Left click and middle click for links have been swapped; double left click to navigate to the linked page, and middle click to open a pop-up of it.")
+
+    def ToggleSwapLeftAndMiddleClickForImages(self):
+        self.SwapLeftAndMiddleClickForImages = not self.SwapLeftAndMiddleClickForImages
+        if self.SwapLeftAndMiddleClickForImages:
+            self.DisplayMessageBox("Left click and middle click for images have been swapped; double left click to open a pop-up of the image, and middle click to navigate to it in the image manager.")
+        else:
+            self.DisplayMessageBox("Left click and middle click for images have been swapped; double left click to navigate to the image in the image manager, and middle click to open a pop-up of it.")
 
     def ToggleMoveCursorToEndOfLinkText(self):
         self.MoveCursorToEndOfLinkText = not self.MoveCursorToEndOfLinkText

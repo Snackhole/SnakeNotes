@@ -14,11 +14,12 @@ class Renderer(mistune.Renderer):
     def link(self, Link, Title, Text):
         Link = mistune.escape_link(Link)
         if Link.startswith("[0,") and not self.Notebook.StringIsValidIndexPath(Link):
-            return f"{Text} (LINKED PAGE NOT FOUND)"
+            return f"{Text} [LINKED PAGE NOT FOUND]"
         if Link == "[deleted]":
-            return f"{Text} (LINKED PAGE DELETED)"
+            return f"{Text} [LINKED PAGE DELETED]"
         if Link.startswith("[file:") and not self.Notebook.HasFile(Link[6:-1]):
-            return f"{Text} (LINKED FILE NOT FOUND)"
+            TitleText = f" | {Title}" if (Title is not None and Title != "") else ""
+            return f"{Text} [LINKED FILE NOT FOUND | {Link}{TitleText}]"
         if not Title:
             return f"<a href=\"{Link}\">{Text}</a>"
         Title = mistune.escape(Title, quote=True)
@@ -59,8 +60,8 @@ class Renderer(mistune.Renderer):
                 return f"{HTML} />"
             return f"{HTML}>"
         else:
-            AltTextString = (f" | {AltText}") if AltText != "" else ""
-            TitleString = (f" | {Title}") if Title is not None and Title != "" else ""
+            AltTextString = f" | {AltText}" if AltText != "" else ""
+            TitleString = f" | {Title}" if (Title is not None and Title != "") else ""
             return f"[IMAGE NOT FOUND | {Source}{AltTextString}{TitleString}]"
 
 
@@ -73,11 +74,12 @@ class HTMLExportRenderer(Renderer):
         ValidIndexPath = self.Notebook.StringIsValidIndexPath(Link)
         FileInNotebook = self.Notebook.HasFile(Link[6:-1])
         if Link.startswith("[0,") and not ValidIndexPath:
-            return f"{Text} (LINKED PAGE NOT FOUND)"
+            return f"{Text} [LINKED PAGE NOT FOUND]"
         if Link == "[deleted]":
-            return f"{Text} (LINKED PAGE DELETED)"
+            return f"{Text} [LINKED PAGE DELETED]"
         if Link.startswith("[file:") and not FileInNotebook:
-            return f"{Text} (LINKED FILE NOT FOUND)"
+            TitleText = f" | {Title}" if (Title is not None and Title != "") else ""
+            return f"{Text} [LINKED FILE NOT FOUND | {Link}{TitleText}]"
         if Title:
             Title = mistune.escape(Title, quote=True)
         if ValidIndexPath:

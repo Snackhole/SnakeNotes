@@ -19,8 +19,6 @@ class Renderer(mistune.Renderer):
             return f"{Text} (LINKED PAGE DELETED)"
         if Link.startswith("[file:") and not self.Notebook.HasFile(Link[6:-1]):
             return f"{Text} (LINKED FILE NOT FOUND)"
-        if Link == "[filedeleted]":
-            return f"{Text} (LINKED FILE DELETED)"
         if not Title:
             return f"<a href=\"{Link}\">{Text}</a>"
         Title = mistune.escape(Title, quote=True)
@@ -80,8 +78,6 @@ class HTMLExportRenderer(Renderer):
             return f"{Text} (LINKED PAGE DELETED)"
         if Link.startswith("[file:") and not FileInNotebook:
             return f"{Text} (LINKED FILE NOT FOUND)"
-        if Link == "[filedeleted]":
-            return f"{Text} (LINKED FILE DELETED)"
         if Title:
             Title = mistune.escape(Title, quote=True)
         if ValidIndexPath:

@@ -59,9 +59,9 @@ class Renderer(mistune.Renderer):
                 return f"{HTML} />"
             return f"{HTML}>"
         else:
-            AltTextString = (f"|{AltText}") if AltText != "" else ""
-            TitleString = (f"|{Title}") if Title is not None and Title != "" else ""
-            return f"IMAGE NOT FOUND|{Source}{AltTextString}{TitleString}"
+            AltTextString = (f" | {AltText}") if AltText != "" else ""
+            TitleString = (f" | {Title}") if Title is not None and Title != "" else ""
+            return f"[IMAGE NOT FOUND | {Source}{AltTextString}{TitleString}]"
 
 
 class HTMLExportRenderer(Renderer):

@@ -89,8 +89,9 @@ class FindPagesWithMissingFilesAndImagesDialog(QDialog):
                 if not self.Notebook.HasImage(LinkedImageOrFile):
                     MissingFilesOrImages.append(LinkedImageOrFile)
             elif FileIndicator:
-                if not self.Notebook.HasFile(LinkedImageOrFile):
-                    MissingFilesOrImages.append(LinkedImageOrFile)
+                FileName = LinkedImageOrFile[6:-1]
+                if not self.Notebook.HasFile(FileName):
+                    MissingFilesOrImages.append(FileName)
         return MissingFilesOrImages
 
 

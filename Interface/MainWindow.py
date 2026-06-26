@@ -29,6 +29,7 @@ from Interface.Dialogs.AddToPageAndSubpagesDialog import AddToPageAndSubpagesDia
 from Interface.Dialogs.PopOutTextDialog import PopOutTextDialog
 from Interface.Dialogs.PopOutImageDialog import PopOutImageDialog
 from Interface.Dialogs.UpdateDialog import UpdateDialog
+from Interface.Dialogs.FindFilesAndImagesNotLinkedInPagesDialog import FindFilesAndImagesNotLinkedInPagesDialog
 from Interface.Dialogs.FindPagesWithMissingFilesAndImagesDialog import FindPagesWithMissingFilesAndImagesDialog
 from Interface.Widgets.NavigationBar import NavigationBar
 from Interface.Widgets.NotebookDisplayWidget import NotebookDisplayWidget
@@ -556,6 +557,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.TemplateManagerAction.triggered.connect(self.TemplateManager)
         self.ToggleReadModeActionsList.append(self.TemplateManagerAction)
 
+        self.FindFilesAndImagesNotLinkedInPagesAction = QAction("Find Files and Images Not Linked in Pages")
+        self.FindFilesAndImagesNotLinkedInPagesAction.triggered.connect(self.FindFilesAndImagesNotLinkedInPages)
+
         self.FindPagesWithMissingFilesAndImagesAction = QAction("Find Pages with Missing Files and Images")
         self.FindPagesWithMissingFilesAndImagesAction.triggered.connect(self.FindPagesWithMissingFilesAndImages)
 
@@ -700,6 +704,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.NotebookMenu.addAction(self.FileManagerAction)
         self.NotebookMenu.addAction(self.TemplateManagerAction)
         self.NotebookMenu.addSeparator()
+        self.NotebookMenu.addAction(self.FindFilesAndImagesNotLinkedInPagesAction)
         self.NotebookMenu.addAction(self.FindPagesWithMissingFilesAndImagesAction)
         self.NotebookMenu.addSeparator()
         self.NotebookMenu.addAction(self.EditHeaderAction)
@@ -1541,6 +1546,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
                 self.NotebookDisplayWidgetInst.SelectTreeItemFromIndexPathString(IndexPathString)
             else:
                 self.DisplayMessageBox("Not a valid index path.")
+
+    def FindFilesAndImagesNotLinkedInPages(self):
+        FindFilesAndImagesNotLinkedInPagesDialogInst = FindFilesAndImagesNotLinkedInPagesDialog(self.Notebook, self)
 
     def FindPagesWithMissingFilesAndImages(self):
         FindPagesWithMissingFilesAndImagesDialogInst = FindPagesWithMissingFilesAndImagesDialog(self.Notebook, self)

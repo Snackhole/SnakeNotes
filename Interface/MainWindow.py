@@ -349,6 +349,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.InsertExternalLinkAction.triggered.connect(self.TextWidgetInst.InsertExternalLink)
         self.ToggleReadModeActionsList.append(self.InsertExternalLinkAction)
 
+        self.InsertHeadingLinkAction = QAction("Insert Heading Link")
+        self.InsertHeadingLinkAction.triggered.connect(self.TextWidgetInst.InsertHeadingLink)
+        self.ToggleReadModeActionsList.append(self.InsertHeadingLinkAction)
+
         self.TextToLinkAction = QAction("Convert Exact Title to Link")
         self.TextToLinkAction.triggered.connect(self.TextWidgetInst.TextToLink)
         self.ToggleReadModeActionsList.append(self.TextToLinkAction)
@@ -630,13 +634,15 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.InlineFootnoteStyleAction)
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.InsertLinksAction)
-        self.EditMenu.addAction(self.AddTitleToolTipsToLinksAction)
         self.EditMenu.addAction(self.InsertExternalLinkAction)
         self.EditMenu.addAction(self.TextToLinkAction)
+        self.EditMenu.addAction(self.LinkFileAction)
+        self.EditMenu.addAction(self.InsertHeadingLinkAction)
+        self.EditMenu.addAction(self.AddTitleToolTipsToLinksAction)
         self.EditMenu.addAction(self.MoveCursorToEndOfLinkTextAction)
+        self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.InsertTableAction)
         self.EditMenu.addAction(self.InsertImageAction)
-        self.EditMenu.addAction(self.LinkFileAction)
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.PrependAction)
         self.EditMenu.addAction(self.AppendAction)
@@ -782,6 +788,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultKeybindings["InsertLinksAction"] = "Ctrl+L"
         self.DefaultKeybindings["InsertExternalLinkAction"] = "Ctrl+Shift+L"
         self.DefaultKeybindings["TextToLinkAction"] = "Ctrl+Alt+L"
+        self.DefaultKeybindings["InsertHeadingLinkAction"] = "Ctrl+H"
         self.DefaultKeybindings["InsertTableAction"] = "Ctrl+Shift+T"
         self.DefaultKeybindings["InsertImageAction"] = "Ctrl+Shift+I"
         self.DefaultKeybindings["LinkFileAction"] = "Ctrl+Alt+Shift+L"

@@ -479,6 +479,23 @@ class TextWidget(QTextEdit):
             if OK:
                 self.SelectionSpanWrap("[", f"]({LinkString})", MoveCursorToEndOfWrappedText=self.MainWindow.MoveCursorToEndOfLinkText)
 
+    def InsertHeadingLink(self):
+        if not self.ReadMode and self.hasFocus():
+            CurrentPageContent = self.CurrentPage["Content"]
+            Headings = []
+            HeaderRegEx = r"(?m)^#{1,6}(?!#) (.+)"
+            TargetIterator = re.finditer(HeaderRegEx, CurrentPageContent)
+            for Target in TargetIterator:
+                TargetString = Target.group()
+                if TargetString not in Headings:
+                    Headings.append(TargetString)
+            if len(Headings) > 0:
+                HeadingString, OK = QInputDialog.getItem(self, "Insert Heading Link", "Select a heading to link to:", Headings, editable=False)
+                if OK:
+                    self.SelectionSpanWrap("[", f"]([heading:{HeadingString}])", MoveCursorToEndOfWrappedText=self.MainWindow.MoveCursorToEndOfLinkText)
+            else:
+                self.MainWindow.DisplayMessageBox("No headings present on the page.")
+
     def TextToLink(self):
         if not self.ReadMode and self.hasFocus():
             Cursor = self.textCursor()

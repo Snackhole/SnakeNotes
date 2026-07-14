@@ -659,6 +659,11 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.FootnotesFormat.setBackground(QColor("darkGoldenrod"))
         self.FootnotesFormat.setForeground(QColor("white"))
 
+        # Tokens
+        self.TokensFormat = QTextCharFormat()
+        self.TokensFormat.setBackground(QColor("saddleBrown"))
+        self.TokensFormat.setForeground(QColor("white"))
+
         # Text Highlight
         self.TextHighlightFormat = QTextCharFormat()
         self.TextHighlightFormat.setBackground(QColor("darkOrange"))
@@ -682,6 +687,9 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         # Footnotes
         self.HighlightTargets.append({"RegEx": r"\[\^[^\]]+?\]", "FormatCallable": self.GetFootnotesFormat})
 
+        # Text Generation Tokens
+        self.HighlightTargets.append({"RegEx": r"\{(PAGETITLE|SUBPAGELINKS|SUBPAGEOFLINK|LINKINGPAGES|TOC)\}", "FormatCallable": self.GetTokensFormat})
+
     def GetHeaderFormat(self, Match):
         return self.HeaderFormat
 
@@ -701,6 +709,9 @@ class SyntaxHighlighter(QSyntaxHighlighter):
 
     def GetFootnotesFormat(self, Match):
         return self.FootnotesFormat
+
+    def GetTokensFormat(self, Match):
+        return self.TokensFormat
 
     def highlightBlock(self, Text):
         # Highlight Syntax

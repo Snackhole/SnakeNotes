@@ -123,13 +123,23 @@ def ConstructMarkdownStringFromPage(Page, Notebook):
     HeaderString = HeaderString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, Notebook))
     HeaderString = HeaderString.replace("{LINKINGPAGES}", ConstructLinkingPagesLinks(Page, Notebook))
     HeaderString = HeaderString.replace("{TOC}", ConstructTableOfContents(Page))
+
+    BodyString = Page["Content"]
+    BodyString = BodyString.replace("{PAGETITLE}", Page["Title"])
+    BodyString = BodyString.replace("{SUBPAGELINKS}", ConstructSubPageLinks(Page))
+    BodyString = BodyString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, Notebook))
+    BodyString = BodyString.replace("{LINKINGPAGES}", ConstructLinkingPagesLinks(Page, Notebook))
+    BodyString = BodyString.replace("{TOC}", ConstructTableOfContents(Page))
+
     FooterString = f"\n\n{Notebook.Footer}"
     FooterString = FooterString.replace("{PAGETITLE}", Page["Title"])
     FooterString = FooterString.replace("{SUBPAGELINKS}", ConstructSubPageLinks(Page))
     FooterString = FooterString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, Notebook))
     FooterString = FooterString.replace("{LINKINGPAGES}", ConstructLinkingPagesLinks(Page, Notebook))
     FooterString = FooterString.replace("{TOC}", ConstructTableOfContents(Page))
-    MarkdownString = f"{HeaderString}{Page["Content"]}{FooterString}"
+
+    MarkdownString = f"{HeaderString}{BodyString}{FooterString}"
+
     return MarkdownString
 
 

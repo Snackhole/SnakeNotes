@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 import mistune
 
@@ -121,11 +122,13 @@ def ConstructMarkdownStringFromPage(Page, Notebook):
     HeaderString = HeaderString.replace("{SUBPAGELINKS}", ConstructSubPageLinks(Page))
     HeaderString = HeaderString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, Notebook))
     HeaderString = HeaderString.replace("{LINKINGPAGES}", ConstructLinkingPagesLinks(Page, Notebook))
+    HeaderString = HeaderString.replace("{TOC}", ConstructTableOfContents(Page))
     FooterString = f"\n\n{Notebook.Footer}"
     FooterString = FooterString.replace("{PAGETITLE}", Page["Title"])
     FooterString = FooterString.replace("{SUBPAGELINKS}", ConstructSubPageLinks(Page))
     FooterString = FooterString.replace("{SUBPAGEOFLINK}", ConstructSubPageOfLink(Page, Notebook))
     FooterString = FooterString.replace("{LINKINGPAGES}", ConstructLinkingPagesLinks(Page, Notebook))
+    FooterString = FooterString.replace("{TOC}", ConstructTableOfContents(Page))
     MarkdownString = f"{HeaderString}{Page["Content"]}{FooterString}"
     return MarkdownString
 
@@ -160,6 +163,30 @@ def ConstructLinkingPagesLinks(Page, Notebook):
             LinksString += f"[{Result[0]}]({json.dumps(Result[1])})  \n"
         LinksString = LinksString.rstrip()
     return LinksString
+
+
+def ConstructTableOfContents(Page):
+    Headings = []
+    HeaderRegEx = r"(?m)^#{1,6}(?!#) (.+)"
+    PageContent = Page["Content"]
+    TargetIterator = re.finditer(HeaderRegEx, PageContent)
+    for Target in TargetIterator:
+        TargetString = Target.group()
+        Headings.append(TargetString)
+    if len(Headings) > 0:
+        TOCString = "## Table of Contents\n"
+        HeadingOffset = 5
+        for Heading in Headings:
+            HeadingLevel = len(Heading) - len(Heading.lstrip("#"))
+            if HeadingOffset >= HeadingLevel:
+                HeadingOffset = HeadingLevel - 1
+        for Heading in Headings:
+            HeadingLevel = len(Heading) - len(Heading.lstrip("#"))
+            TOCString += f"{"\u00B7" * (HeadingLevel - HeadingOffset)} [{Heading.lstrip("#").strip("")}]([heading:{Heading}])  \n"
+        TOCString = TOCString.rstrip()
+        return TOCString
+    else:
+        return ""
 
 
 def ConstructHTMLExportString(Notebook, AssetPaths):

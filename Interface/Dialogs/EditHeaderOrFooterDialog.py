@@ -31,6 +31,8 @@ class EditHeaderOrFooterDialog(QDialog):
         self.SubPageOfButton.clicked.connect(self.SubPageOf)
         self.LinkingPagesButton = QPushButton("Linking Pages Links")
         self.LinkingPagesButton.clicked.connect(self.LinkingPages)
+        self.TableOfContentsButton = QPushButton("Table of Contents")
+        self.TableOfContentsButton.clicked.connect(self.TableOfContents)
         self.DefaultButton = QPushButton("Default")
         self.DefaultButton.clicked.connect(self.Default)
 
@@ -46,7 +48,8 @@ class EditHeaderOrFooterDialog(QDialog):
         self.EditLayout.addWidget(self.SubPagesButton, 0, 1)
         self.EditLayout.addWidget(self.SubPageOfButton, 0, 2)
         self.EditLayout.addWidget(self.LinkingPagesButton, 0, 3)
-        self.EditLayout.addWidget(self.DefaultButton, 0, 4)
+        self.EditLayout.addWidget(self.TableOfContentsButton, 0, 4)
+        self.EditLayout.addWidget(self.DefaultButton, 0, 5)
         self.ButtonsLayout = QGridLayout()
         self.ButtonsLayout.addWidget(self.DoneButton, 0, 0)
         self.ButtonsLayout.addWidget(self.CancelButton, 0, 1)
@@ -88,6 +91,9 @@ class EditHeaderOrFooterDialog(QDialog):
 
     def LinkingPages(self):
         self.HeaderOrFooterText.insertPlainText("{LINKINGPAGES}")
+
+    def TableOfContents(self):
+        self.HeaderOrFooterText.insertPlainText("{TOC}")
 
     def Default(self):
         self.HeaderOrFooterText.setPlainText(self.Notebook.DefaultHeader if self.Mode == "Header" else (self.Notebook.DefaultFooter if self.Mode == "Footer" else ""))

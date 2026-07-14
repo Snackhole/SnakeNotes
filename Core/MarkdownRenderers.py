@@ -43,8 +43,8 @@ class Renderer(mistune.Renderer):
     def table(self, Header, Body):
         return f"<p><table border=\"1\" cellpadding=\"2\">\n<thead>{Header}</thead>\n<tbody>\n{Body}</tbody>\n</table>\n"
 
-    def header(self, text, level, raw=None):
-        return f"<h{str(level)} style=\"color: seagreen\">{text}</h{str(level)}>\n"
+    def header(self, Text, Level, Raw=None):
+        return f"<h{str(Level)} style=\"color: seagreen\">{Text}</h{str(Level)}><a name=\"[heading:{"#" * Level} {Text}]\"></a>\n"
 
     def image(self, Source, Title, AltText):
         if self.Notebook.HasImage(Source):
@@ -73,6 +73,7 @@ class HTMLExportRenderer(Renderer):
         Link = mistune.escape_link(Link)
         ValidIndexPath = self.Notebook.StringIsValidIndexPath(Link)
         FileInNotebook = self.Notebook.HasFile(Link[6:-1])
+        IsHeadingLink = Link.startswith("[heading:") and Link.endswith("]")
         if Link.startswith("[0,") and not ValidIndexPath:
             return f"{Text} [LINKED PAGE NOT FOUND]"
         if Link == "[deleted]":
@@ -90,10 +91,17 @@ class HTMLExportRenderer(Renderer):
             if not Title:
                 return f"<a download=\"{Link[6:-1]}\" href=\"Files/{Link[6:-1]}\" target=\"_blank\">{Text}</a>"
             return f"<a download=\"{Link[6:-1]}\" href=\"Files/{Link[6:-1]}\" title=\"{Title}\" target=\"_blank\">{Text}</a>"
+        elif IsHeadingLink:
+            if not Title:
+                f"<a href=\"#{"".join(Link.split())}\">{Text}</a>"
+            return f"<a href=\"#{"".join(Link.split())}\" title=\"{Title}\">{Text}</a>"
         else:
             if not Title:
                 return f"<a href=\"{Link}\" target=\"_blank\">{Text}</a>"
             return f"<a href=\"{Link}\" title=\"{Title}\" target=\"_blank\">{Text}</a>"
+
+    def header(self, Text, Level, Raw=None):
+        return f"<h{str(Level)} id=\"[heading:{"#" * Level}{"".join(Text.split())}]\" style=\"color: seagreen\">{Text}</h{str(Level)}>\n"
 
 
 class PDFExportRenderer(Renderer):
@@ -102,6 +110,9 @@ class PDFExportRenderer(Renderer):
 
     def link(self, Link, Title, Text):
         return Text
+
+    def header(self, Text, Level, Raw=None):
+        return f"<h{str(Level)} style=\"color: seagreen\">{Text}</h{str(Level)}>\n"
 
 
 def ConstructMarkdownStringFromPage(Page, Notebook):

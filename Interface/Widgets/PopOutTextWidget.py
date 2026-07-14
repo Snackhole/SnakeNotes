@@ -93,6 +93,8 @@ class PopOutTextWidget(QTextEdit):
         elif Anchor.startswith("[file:") and self.Notebook.HasFile(Anchor[6:-1]):
             self.MainWindow.ExportLinkedFile(Anchor[6:-1])
             QMouseEvent.accept()
+        elif Anchor.startswith("[heading:"):
+            self.scrollToAnchor(Anchor)
         else:
             if Anchor.startswith("[0,"):
                 self.MainWindow.DisplayMessageBox("Linked page not found.  Pop-out page may need to be refreshed.", Parent=self)
@@ -112,6 +114,8 @@ class PopOutTextWidget(QTextEdit):
         elif Anchor.startswith("[file:") and self.Notebook.HasFile(Anchor[6:-1]):
             self.MainWindow.ExportLinkedFile(Anchor[6:-1])
             QMouseEvent.accept()
+        elif Anchor.startswith("[heading:"):
+            self.scrollToAnchor(Anchor)
         else:
             if Anchor.startswith("[0,"):
                 self.MainWindow.DisplayMessageBox("Linked page not found.  Pop-out page may need to be refreshed.", Parent=self)

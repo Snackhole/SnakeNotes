@@ -305,6 +305,8 @@ class TextWidget(QTextEdit):
         elif Anchor.startswith("[file:") and self.Notebook.HasFile(Anchor[6:-1]):
             self.MainWindow.ExportLinkedFile(Anchor[6:-1])
             QMouseEvent.accept()
+        elif Anchor.startswith("[heading:"):
+            self.scrollToAnchor(Anchor)
         else:
             if Anchor.startswith("[0,"):
                 self.MainWindow.DisplayMessageBox("Linked page not found.")
@@ -324,6 +326,8 @@ class TextWidget(QTextEdit):
         elif Anchor.startswith("[file:") and self.Notebook.HasFile(Anchor[6:-1]):
             self.MainWindow.ExportLinkedFile(Anchor[6:-1])
             QMouseEvent.accept()
+        elif Anchor.startswith("[heading:"):
+            self.scrollToAnchor(Anchor)
         else:
             if Anchor.startswith("[0,"):
                 self.MainWindow.DisplayMessageBox("Linked page not found.")
@@ -623,6 +627,11 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.FileLinksFormat.setBackground(QColor("dimGray"))
         self.FileLinksFormat.setForeground(QColor("white"))
 
+        # Heading Links
+        self.HeadingLinksFormat = QTextCharFormat()
+        self.HeadingLinksFormat.setBackground(QColor("yellowGreen"))
+        self.HeadingLinksFormat.setForeground(QColor("white"))
+
         # Images
         self.ImagesFormat = QTextCharFormat()
         self.ImagesFormat.setBackground(QColor("darkRed"))
@@ -664,6 +673,8 @@ class SyntaxHighlighter(QSyntaxHighlighter):
             return self.ImagesFormat
         elif Match.group(2) != "" and Match.group(3).startswith("[file:") and Match.group(3).endswith("]"):
             return self.FileLinksFormat
+        elif Match.group(2) != "" and Match.group(3).startswith("[heading:") and Match.group(3).endswith("]"):
+            return self.HeadingLinksFormat
         elif Match.group(2) != "" and Match.group(3).startswith("[") and Match.group(3).endswith("]"):
             return self.InternalLinksFormat
         elif Match.group(2) != "" and not (Match.group(3).startswith("[") and Match.group(3).endswith("]")):

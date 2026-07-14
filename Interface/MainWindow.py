@@ -363,6 +363,26 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.MoveCursorToEndOfLinkTextAction.triggered.connect(self.ToggleMoveCursorToEndOfLinkText)
         self.ToggleReadModeActionsList.append(self.MoveCursorToEndOfLinkTextAction)
 
+        self.InsertPageTitleTokenAction = QAction("Insert Page Title Token")
+        self.InsertPageTitleTokenAction.triggered.connect(lambda: self.TextWidgetInst.InsertOnBlankLine("{PAGETITLE}"))
+        self.ToggleReadModeActionsList.append(self.InsertPageTitleTokenAction)
+
+        self.InsertSubpageLinksTokenAction = QAction("Insert Subpage Links Token")
+        self.InsertSubpageLinksTokenAction.triggered.connect(lambda: self.TextWidgetInst.InsertOnBlankLine("{SUBPAGELINKS}"))
+        self.ToggleReadModeActionsList.append(self.InsertSubpageLinksTokenAction)
+
+        self.InsertSubpageOfLinkTokenAction = QAction("Insert Subpage of Link Token")
+        self.InsertSubpageOfLinkTokenAction.triggered.connect(lambda: self.TextWidgetInst.InsertOnBlankLine("{SUBPAGEOFLINK}"))
+        self.ToggleReadModeActionsList.append(self.InsertSubpageOfLinkTokenAction)
+
+        self.InsertLinkingPagesTokenAction = QAction("Insert Linking Pages Token")
+        self.InsertLinkingPagesTokenAction.triggered.connect(lambda: self.TextWidgetInst.InsertOnBlankLine("{LINKINGPAGES}"))
+        self.ToggleReadModeActionsList.append(self.InsertLinkingPagesTokenAction)
+
+        self.InsertTableOfContentsTokenAction = QAction("Insert Table of Contents Token")
+        self.InsertTableOfContentsTokenAction.triggered.connect(lambda: self.TextWidgetInst.InsertOnBlankLine("{TOC}"))
+        self.ToggleReadModeActionsList.append(self.InsertTableOfContentsTokenAction)
+
         self.InsertTableAction = QAction(self.InsertTableIcon, "Insert Table")
         self.InsertTableAction.triggered.connect(self.TextWidgetInst.InsertTable)
         self.ToggleReadModeActionsList.append(self.InsertTableAction)
@@ -640,6 +660,13 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.InsertHeadingLinkAction)
         self.EditMenu.addAction(self.AddTitleToolTipsToLinksAction)
         self.EditMenu.addAction(self.MoveCursorToEndOfLinkTextAction)
+        self.EditMenu.addSeparator()
+        self.InsertTokenMenu = self.EditMenu.addMenu("Insert Token...")
+        self.InsertTokenMenu.addAction(self.InsertPageTitleTokenAction)
+        self.InsertTokenMenu.addAction(self.InsertSubpageLinksTokenAction)
+        self.InsertTokenMenu.addAction(self.InsertSubpageOfLinkTokenAction)
+        self.InsertTokenMenu.addAction(self.InsertLinkingPagesTokenAction)
+        self.InsertTokenMenu.addAction(self.InsertTableOfContentsTokenAction)
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.InsertTableAction)
         self.EditMenu.addAction(self.InsertImageAction)

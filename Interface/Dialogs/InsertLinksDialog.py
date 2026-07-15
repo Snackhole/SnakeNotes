@@ -1,5 +1,6 @@
 import mistune
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QDialog, QLineEdit, QTextEdit, QTreeWidget, QHeaderView, QTreeWidgetItem, QGridLayout, QPushButton, QCheckBox, QLabel, QComboBox
 
 from Core import MarkdownRenderers
@@ -52,6 +53,8 @@ class InsertLinksDialog(QDialog):
 
         # Preview Text Edit
         self.PreviewTextEdit = QTextEdit()
+        if self.MainWindow.CurrentFont is not None:
+            self.PreviewTextEdit.setFont(QFont(self.MainWindow.CurrentFont))
         self.PreviewTextEdit.setReadOnly(True)
 
         # Insert Sub Page Links Check Box

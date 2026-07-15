@@ -2,7 +2,7 @@ import json
 import webbrowser
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QTextFormat
+from PyQt6.QtGui import QTextFormat, QFont
 from PyQt6.QtWidgets import QTextEdit
 
 from Core import MarkdownRenderers
@@ -17,6 +17,10 @@ class PopOutTextWidget(QTextEdit):
         self.Notebook = Notebook
         self.PopOutMarkdownParser = PopOutMarkdownParser
         self.MainWindow = MainWindow
+
+        # Set Font
+        if self.MainWindow.CurrentFont is not None:
+            self.setFont(QFont(self.MainWindow.CurrentFont))
 
         # Tab Behavior
         self.setTabChangesFocus(True)

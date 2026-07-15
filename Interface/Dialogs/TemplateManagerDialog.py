@@ -1,3 +1,4 @@
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QDialog, QListWidget, QTextEdit, QListWidgetItem, QPushButton, QGridLayout, QMessageBox, QLabel, QLineEdit, QSplitter, QInputDialog
 
 
@@ -20,6 +21,8 @@ class TemplateManagerDialog(QDialog):
 
         # Template Display
         self.TemplateDisplay = QTextEdit()
+        if self.MainWindow.CurrentFont is not None:
+            self.TemplateDisplay.setFont(QFont(self.MainWindow.CurrentFont))
         self.TemplateDisplay.setReadOnly(True)
         self.TemplateDisplay.setStyleSheet("selection-background-color: rgb(0, 120, 215); selection-color: white")
 
@@ -185,6 +188,8 @@ class AddTemplateDialog(QDialog):
 
         # Template Text
         self.TemplateText = QTextEdit()
+        if self.MainWindow.CurrentFont is not None:
+            self.TemplateText.setFont(QFont(self.MainWindow.CurrentFont))
         self.TemplateText.setPlainText(self.TemplateContent)
         self.TemplateText.setTabChangesFocus(True)
         self.TemplateText.setStyleSheet("selection-background-color: rgb(0, 120, 215); selection-color: white")

@@ -5,7 +5,7 @@ import webbrowser
 import mistune
 from PyQt6.QtCore import Qt
 from PyQt6.QtCore import QTimer
-from PyQt6.QtGui import QColor, QSyntaxHighlighter, QTextCursor, QTextCharFormat, QTextFormat
+from PyQt6.QtGui import QColor, QSyntaxHighlighter, QTextCursor, QTextCharFormat, QTextFormat, QFont
 from PyQt6.QtWidgets import QTextEdit, QInputDialog, QMessageBox
 
 from Core import MarkdownRenderers
@@ -22,6 +22,10 @@ class TextWidget(QTextEdit):
         # Store Parameters
         self.Notebook = Notebook
         self.MainWindow = MainWindow
+
+        # Set Font
+        if self.MainWindow.CurrentFont is not None:
+            self.setFont(QFont(self.MainWindow.CurrentFont))
 
         # Variables
         self.CurrentPage = self.Notebook.RootPage

@@ -1,6 +1,6 @@
 import mistune
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor
+from PyQt6.QtGui import QColor, QFont
 from PyQt6.QtWidgets import QDialog, QHeaderView, QTextEdit, QPushButton, QCheckBox, QGridLayout, QLineEdit, QTreeWidget, QTreeWidgetItem
 
 from Core import MarkdownRenderers
@@ -44,6 +44,8 @@ class MovePageToDialog(QDialog):
 
         # Preview Text Edit
         self.PreviewTextEdit = QTextEdit()
+        if self.MainWindow.CurrentFont is not None:
+            self.PreviewTextEdit.setFont(QFont(self.MainWindow.CurrentFont))
         self.PreviewTextEdit.setReadOnly(True)
 
         # Buttons

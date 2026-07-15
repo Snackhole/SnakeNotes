@@ -1,3 +1,4 @@
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QDialog, QGridLayout, QPushButton, QTextEdit
 
 
@@ -17,6 +18,8 @@ class AddToPageAndSubpagesDialog(QDialog):
 
         # Text to Add
         self.TextToAddTextEdit = QTextEdit()
+        if self.MainWindow.CurrentFont is not None:
+            self.TextToAddTextEdit.setFont(QFont(self.MainWindow.CurrentFont))
         self.TextToAddTextEdit.setTabChangesFocus(True)
         self.TextToAddTextEdit.setStyleSheet("selection-background-color: rgb(0, 120, 215); selection-color: white")
 

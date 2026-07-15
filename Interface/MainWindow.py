@@ -5,7 +5,7 @@ import urllib.request
 
 import mistune
 from PyQt6.QtCore import QTimer, Qt
-from PyQt6.QtGui import QColor, QIcon, QPalette, QPdfWriter, QTextCursor, QAction, QPageSize
+from PyQt6.QtGui import QColor, QIcon, QPalette, QPdfWriter, QTextCursor, QAction, QPageSize, QFont
 from PyQt6.QtWidgets import QFileDialog, QLabel, QMainWindow, QInputDialog, QMessageBox, QSplitter, QApplication, QTextEdit, QFrame, QGridLayout
 
 from Build import BuildVariables
@@ -49,6 +49,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         super().__init__()
 
         # Variables
+        self.CurrentFont = None
         self.CurrentZoomLevel = 0
         self.BackList = []
         self.BackMaximum = 50
@@ -1845,6 +1846,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         PDFWriter = QPdfWriter(ExportFileName)
         PDFWriter.setPageSize(QPageSize(QPageSize.PageSizeId.Letter))
         PDFTextWidget = QTextEdit()
+        if self.CurrentFont is not None:
+            PDFTextWidget.setFont(QFont(self.CurrentFont))
         PDFTextWidget.setHtml(ConstructPDFExportHTMLString(Page, Notebook))
         PDFTextWidget.print(PDFWriter)
         PDFTextWidget.destroy()

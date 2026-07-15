@@ -53,7 +53,6 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CurrentFont = None
         self.CurrentFontSize = 12
         self.DefaultFont = None
-        self.CurrentZoomLevel = 0
         self.BackList = []
         self.BackMaximum = 50
         self.ForwardList = []
@@ -1614,20 +1613,17 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ClearBackAndForward()
 
     def ZoomOut(self):
-        self.TextWidgetInst.zoomOut(1)
-        self.CurrentZoomLevel -= 1
+        self.CurrentFontSize -= 1
+        self.CurrentFontSize = max(1, self.CurrentFontSize)
+        self.RefreshFontOfTextEdits()
 
     def ZoomIn(self):
-        self.TextWidgetInst.zoomIn(1)
-        self.CurrentZoomLevel += 1
+        self.CurrentFontSize += 1
+        self.RefreshFontOfTextEdits()
 
     def DefaultZoom(self):
-        if self.CurrentZoomLevel > 0:
-            self.TextWidgetInst.zoomOut(self.CurrentZoomLevel)
-            self.CurrentZoomLevel = 0
-        elif self.CurrentZoomLevel < 0:
-            self.TextWidgetInst.zoomIn(-self.CurrentZoomLevel)
-            self.CurrentZoomLevel = 0
+        self.CurrentFontSize = 12
+        self.RefreshFontOfTextEdits()
 
     def ToggleInlineFootnoteStyle(self):
         self.InlineFootnoteStyle = not self.InlineFootnoteStyle

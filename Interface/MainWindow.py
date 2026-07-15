@@ -881,13 +881,11 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         if os.path.isfile(DisplaySettingsFile):
             with open(DisplaySettingsFile, "r") as ConfigFile:
                 DisplaySettings = json.loads(ConfigFile.read())
-            if "CurrentZoomLevel" in DisplaySettings:
-                if DisplaySettings["CurrentZoomLevel"] > 0:
-                    for ZoomLevel in range(DisplaySettings["CurrentZoomLevel"]):
-                        self.ZoomIn()
-                elif DisplaySettings["CurrentZoomLevel"] < 0:
-                    for ZoomLevel in range(-DisplaySettings["CurrentZoomLevel"]):
-                        self.ZoomOut()
+            if "CurrentFont" in DisplaySettings:
+                self.CurrentFont = DisplaySettings["CurrentFont"]
+            if "CurrentFontSize" in DisplaySettings:
+                self.CurrentFontSize = DisplaySettings["CurrentFontSize"]
+            self.RefreshFontOfTextEdits()
             if "HorizontalSplit" in DisplaySettings:
                 self.NotebookAndTextSplitter.setSizes(DisplaySettings["HorizontalSplit"])
 
@@ -1067,7 +1065,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         # Display Settings
         DisplaySettings = {}
-        DisplaySettings["CurrentZoomLevel"] = self.CurrentZoomLevel
+        DisplaySettings["CurrentFont"] = self.CurrentFont
+        DisplaySettings["CurrentFontSize"] = self.CurrentFontSize
         DisplaySettings["HorizontalSplit"] = self.NotebookAndTextSplitter.sizes()
         with open(self.GetResourcePath("Configs/DisplaySettings.cfg"), "w") as ConfigFile:
             ConfigFile.write(json.dumps(DisplaySettings, indent=2))

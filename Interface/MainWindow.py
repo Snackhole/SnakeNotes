@@ -1866,8 +1866,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         PDFWriter = QPdfWriter(ExportFileName)
         PDFWriter.setPageSize(QPageSize(QPageSize.PageSizeId.Letter))
         PDFTextWidget = QTextEdit()
-        if self.CurrentFont is not None:
-            PDFTextWidget.setFont(QFont(self.CurrentFont))
+        FontFamily, FontSize = self.GetFontSettings()
+        PDFTextWidget.setFont(QFont(FontFamily, FontSize))
         PDFTextWidget.setHtml(ConstructPDFExportHTMLString(Page, Notebook))
         PDFTextWidget.print(PDFWriter)
         PDFTextWidget.destroy()

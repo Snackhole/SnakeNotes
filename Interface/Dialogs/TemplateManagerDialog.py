@@ -21,8 +21,8 @@ class TemplateManagerDialog(QDialog):
 
         # Template Display
         self.TemplateDisplay = QTextEdit()
-        if self.MainWindow.CurrentFont is not None:
-            self.TemplateDisplay.setFont(QFont(self.MainWindow.CurrentFont))
+        FontFamily, FontSize = self.MainWindow.GetFontSettings()
+        self.TemplateDisplay.setFont(QFont(FontFamily, FontSize))
         self.TemplateDisplay.setReadOnly(True)
         self.TemplateDisplay.setStyleSheet("selection-background-color: rgb(0, 120, 215); selection-color: white")
 
@@ -188,8 +188,8 @@ class AddTemplateDialog(QDialog):
 
         # Template Text
         self.TemplateText = QTextEdit()
-        if self.MainWindow.CurrentFont is not None:
-            self.TemplateText.setFont(QFont(self.MainWindow.CurrentFont))
+        FontFamily, FontSize = self.MainWindow.GetFontSettings()
+        self.TemplateText.setFont(QFont(FontFamily, FontSize))
         self.TemplateText.setPlainText(self.TemplateContent)
         self.TemplateText.setTabChangesFocus(True)
         self.TemplateText.setStyleSheet("selection-background-color: rgb(0, 120, 215); selection-color: white")

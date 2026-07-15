@@ -23,15 +23,17 @@ class TextWidget(QTextEdit):
         self.Notebook = Notebook
         self.MainWindow = MainWindow
 
-        # Set Font
-        if self.MainWindow.CurrentFont is not None:
-            self.setFont(QFont(self.MainWindow.CurrentFont))
-
         # Variables
         self.CurrentPage = self.Notebook.RootPage
         self.DisplayChanging = False
         self.ReadMode = True
         self.DefaultCharacterFormat = QTextCharFormat()
+
+        # Update Default Font Property of Main Window
+        self.MainWindow.DefaultFont = self.font().family()
+
+        # Set Font
+        self.UpdateFontAndSize()
 
         # Create Markdown Parser
         self.Renderer = MarkdownRenderers.Renderer(self.Notebook)
@@ -77,6 +79,10 @@ class TextWidget(QTextEdit):
             if self.verticalScrollBar().maximum() == self.MainWindow.AutoScrollQueue["ScrollBarMaximum"]:
                 self.verticalScrollBar().setValue(int(self.MainWindow.AutoScrollQueue["TargetScrollPosition"]))
                 self.MainWindow.AutoScrollQueue = None
+
+    def UpdateFontAndSize(self):
+        FontFamily, FontSize = self.MainWindow.GetFontSettings()
+        self.setFont(QFont(FontFamily, FontSize))
 
     # Internal Text and Cursor Methods
     def SelectionSpanWrap(self, WrapPrefix, WrapSuffix, MoveCursorToEndOfWrappedText=True):

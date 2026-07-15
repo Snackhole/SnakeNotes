@@ -19,8 +19,7 @@ class PopOutTextWidget(QTextEdit):
         self.MainWindow = MainWindow
 
         # Set Font
-        if self.MainWindow.CurrentFont is not None:
-            self.setFont(QFont(self.MainWindow.CurrentFont))
+        self.UpdateFontAndSize()
 
         # Tab Behavior
         self.setTabChangesFocus(True)
@@ -35,6 +34,10 @@ class PopOutTextWidget(QTextEdit):
         DisplayText = MarkdownRenderers.ConstructMarkdownStringFromPage(self.Page, self.Notebook)
         HTMLText = self.PopOutMarkdownParser(DisplayText)
         self.setHtml(HTMLText)
+
+    def UpdateFontAndSize(self):
+        FontFamily, FontSize = self.MainWindow.GetFontSettings()
+        self.setFont(QFont(FontFamily, FontSize))
 
     # Events
     def contextMenuEvent(self, QContextMenuEvent):

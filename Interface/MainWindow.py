@@ -31,6 +31,7 @@ from Interface.Dialogs.PopOutImageDialog import PopOutImageDialog
 from Interface.Dialogs.UpdateDialog import UpdateDialog
 from Interface.Dialogs.FindFilesAndImagesNotLinkedInPagesDialog import FindFilesAndImagesNotLinkedInPagesDialog
 from Interface.Dialogs.FindPagesWithMissingFilesAndImagesDialog import FindPagesWithMissingFilesAndImagesDialog
+from Interface.Dialogs.SetFontOverrideDialog import SetFontOverrideDialog
 from Interface.Widgets.NavigationBar import NavigationBar
 from Interface.Widgets.NotebookDisplayWidget import NotebookDisplayWidget
 from Interface.Widgets.SearchWidget import SearchWidget
@@ -50,6 +51,8 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
 
         # Variables
         self.CurrentFont = None
+        self.CurrentFontSize = 12
+        self.DefaultFont = None
         self.CurrentZoomLevel = 0
         self.BackList = []
         self.BackMaximum = 50
@@ -514,6 +517,9 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.SetThemeAction = QAction("Set Theme")
         self.SetThemeAction.triggered.connect(self.SetTheme)
 
+        self.SetFontOverrideAction = QAction("Set Font Override")
+        self.SetFontOverrideAction.triggered.connect(self.SetFontOverride)
+
         self.SetStartupSizeAndPositionAction = QAction("Set Startup Size and Position")
         self.SetStartupSizeAndPositionAction.triggered.connect(self.SetStartupSizeAndPosition)
 
@@ -714,6 +720,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.ViewMenu.addAction(self.HighlightTextAction)
         self.ViewMenu.addSeparator()
         self.ViewMenu.addAction(self.SetThemeAction)
+        self.ViewMenu.addAction(self.SetFontOverrideAction)
         self.ViewMenu.addAction(self.SetStartupSizeAndPositionAction)
 
         self.NotebookMenu = self.MenuBar.addMenu("&Notebook")
@@ -1695,6 +1702,36 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
             self.SearchWidgetInst.RefreshSearch()
             self.RefreshAdvancedSearch()
             self.UpdateUnsavedChangesFlag(True)
+
+    def GetFontSettings(self):
+        FontFamily = self.CurrentFont
+        if self.CurrentFont is None:
+            FontFamily = self.DefaultFont
+        FontSize = self.CurrentFontSize
+        return (FontFamily, FontSize)
+
+    def SetFontOverride(self):
+        SetFontOverrideDialogInst = SetFontOverrideDialog(self)
+        if SetFontOverrideDialogInst.FontChanged:
+            # Get Font Selected
+            FontSelected = SetFontOverrideDialogInst.FontSelected
+
+            # Set Default Font on Startup
+            self.CurrentFont = FontSelected
+
+            # Update Font Selected to Default if None Selected
+            if FontSelected == None:
+                FontSelected = self.DefaultFont
+
+            FontSize = self.CurrentFontSize
+
+            # Create Font Object from Font and Font Size
+            FontObject = QFont(FontSelected, FontSize)
+
+            # Update Font of All Applicable Objects
+            self.TextWidgetInst.UpdateFontAndSize()
+            for PopOut in self.PopOutPages:
+                PopOut[1].PopOutTextWidget.UpdateFontAndSize()
 
     # Interface Methods
     def DisplayMessageBox(self, Message, Icon=QMessageBox.Icon.Information, Buttons=QMessageBox.StandardButton.Ok, Parent=None):

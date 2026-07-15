@@ -19,8 +19,8 @@ class EditHeaderOrFooterDialog(QDialog):
 
         # Header or Footer Text
         self.HeaderOrFooterText = QTextEdit()
-        if self.MainWindow.CurrentFont is not None:
-            self.HeaderOrFooterText.setFont(QFont(self.MainWindow.CurrentFont))
+        FontFamily, FontSize = self.MainWindow.GetFontSettings()
+        self.HeaderOrFooterText.setFont(QFont(FontFamily, FontSize))
         self.HeaderOrFooterText.setTabChangesFocus(True)
         self.HeaderOrFooterText.setStyleSheet("selection-background-color: rgb(0, 120, 215); selection-color: white")
         self.HeaderOrFooterText.setPlainText(self.Notebook.Header if self.Mode == "Header" else (self.Notebook.Footer if self.Mode == "Footer" else ""))

@@ -53,8 +53,8 @@ class InsertLinksDialog(QDialog):
 
         # Preview Text Edit
         self.PreviewTextEdit = QTextEdit()
-        if self.MainWindow.CurrentFont is not None:
-            self.PreviewTextEdit.setFont(QFont(self.MainWindow.CurrentFont))
+        FontFamily, FontSize = self.MainWindow.GetFontSettings()
+        self.PreviewTextEdit.setFont(QFont(FontFamily, FontSize))
         self.PreviewTextEdit.setReadOnly(True)
 
         # Insert Sub Page Links Check Box

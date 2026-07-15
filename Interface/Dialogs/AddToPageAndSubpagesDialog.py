@@ -18,8 +18,8 @@ class AddToPageAndSubpagesDialog(QDialog):
 
         # Text to Add
         self.TextToAddTextEdit = QTextEdit()
-        if self.MainWindow.CurrentFont is not None:
-            self.TextToAddTextEdit.setFont(QFont(self.MainWindow.CurrentFont))
+        FontFamily, FontSize = self.MainWindow.GetFontSettings()
+        self.TextToAddTextEdit.setFont(QFont(FontFamily, FontSize))
         self.TextToAddTextEdit.setTabChangesFocus(True)
         self.TextToAddTextEdit.setStyleSheet("selection-background-color: rgb(0, 120, 215); selection-color: white")
 

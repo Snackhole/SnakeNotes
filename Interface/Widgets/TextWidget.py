@@ -356,7 +356,7 @@ class TextWidget(QTextEdit):
         if not self.ReadMode and self.hasFocus():
             self.SelectionSpanWrap("`", "`")
 
-    def Header(self, Level):
+    def Heading(self, Level):
         if not self.ReadMode and self.hasFocus():
             self.SingleBlockPrefix(f"{"#" * Level} ")
 
@@ -483,8 +483,8 @@ class TextWidget(QTextEdit):
         if not self.ReadMode and self.hasFocus():
             CurrentPageContent = self.CurrentPage["Content"]
             Headings = []
-            HeaderRegEx = r"(?m)^#{1,6}(?!#) (.+)"
-            TargetIterator = re.finditer(HeaderRegEx, CurrentPageContent)
+            HeadingRegEx = r"(?m)^#{1,6}(?!#) (.+)"
+            TargetIterator = re.finditer(HeadingRegEx, CurrentPageContent)
             for Target in TargetIterator:
                 TargetString = Target.group()
                 if TargetString not in Headings:
@@ -624,10 +624,10 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         self.CreateHighlightTargets()
 
     def CreateFormats(self):
-        # Headers
-        self.HeaderFormat = QTextCharFormat()
-        self.HeaderFormat.setBackground(QColor("seagreen"))
-        self.HeaderFormat.setForeground(QColor("white"))
+        # Heading
+        self.HeadingFormat = QTextCharFormat()
+        self.HeadingFormat.setBackground(QColor("seagreen"))
+        self.HeadingFormat.setForeground(QColor("white"))
 
         # External Links
         self.ExternalLinksFormat = QTextCharFormat()
@@ -678,8 +678,8 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         # Highlight Targets
         self.HighlightTargets = []
 
-        # Headers
-        self.HighlightTargets.append({"RegEx": r"(?m)^#{1,6}(?!#) (.+)", "FormatCallable": self.GetHeaderFormat})
+        # Heading
+        self.HighlightTargets.append({"RegEx": r"(?m)^#{1,6}(?!#) (.+)", "FormatCallable": self.GetHeadingFormat})
 
         # Link-Type
         self.HighlightTargets.append({"RegEx": r"(!?)\[([^\[\]\n]*?)\]\((.+?)( \".+?\")?\)", "FormatCallable": self.GetLinksFormat})
@@ -690,8 +690,8 @@ class SyntaxHighlighter(QSyntaxHighlighter):
         # Text Generation Tokens
         self.HighlightTargets.append({"RegEx": r"\{(PAGETITLE|SUBPAGELINKS|SUBPAGEOFLINK|LINKINGPAGES|TOC)\}", "FormatCallable": self.GetTokensFormat})
 
-    def GetHeaderFormat(self, Match):
-        return self.HeaderFormat
+    def GetHeadingFormat(self, Match):
+        return self.HeadingFormat
 
     def GetLinksFormat(self, Match):
         if Match.group(1) == "!":

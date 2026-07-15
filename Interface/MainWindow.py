@@ -275,29 +275,29 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.CodeSpanAction.triggered.connect(self.TextWidgetInst.CodeSpan)
         self.ToggleReadModeActionsList.append(self.CodeSpanAction)
 
-        self.HeaderOneAction = QAction("Header 1")
-        self.HeaderOneAction.triggered.connect(lambda: self.TextWidgetInst.Header(1))
-        self.ToggleReadModeActionsList.append(self.HeaderOneAction)
+        self.HeadingOneAction = QAction("Heading 1")
+        self.HeadingOneAction.triggered.connect(lambda: self.TextWidgetInst.Heading(1))
+        self.ToggleReadModeActionsList.append(self.HeadingOneAction)
 
-        self.HeaderTwoAction = QAction("Header 2")
-        self.HeaderTwoAction.triggered.connect(lambda: self.TextWidgetInst.Header(2))
-        self.ToggleReadModeActionsList.append(self.HeaderTwoAction)
+        self.HeadingTwoAction = QAction("Heading 2")
+        self.HeadingTwoAction.triggered.connect(lambda: self.TextWidgetInst.Heading(2))
+        self.ToggleReadModeActionsList.append(self.HeadingTwoAction)
 
-        self.HeaderThreeAction = QAction("Header 3")
-        self.HeaderThreeAction.triggered.connect(lambda: self.TextWidgetInst.Header(3))
-        self.ToggleReadModeActionsList.append(self.HeaderThreeAction)
+        self.HeadingThreeAction = QAction("Heading 3")
+        self.HeadingThreeAction.triggered.connect(lambda: self.TextWidgetInst.Heading(3))
+        self.ToggleReadModeActionsList.append(self.HeadingThreeAction)
 
-        self.HeaderFourAction = QAction("Header 4")
-        self.HeaderFourAction.triggered.connect(lambda: self.TextWidgetInst.Header(4))
-        self.ToggleReadModeActionsList.append(self.HeaderFourAction)
+        self.HeadingFourAction = QAction("Heading 4")
+        self.HeadingFourAction.triggered.connect(lambda: self.TextWidgetInst.Heading(4))
+        self.ToggleReadModeActionsList.append(self.HeadingFourAction)
 
-        self.HeaderFiveAction = QAction("Header 5")
-        self.HeaderFiveAction.triggered.connect(lambda: self.TextWidgetInst.Header(5))
-        self.ToggleReadModeActionsList.append(self.HeaderFiveAction)
+        self.HeadingFiveAction = QAction("Heading 5")
+        self.HeadingFiveAction.triggered.connect(lambda: self.TextWidgetInst.Heading(5))
+        self.ToggleReadModeActionsList.append(self.HeadingFiveAction)
 
-        self.HeaderSixAction = QAction("Header 6")
-        self.HeaderSixAction.triggered.connect(lambda: self.TextWidgetInst.Header(6))
-        self.ToggleReadModeActionsList.append(self.HeaderSixAction)
+        self.HeadingSixAction = QAction("Heading 6")
+        self.HeadingSixAction.triggered.connect(lambda: self.TextWidgetInst.Heading(6))
+        self.ToggleReadModeActionsList.append(self.HeadingSixAction)
 
         self.BulletListAction = QAction(self.BulletListIcon, "&Bullet List")
         self.BulletListAction.triggered.connect(self.TextWidgetInst.BulletList)
@@ -635,12 +635,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.StrikethroughAction)
         self.EditMenu.addAction(self.CodeSpanAction)
         self.EditMenu.addSeparator()
-        self.EditMenu.addAction(self.HeaderOneAction)
-        self.EditMenu.addAction(self.HeaderTwoAction)
-        self.EditMenu.addAction(self.HeaderThreeAction)
-        self.EditMenu.addAction(self.HeaderFourAction)
-        self.EditMenu.addAction(self.HeaderFiveAction)
-        self.EditMenu.addAction(self.HeaderSixAction)
+        self.EditMenu.addAction(self.HeadingOneAction)
+        self.EditMenu.addAction(self.HeadingTwoAction)
+        self.EditMenu.addAction(self.HeadingThreeAction)
+        self.EditMenu.addAction(self.HeadingFourAction)
+        self.EditMenu.addAction(self.HeadingFiveAction)
+        self.EditMenu.addAction(self.HeadingSixAction)
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.BulletListAction)
         self.EditMenu.addAction(self.NumberListAction)
@@ -805,12 +805,12 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.DefaultKeybindings["RenamePageAction"] = "Ctrl+R"
         self.DefaultKeybindings["ItalicsAction"] = "Ctrl+I"
         self.DefaultKeybindings["BoldAction"] = "Ctrl+B"
-        self.DefaultKeybindings["HeaderOneAction"] = "Ctrl+1"
-        self.DefaultKeybindings["HeaderTwoAction"] = "Ctrl+2"
-        self.DefaultKeybindings["HeaderThreeAction"] = "Ctrl+3"
-        self.DefaultKeybindings["HeaderFourAction"] = "Ctrl+4"
-        self.DefaultKeybindings["HeaderFiveAction"] = "Ctrl+5"
-        self.DefaultKeybindings["HeaderSixAction"] = "Ctrl+6"
+        self.DefaultKeybindings["HeadingOneAction"] = "Ctrl+1"
+        self.DefaultKeybindings["HeadingTwoAction"] = "Ctrl+2"
+        self.DefaultKeybindings["HeadingThreeAction"] = "Ctrl+3"
+        self.DefaultKeybindings["HeadingFourAction"] = "Ctrl+4"
+        self.DefaultKeybindings["HeadingFiveAction"] = "Ctrl+5"
+        self.DefaultKeybindings["HeadingSixAction"] = "Ctrl+6"
         self.DefaultKeybindings["FootnoteAction"] = "Ctrl+T"
         self.DefaultKeybindings["InsertLinksAction"] = "Ctrl+L"
         self.DefaultKeybindings["InsertExternalLinkAction"] = "Ctrl+Shift+L"

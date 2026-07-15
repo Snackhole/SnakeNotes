@@ -177,9 +177,9 @@ def ConstructLinkingPagesLinks(Page, Notebook):
 
 def ConstructTableOfContents(Page):
     Headings = []
-    HeaderRegEx = r"(?m)^#{1,6}(?!#) (.+)"
+    HeadingRegEx = r"(?m)^#{1,6}(?!#) (.+)"
     PageContent = Page["Content"]
-    TargetIterator = re.finditer(HeaderRegEx, PageContent)
+    TargetIterator = re.finditer(HeadingRegEx, PageContent)
     for Target in TargetIterator:
         TargetString = Target.group()
         Headings.append(TargetString)

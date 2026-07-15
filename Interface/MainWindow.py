@@ -1710,28 +1710,16 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         FontSize = self.CurrentFontSize
         return (FontFamily, FontSize)
 
+    def RefreshFontOfTextEdits(self):
+        self.TextWidgetInst.UpdateFontAndSize()
+        for PopOut in self.PopOutPages:
+            PopOut[1].PopOutTextWidget.UpdateFontAndSize()
+
     def SetFontOverride(self):
         SetFontOverrideDialogInst = SetFontOverrideDialog(self)
         if SetFontOverrideDialogInst.FontChanged:
-            # Get Font Selected
-            FontSelected = SetFontOverrideDialogInst.FontSelected
-
-            # Set Default Font on Startup
-            self.CurrentFont = FontSelected
-
-            # Update Font Selected to Default if None Selected
-            if FontSelected == None:
-                FontSelected = self.DefaultFont
-
-            FontSize = self.CurrentFontSize
-
-            # Create Font Object from Font and Font Size
-            FontObject = QFont(FontSelected, FontSize)
-
-            # Update Font of All Applicable Objects
-            self.TextWidgetInst.UpdateFontAndSize()
-            for PopOut in self.PopOutPages:
-                PopOut[1].PopOutTextWidget.UpdateFontAndSize()
+            self.CurrentFont = SetFontOverrideDialogInst.FontSelected
+            self.RefreshFontOfTextEdits()
 
     # Interface Methods
     def DisplayMessageBox(self, Message, Icon=QMessageBox.Icon.Information, Buttons=QMessageBox.StandardButton.Ok, Parent=None):

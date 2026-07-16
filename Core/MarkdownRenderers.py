@@ -184,7 +184,7 @@ def ConstructTableOfContents(Page):
         TargetString = Target.group()
         Headings.append(TargetString)
     if len(Headings) > 0:
-        TOCString = "## Table of Contents\n"
+        TOCString = "> ## Table of Contents\n"
         HeadingOffset = 5
         for Heading in Headings:
             HeadingLevel = len(Heading) - len(Heading.lstrip("#"))
@@ -192,7 +192,7 @@ def ConstructTableOfContents(Page):
                 HeadingOffset = HeadingLevel - 1
         for Heading in Headings:
             HeadingLevel = len(Heading) - len(Heading.lstrip("#"))
-            TOCString += f"{"\u00B7" * (HeadingLevel - HeadingOffset)} [{Heading.lstrip("#").strip("")}]([heading:{Heading}])  \n"
+            TOCString += f"> {"\u00B7" * (HeadingLevel - HeadingOffset)} [{Heading.lstrip("#").strip("")}]([heading:{Heading}])  \n"
         TOCString = TOCString.rstrip()
         return TOCString
     else:

@@ -45,7 +45,8 @@ class Renderer(mistune.Renderer):
         return f"<p><table border=\"1\" cellpadding=\"2\">\n<thead>{Header}</thead>\n<tbody>\n{Body}</tbody>\n</table>\n"
 
     def header(self, Text, Level, Raw=None):
-        return f"<h{str(Level)} style=\"color: seagreen\">{Text}</h{str(Level)}><a name=\"[heading:{"#" * Level} {Text}]\"></a>\n"
+        SanitizedHeading = SanitizeHeadingForLink(Text, Level)
+        return f"<h{str(Level)} style=\"color: seagreen\">{Text}</h{str(Level)}><a name=\"[heading:{SanitizedHeading}]\"></a>\n"
 
     def image(self, Source, Title, AltText):
         if self.Notebook.HasImage(Source):
@@ -175,6 +176,13 @@ def ConstructLinkingPagesLinks(Page, Notebook):
     return LinksString
 
 
+def SanitizeHeadingForLink(HeadingText, Level):
+    ForbiddenCharacters = set(["/", "\\", "\"", "\'", "?", "%", "*", ":", "|", "<", ">", "[", "]", "(", ")"])
+    SanitizedHeading = f"{"#" * Level} {"".join(Character for Character in HeadingText if Character not in ForbiddenCharacters)}"
+    print(SanitizedHeading)
+    return SanitizedHeading
+
+
 def ConstructTableOfContents(Page):
     Headings = []
     HeadingRegEx = r"(?m)^#{1,6}(?!#) (.+)"
@@ -192,7 +200,9 @@ def ConstructTableOfContents(Page):
                 HeadingOffset = HeadingLevel - 1
         for Heading in Headings:
             HeadingLevel = len(Heading) - len(Heading.lstrip("#"))
-            TOCString += f"> {"\u00B7" * (HeadingLevel - HeadingOffset)} [{Heading.lstrip("#").strip("")}]([heading:{Heading}])  \n"
+            HeadingText = Heading.lstrip("#").strip()
+            SanitizedHeadingLink = SanitizeHeadingForLink(HeadingText, HeadingLevel)
+            TOCString += f"> {"\u00B7" * (HeadingLevel - HeadingOffset)} [{HeadingText}]([heading:{SanitizedHeadingLink}])  \n"
         TOCString = TOCString.rstrip()
         return TOCString
     else:

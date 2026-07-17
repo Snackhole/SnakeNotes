@@ -502,7 +502,10 @@ class TextWidget(QTextEdit):
             if len(Headings) > 0:
                 HeadingString, OK = QInputDialog.getItem(self, "Insert Heading Link", "Select a heading to link to:", Headings, editable=False)
                 if OK:
-                    self.SelectionSpanWrap("[", f"]([heading:{HeadingString}])", MoveCursorToEndOfWrappedText=self.MainWindow.MoveCursorToEndOfLinkText)
+                    HeadingLevel = len(HeadingString) - len(HeadingString.lstrip("#"))
+                    HeadingText = HeadingString.lstrip("#").strip()
+                    SanitizedHeading = MarkdownRenderers.SanitizeHeadingForLink(HeadingText, HeadingLevel)
+                    self.SelectionSpanWrap("[", f"]([heading:{SanitizedHeading}])", MoveCursorToEndOfWrappedText=self.MainWindow.MoveCursorToEndOfLinkText)
             else:
                 self.MainWindow.DisplayMessageBox("No headings present on the page.")
 

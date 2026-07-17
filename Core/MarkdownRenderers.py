@@ -94,16 +94,20 @@ class HTMLExportRenderer(Renderer):
                 return f"<a download=\"{Link[6:-1]}\" href=\"Files/{Link[6:-1]}\" target=\"_blank\">{Text}</a>"
             return f"<a download=\"{Link[6:-1]}\" href=\"Files/{Link[6:-1]}\" title=\"{Title}\" target=\"_blank\">{Text}</a>"
         elif IsHeadingLink:
+            HeadingLevel = len(Link.lstrip("[heading:")) - len(Link.lstrip("[heading:").lstrip("#"))
+            HeadingText = Link.lstrip("[heading:").lstrip("#").strip()
+            SanitizedHeadingForLink = SanitizeHeadingForLink(HeadingText, HeadingLevel)
             if not Title:
-                f"<a href=\"#{"".join(Link.split())}\">{Text}</a>"
-            return f"<a href=\"#{"".join(Link.split())}\" title=\"{Title}\">{Text}</a>"
+                f"<a href=\"#[heading:{"".join(SanitizedHeadingForLink.split())}]\">{Text}</a>"
+            return f"<a href=\"#[heading:{"".join(SanitizedHeadingForLink.split())}]\" title=\"{Title}\">{Text}</a>"
         else:
             if not Title:
                 return f"<a href=\"{Link}\" target=\"_blank\">{Text}</a>"
             return f"<a href=\"{Link}\" title=\"{Title}\" target=\"_blank\">{Text}</a>"
 
     def header(self, Text, Level, Raw=None):
-        return f"<h{str(Level)} id=\"[heading:{"#" * Level}{"".join(Text.split())}]\" style=\"color: seagreen\">{Text}</h{str(Level)}>\n"
+        SanitizedHeadingForLink = SanitizeHeadingForLink(Text, Level)
+        return f"<h{str(Level)} id=\"[heading:{"".join(SanitizedHeadingForLink.split())}]\" style=\"color: seagreen\">{Text}</h{str(Level)}>\n"
 
 
 class PDFExportRenderer(Renderer):

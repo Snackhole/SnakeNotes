@@ -179,7 +179,6 @@ def ConstructLinkingPagesLinks(Page, Notebook):
 def SanitizeHeadingForLink(HeadingText, Level):
     ForbiddenCharacters = set(["/", "\\", "\"", "\'", "?", "%", "*", ":", "|", "<", ">", "[", "]", "(", ")"])
     SanitizedHeading = f"{"#" * Level} {"".join(Character for Character in HeadingText if Character not in ForbiddenCharacters)}"
-    print(SanitizedHeading)
     return SanitizedHeading
 
 

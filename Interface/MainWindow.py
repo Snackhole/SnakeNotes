@@ -302,6 +302,10 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.HeadingSixAction.triggered.connect(lambda: self.TextWidgetInst.Heading(6))
         self.ToggleReadModeActionsList.append(self.HeadingSixAction)
 
+        self.AddTableOfContentsOverrideToHeadingAction = QAction("Add Table of Contents Override to Heading")
+        self.AddTableOfContentsOverrideToHeadingAction.triggered.connect(self.TextWidgetInst.AddTableOfContentsOverrideToHeading)
+        self.ToggleReadModeActionsList.append(self.AddTableOfContentsOverrideToHeadingAction)
+
         self.BulletListAction = QAction(self.BulletListIcon, "&Bullet List")
         self.BulletListAction.triggered.connect(self.TextWidgetInst.BulletList)
         self.ToggleReadModeActionsList.append(self.BulletListAction)
@@ -647,6 +651,7 @@ class MainWindow(QMainWindow, SaveAndOpenMixin):
         self.EditMenu.addAction(self.HeadingFourAction)
         self.EditMenu.addAction(self.HeadingFiveAction)
         self.EditMenu.addAction(self.HeadingSixAction)
+        self.EditMenu.addAction(self.AddTableOfContentsOverrideToHeadingAction)
         self.EditMenu.addSeparator()
         self.EditMenu.addAction(self.BulletListAction)
         self.EditMenu.addAction(self.NumberListAction)

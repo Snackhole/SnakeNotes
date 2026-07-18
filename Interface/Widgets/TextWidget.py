@@ -185,6 +185,15 @@ class TextWidget(QTextEdit):
             self.MakeCursorVisible()
             Cursor.endEditBlock()
 
+    def InsertAtEndOfLine(self, InsertSymbol):
+        Cursor = self.textCursor()
+        Cursor.beginEditBlock()
+        Cursor.movePosition(QTextCursor.MoveOperation.EndOfBlock)
+        self.setTextCursor(Cursor)
+        self.insertPlainText(InsertSymbol)
+        self.MakeCursorVisible()
+        Cursor.endEditBlock()
+
     def MoveLine(self, Delta):
         if Delta != 0:
             LineData = self.GetLineData()
@@ -230,6 +239,24 @@ class TextWidget(QTextEdit):
         Cursor.select(QTextCursor.SelectionType.LineUnderCursor)
         LineText = Cursor.selectedText()
         return LineText == ""
+
+    def CursorOnHeadingLine(self, Cursor):
+        Cursor.select(QTextCursor.SelectionType.LineUnderCursor)
+        LineText = Cursor.selectedText()
+        OnHeadingLine = False
+        HeadingStarts = [
+            "# ",
+            "## ",
+            "### ",
+            "#### ",
+            "##### ",
+            "###### "
+        ]
+        for HeadingStart in HeadingStarts:
+            if LineText.startswith(HeadingStart):
+                OnHeadingLine = True
+                break
+        return OnHeadingLine
 
     def VerticallyCenterCursor(self):
         CursorVerticalPosition = self.cursorRect().top()
@@ -560,6 +587,14 @@ class TextWidget(QTextEdit):
                     self.MakeCursorVisible()
                 else:
                     self.MainWindow.FlashStatusBar("No file linked.")
+
+    def AddTableOfContentsOverrideToHeading(self):
+        if not self.ReadMode and self.hasFocus():
+            Cursor = self.textCursor()
+            if self.CursorOnHeadingLine(Cursor):
+                self.InsertAtEndOfLine(" ||| ")
+            else:
+                self.MainWindow.DisplayMessageBox("The cursor is not currently on a heading line.")
 
     def MoveLineUp(self):
         if not self.ReadMode and self.hasFocus():

@@ -45,8 +45,9 @@ class Renderer(mistune.Renderer):
         return f"<p><table border=\"1\" cellpadding=\"2\">\n<thead>{Header}</thead>\n<tbody>\n{Body}</tbody>\n</table>\n"
 
     def header(self, Text, Level, Raw=None):
-        SanitizedHeading = SanitizeHeadingForLink(Text, Level)
-        return f"<h{str(Level)} style=\"color: seagreen\">{Text}</h{str(Level)}><a name=\"[heading:{SanitizedHeading}]\"></a>\n"
+        HeadingLink = CreateLinkMarkdownFromHeading(Raw, Level, LinkTextOnly=True)
+        Text = Text if " ||| " not in Text else Text.split(" ||| ")[0]
+        return f"<h{str(Level)} style=\"color: seagreen\">{Text}</h{str(Level)}><a name=\"{HeadingLink}\"></a>\n"
 
     def image(self, Source, Title, AltText):
         if self.Notebook.HasImage(Source):
@@ -96,18 +97,19 @@ class HTMLExportRenderer(Renderer):
         elif IsHeadingLink:
             HeadingLevel = len(Link.lstrip("[heading:")) - len(Link.lstrip("[heading:").lstrip("#"))
             HeadingText = Link.lstrip("[heading:").lstrip("#").strip()
-            SanitizedHeadingForLink = SanitizeHeadingForLink(HeadingText, HeadingLevel)
+            HeadingLink = CreateLinkMarkdownFromHeading(HeadingText, HeadingLevel, LinkTextOnly=True)
             if not Title:
-                f"<a href=\"#[heading:{"".join(SanitizedHeadingForLink.split())}]\">{Text}</a>"
-            return f"<a href=\"#[heading:{"".join(SanitizedHeadingForLink.split())}]\" title=\"{Title}\">{Text}</a>"
+                f"<a href=\"#{HeadingLink}\">{Text}</a>"
+            return f"<a href=\"#{HeadingLink}\" title=\"{Title}\">{Text}</a>"
         else:
             if not Title:
                 return f"<a href=\"{Link}\" target=\"_blank\">{Text}</a>"
             return f"<a href=\"{Link}\" title=\"{Title}\" target=\"_blank\">{Text}</a>"
 
     def header(self, Text, Level, Raw=None):
-        SanitizedHeadingForLink = SanitizeHeadingForLink(Text, Level)
-        return f"<h{str(Level)} id=\"[heading:{"".join(SanitizedHeadingForLink.split())}]\" style=\"color: seagreen\">{Text}</h{str(Level)}>\n"
+        HeadingLink = CreateLinkMarkdownFromHeading(Raw, Level, LinkTextOnly=True)
+        Text = Text if " ||| " not in Text else Text.split(" ||| ")[0]
+        return f"<h{str(Level)} id=\"{HeadingLink}\" style=\"color: seagreen\">{Text}</h{str(Level)}>\n"
 
 
 class PDFExportRenderer(Renderer):
@@ -118,6 +120,7 @@ class PDFExportRenderer(Renderer):
         return Text
 
     def header(self, Text, Level, Raw=None):
+        Text = Text if " ||| " not in Text else Text.split(" ||| ")[0]
         return f"<h{str(Level)} style=\"color: seagreen\">{Text}</h{str(Level)}>\n"
 
 
@@ -180,10 +183,18 @@ def ConstructLinkingPagesLinks(Page, Notebook):
     return LinksString
 
 
-def SanitizeHeadingForLink(HeadingText, Level):
+def CreateLinkMarkdownFromHeading(HeadingText, Level, LinkTextOnly=False):
+    LevelText = "#" * Level
+    SubTextWithOverride = " ||| " in HeadingText
     ForbiddenCharacters = set(["/", "\\", "\"", "\'", "?", "%", "*", ":", "|", "<", ">", "[", "]", "(", ")"])
-    SanitizedHeading = f"{"#" * Level} {"".join(Character for Character in HeadingText if Character not in ForbiddenCharacters)}"
-    return SanitizedHeading
+    HeadingTextCharacters = "".join(HeadingText.split())
+    Link = "".join([Character for Character in HeadingTextCharacters if Character not in ForbiddenCharacters])
+    LinkText = f"[heading:{LevelText}{Link}]"
+    if LinkTextOnly:
+        return LinkText
+    else:
+        LinkText = f"[{HeadingText if not SubTextWithOverride else HeadingText.split(" ||| ")[1]}]({LinkText})"
+        return LinkText
 
 
 def ConstructTableOfContents(Page):
@@ -204,8 +215,8 @@ def ConstructTableOfContents(Page):
         for Heading in Headings:
             HeadingLevel = len(Heading) - len(Heading.lstrip("#"))
             HeadingText = Heading.lstrip("#").strip()
-            SanitizedHeadingLink = SanitizeHeadingForLink(HeadingText, HeadingLevel)
-            TOCString += f"> {"\u00B7" * (HeadingLevel - HeadingOffset)} [{HeadingText}]([heading:{SanitizedHeadingLink}])  \n"
+            HeadingLink = CreateLinkMarkdownFromHeading(HeadingText, HeadingLevel)
+            TOCString += f"> {"\u00B7" * (HeadingLevel - HeadingOffset)} {HeadingLink}  \n"
         TOCString = TOCString.rstrip()
         return TOCString
     else:

@@ -504,8 +504,8 @@ class TextWidget(QTextEdit):
                 if OK:
                     HeadingLevel = len(HeadingString) - len(HeadingString.lstrip("#"))
                     HeadingText = HeadingString.lstrip("#").strip()
-                    SanitizedHeading = MarkdownRenderers.SanitizeHeadingForLink(HeadingText, HeadingLevel)
-                    self.SelectionSpanWrap("[", f"]([heading:{SanitizedHeading}])", MoveCursorToEndOfWrappedText=self.MainWindow.MoveCursorToEndOfLinkText)
+                    HeadingLink = MarkdownRenderers.CreateLinkMarkdownFromHeading(HeadingText, HeadingLevel, LinkTextOnly=True)
+                    self.SelectionSpanWrap("[", f"]({HeadingLink})", MoveCursorToEndOfWrappedText=self.MainWindow.MoveCursorToEndOfLinkText)
             else:
                 self.MainWindow.DisplayMessageBox("No headings present on the page.")
 

@@ -31,12 +31,11 @@ class Renderer(mistune.Renderer):
 
     def footnote_ref(self, Key, Index):
         Key = mistune.escape(Key)
-        return f"<sup class=\"footnote-ref\" id=\"fnref-{Key}\">{Key}</sup>"
+        return f"<sup class=\"footnote-ref\" id=\"fnref-{Key}\"><a href=\"{CreateFootnoteAnchorID(Key)}\">{Key}</a><a name=\"{CreateFootnoteAnchorID(Key, ReturnID=True)}\"></a></sup>"
 
     def footnote_item(self, Key, Text):
         Key = mistune.escape(Key)
-        Text = f"<p>{Key}. {Text.rstrip()[3:]}"
-        return f"<li>{Text}</li>\n"
+        return f"<li><p><a href=\"{CreateFootnoteAnchorID(Key, ReturnID=True)}\">{Key}</a>. {Text.rstrip()[3:]}<a name=\"{CreateFootnoteAnchorID(Key)}\"></a></li>\n"
 
     def footnotes(self, Text):
         return f"<div class=\"footnotes\">\n{self.hrule()}<ul style=\"list-style-type:none\">{Text}</ul>\n</div>\n"
@@ -106,6 +105,14 @@ class HTMLExportRenderer(Renderer):
                 return f"<a href=\"{Link}\" target=\"_blank\">{Text}</a>"
             return f"<a href=\"{Link}\" title=\"{Title}\" target=\"_blank\">{Text}</a>"
 
+    def footnote_ref(self, Key, Index):
+        Key = mistune.escape(Key)
+        return f"<sup class=\"footnote-ref\" id=\"fnref-{Key}\"><a href=\"#{CreateFootnoteAnchorID(Key)}\">{Key}</a><a name=\"{CreateFootnoteAnchorID(Key, ReturnID=True)}\"></a></sup>"
+
+    def footnote_item(self, Key, Text):
+        Key = mistune.escape(Key)
+        return f"<li><p><a href=\"#{CreateFootnoteAnchorID(Key, ReturnID=True)}\">{Key}</a>. {Text.rstrip()[3:]}<a name=\"{CreateFootnoteAnchorID(Key)}\"></a></li>\n"
+
     def header(self, Text, Level, Raw=None):
         HeadingLink = CreateLinkMarkdownFromHeading(Raw, Level, LinkTextOnly=True)
         Text = Text if " ||| " not in Text else Text.split(" ||| ")[0]
@@ -118,6 +125,15 @@ class PDFExportRenderer(Renderer):
 
     def link(self, Link, Title, Text):
         return Text
+
+    def footnote_ref(self, Key, Index):
+        Key = mistune.escape(Key)
+        return f"<sup class=\"footnote-ref\" id=\"fnref-{Key}\">{Key}</sup>"
+
+    def footnote_item(self, Key, Text):
+        Key = mistune.escape(Key)
+        Text = f"<p>{Key}. {Text.rstrip()[3:]}"
+        return f"<li>{Text}</li>\n"
 
     def header(self, Text, Level, Raw=None):
         Text = Text if " ||| " not in Text else Text.split(" ||| ")[0]
@@ -195,6 +211,14 @@ def CreateLinkMarkdownFromHeading(HeadingText, Level, LinkTextOnly=False):
     else:
         LinkText = f"[{HeadingText if not SubTextWithOverride else HeadingText.split(" ||| ")[1]}]({LinkText})"
         return LinkText
+
+
+def CreateFootnoteAnchorID(Key, ReturnID=False):
+    ForbiddenCharacters = set(["/", "\\", "\"", "\'", "?", "%", "*", ":", "|", "<", ">", "[", "]", "(", ")"])
+    KeyCharacters = "".join(Key.split())
+    AnchorIDCharacters = "".join([Character for Character in KeyCharacters if Character not in ForbiddenCharacters])
+    AnchorIDText = f"[footnote:{AnchorIDCharacters}{"ReturnToBody" if ReturnID else ""}]"
+    return AnchorIDText
 
 
 def ConstructTableOfContents(Page):

@@ -100,8 +100,10 @@ class PopOutTextWidget(QTextEdit):
         elif Anchor.startswith("[file:") and self.Notebook.HasFile(Anchor[6:-1]):
             self.MainWindow.ExportLinkedFile(Anchor[6:-1])
             QMouseEvent.accept()
-        elif Anchor.startswith("[heading:"):
+        elif Anchor.startswith("[heading:") or Anchor.startswith("[footnote:"):
             self.scrollToAnchor(Anchor)
+            if Anchor.startswith("[footnote:") and Anchor.endswith("ReturnToBody]"):
+                self.verticalScrollBar().setValue(self.verticalScrollBar().value() - 50)
         else:
             if Anchor.startswith("[0,"):
                 self.MainWindow.DisplayMessageBox("Linked page not found.  Pop-out page may need to be refreshed.", Parent=self)

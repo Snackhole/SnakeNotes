@@ -15,8 +15,13 @@ Exec=python3 "{AbsolutePathToExecutableZip}"
 Icon={AbsolutePathToIconPNG}
 Categories=Application;"""
 
+ApplicationsFolder = os.path.expanduser(os.path.join("~", ".local", "share", "applications"))
+
+if not os.path.isdir(ApplicationsFolder):
+    os.mkdir(ApplicationsFolder)
+
 CreatedDesktopFilePath = f"{AppName}.desktop"
-DesktopFileDestinationPath = os.path.expanduser(os.path.join("~", ".local", "share", "applications", CreatedDesktopFilePath))
+DesktopFileDestinationPath = os.path.join(ApplicationsFolder, CreatedDesktopFilePath)
 
 with open(CreatedDesktopFilePath, "w") as DesktopFile:
     DesktopFile.write(DesktopFileContents)

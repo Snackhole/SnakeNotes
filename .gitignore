@@ -10,3 +10,5 @@ venv/
 # SnakeNotes Build and Runtime Files
 Configs/
 BUILD - */
+Python Interpreter - Linux.tar.gz
+Python Interpreter - Windows.tar.gz
